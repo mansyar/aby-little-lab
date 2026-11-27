@@ -100,4 +100,4 @@ releases, and they are not a claim about the final release candidate, tag, deplo
 - **Frozen install:** executor evidence records `pnpm install --frozen-lockfile` exit 0 with no lockfile drift.
 - **Acceptance:** version is `1.27.0`; notes remain DRAFT, cover #102–#105 in the required order and truth boundaries, and README links the notes. The release-notes evidence path is plain code text so archival cannot break a link.
 - **Deviations accepted:** equivalent one-field version edit after the denied `pnpm version` command; README limited to the Documentation index as required by Phase 1 Touches.
-- **Checkpoint:** to be recorded after the primary squash.
+- **Checkpoint:** 8f1134ae (recorded after the primary squash).

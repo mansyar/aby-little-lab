@@ -14,28 +14,25 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-4, NFR-1, NFR-3, NFR-4, AC-1, AC-2, AC-3, AC-11
 - **Touches:** `package.json`, `pnpm-lock.yaml` only if required for consistency, `README.md` (Documentation index only), `docs/release-notes-v1.27.0.md`, `conductor/tracks/20261127-release-v1-27-0/verification/phase-1.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `pnpm install --frozen-lockfile`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Bump the release version** — covers: FR-1, AC-1, NFR-1
-  - [ ] **P1.T1.1: Run `pnpm version 1.27.0 --no-git-tag-version`.**
-  - [ ] **P1.T1.2: Confirm no dependency or lockfile drift and preserve frozen installation.**
-- [ ] **P1.T2: Draft the v1.27.0 release notes** — covers: FR-2, FR-3, FR-4, AC-2, AC-3, AC-11
-  - [ ] **P1.T2.1: Use `Status: DRAFT`, `Tag: (pending)` and `Base: v1.26.1 (ce88cb7b, 2026-11-26)`.**
-  - [ ] **P1.T2.2: Lead with the parent-visible #104 content-variant and #105 adaptive-band changes.**
-  - [ ] **P1.T2.3: Document #102/#103 as internal retention protocol/pack work that was not executed.**
-  - [ ] **P1.T2.4: State that profiles, stickers, settings and saves carry over without migration.**
-  - [ ] **P1.T2.5: Leave tag/deploy/device-result claims pending and make no unsupported coverage claim.**
-  - [ ] **P1.T2.6: Add the notes to the README Documentation index.**
-- [ ] **P1.T3: Record phase evidence and task commits** — covers: NFR-3, NFR-4
-  - [ ] **P1.T3.1: Save actual gate and frozen-install output in `verification/phase-1.md`.**
-  - [ ] **P1.T3.2: Use conventional commits and do not tag.**
+- [x] **P1.T1: Bump the release version** — covers: FR-1, AC-1, NFR-1
+  - [x] **P1.T1.1: Run `pnpm version 1.27.0 --no-git-tag-version`.**
+  - [x] **P1.T1.2: Confirm no dependency or lockfile drift and preserve frozen installation.**
+- [x] **P1.T2: Draft the v1.27.0 release notes** — covers: FR-2, FR-3, FR-4, AC-2, AC-3, AC-11
+  - [x] **P1.T2.1: Use `Status: DRAFT`, `Tag: (pending)` and `Base: v1.26.1 (ce88cb7b, 2026-11-26)`.**
+  - [x] **P1.T2.2: Lead with the parent-visible #104 content-variant and #105 adaptive-band changes.**
+  - [x] **P1.T2.3: Document #102/#103 as internal retention protocol/pack work that was not executed.**
+  - [x] **P1.T2.4: State that profiles, stickers, settings and saves carry over without migration.**
+  - [x] **P1.T2.5: Leave tag/deploy/device-result claims pending and make no unsupported coverage claim.**
+  - [x] **P1.T2.6: Add the notes to the README Documentation index.**
+- [x] **P1.T3: Record phase evidence and task commits** — covers: NFR-3, NFR-4
+  - [x] **P1.T3.1: Save actual gate and frozen-install output in `verification/phase-1.md`.**
+  - [x] **P1.T3.2: Use conventional commits and do not tag.**
 
-<!--
-The primary appends after acceptance:
 **Result:** verified
-**Checkpoint:** <short-sha>
+**Checkpoint:** 8f1134ae
 **Evidence:** conductor/tracks/20261127-release-v1-27-0/verification/phase-1.md
--->
 
 ## Phase 2: README and release documentation truth
 
