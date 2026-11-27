@@ -88,21 +88,25 @@
 - **Covers:** FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, NFR-5, AC-13
 - **Touches:** `docs/PRD.md`, `docs/TDD.md`, `README.md`, `docs/changelog.md`, `docs/device-testing-checklist.md`, `conductor/tracks/20261127-parent-help-overlay/verification/phase-3.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Document the parent-facing contract** — covers: FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, AC-13
-  - [ ] **P3.T1.1:** Add PRD §4.12 **Parent Help** plus its Contents entry.
-  - [ ] **P3.T1.2:** Describe the eight topics, read-only boundary, parent gate, navigation, and offline behavior.
-- [ ] **P3.T2: Document the technical design** — covers: NFR-5, AC-13
-  - [ ] **P3.T2.1:** Add Help content/overlay/button modules to the TDD Settings group.
-  - [ ] **P3.T2.2:** Document lifecycle, E2E state, navigation boundaries, content separation, and regression protections.
-- [ ] **P3.T3: Update user-facing documentation** — covers: AC-13
-  - [ ] **P3.T3.1:** Add the dated changelog entry.
-  - [ ] **P3.T3.2:** Update README parent-feature documentation without claiming hardware validation.
-  - [ ] **P3.T3.3:** Add focused manual Help checks to the device checklist.
-- [ ] **P3.T4: Preserve historical truth** — covers: AC-13
-  - [ ] **P3.T4.1:** Leave prior release notes and archived evidence unchanged.
-  - [ ] **P3.T4.2:** Keep retention and physical-device gaps explicit.
-- [ ] **P3.T5: Run the gate and record evidence** — covers: NFR-5, AC-12, AC-13
-  - [ ] **P3.T5.1:** Refresh living test/build figures only from measured output.
-  - [ ] **P3.T5.2:** Run the exact configured verification chain and record scope, AC coverage, and deviations.
+- [x] **P3.T1: Document the parent-facing contract** — covers: FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, AC-13
+  - [x] **P3.T1.1:** Add PRD §4.12 **Parent Help** plus its Contents entry.
+  - [x] **P3.T1.2:** Describe the eight topics, read-only boundary, parent gate, navigation, and offline behavior.
+- [x] **P3.T2: Document the technical design** — covers: NFR-5, AC-13
+  - [x] **P3.T2.1:** Add Help content/overlay/button modules to the TDD Settings group.
+  - [x] **P3.T2.2:** Document lifecycle, E2E state, navigation boundaries, content separation, and regression protections.
+- [x] **P3.T3: Update user-facing documentation** — covers: AC-13
+  - [x] **P3.T3.1:** Add the dated changelog entry.
+  - [x] **P3.T3.2:** Update README parent-feature documentation without claiming hardware validation.
+  - [x] **P3.T3.3:** Add focused manual Help checks to the device checklist.
+- [x] **P3.T4: Preserve historical truth** — covers: AC-13
+  - [x] **P3.T4.1:** Leave prior release notes and archived evidence unchanged.
+  - [x] **P3.T4.2:** Keep retention and physical-device gaps explicit.
+- [x] **P3.T5: Run the gate and record evidence** — covers: NFR-5, AC-12, AC-13
+  - [x] **P3.T5.1:** Refresh living test/build figures only from measured output.
+  - [x] **P3.T5.2:** Run the exact configured verification chain and record scope, AC coverage, and deviations.
+
+- **Result:** verified
+- **Checkpoint:** `d1db4cb18e7f04abe324aa46043f8d7bf86edd80`
+- **Evidence:** `conductor/tracks/20261127-parent-help-overlay/verification/phase-3.md`
