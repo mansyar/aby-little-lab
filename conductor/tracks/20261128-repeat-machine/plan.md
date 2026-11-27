@@ -14,19 +14,20 @@
 - **Covers:** FR-1, FR-2, FR-4, FR-7, NFR-2, AC-1, AC-2, AC-3, AC-6
 - **Touches:** `src/game/repeatMachineLogic.ts`, `src/__tests__/game/repeatMachineLogic.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Author the repeat-N rule module** — covers: FR-1, FR-2, FR-4
-  - [ ] **P1.T1.1:** Target-count schedule with 2→4 ramp across 6 rounds.
-  - [ ] **P1.T1.2:** Program model (action + count) and run verification (exact-N check).
-- [ ] **P1.T2: Seeded tests for all paths** — covers: FR-7, NFR-2, AC-6
-  - [ ] **P1.T2.1:** Correct-count, wrong-count, ramp, no-repeat, and determinism tests.
+- [x] **P1.T1: Author the repeat-N rule module** — covers: FR-1, FR-2, FR-4
+  - [x] **P1.T1.1:** Target-count schedule with 2→4 ramp across 6 rounds.
+  - [x] **P1.T1.2:** Program model (action + count) and run verification (exact-N check).
+- [x] **P1.T2: Seeded tests for all paths** — covers: FR-7, NFR-2, AC-6
+  - [x] **P1.T2.1:** Correct-count, wrong-count, ramp, no-repeat, and determinism tests.
 
 <!--
 The primary appends after acceptance:
 **Result:** verified
-**Checkpoint:** <short-sha>
+**Checkpoint:** 8106bb59
 **Evidence:** conductor/tracks/20261128-repeat-machine/verification/phase-1.md
+**Verified-by-primary:** module-size + textures + check/typecheck/targeted test + docs all green 2026-11-28
 -->
 
 ## Phase 2: Scene, hub wiring, and browser journey
