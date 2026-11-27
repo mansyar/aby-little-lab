@@ -24,7 +24,7 @@
 
 | id | title | type | priority | depends_on | track | origin |
 | --- | --- | --- | --- | --- | --- | --- |
-| RM-7 | Add a parent Help overlay explaining controls, data, backup, and play-time | feature | medium | — | — | user |
+| RM-7 | Add a parent Help overlay explaining controls, data, backup, and play-time | feature | medium | — | 20261127-parent-help-overlay | user |
 
 ## Later
 
