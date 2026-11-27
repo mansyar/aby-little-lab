@@ -400,6 +400,43 @@ describe("HubScene paged grid (narrow viewports)", () => {
     expect((xs[0] + xs[4]) / 2).toBeCloseTo(512, 5);
   });
 
+  it("keeps all 25 paged tiles and their shelf plaques inside the 1024×768 canvas", () => {
+    createNarrowHub();
+
+    // Incoming pages spawn one canvas-width to the right and slide in; the
+    // mocked slide timer leaves them at their spawn x, so subtract that offset
+    // to assert the settled geometry the child actually sees.
+    const slideOffset = 1024;
+    pageDots()[1].handlers.pointerup?.();
+    pageDots()[2].handlers.pointerup?.();
+
+    const tiles = pagedRects();
+    expect(tiles).toHaveLength(25);
+    tiles.forEach((tile, index) => {
+      const [x, y, width, height] = tile.args as number[];
+      const settledX = x - (index < 10 ? 0 : slideOffset);
+      expect(y - height / 2).toBeGreaterThanOrEqual(0);
+      expect(y + height / 2).toBeLessThanOrEqual(768);
+      expect(settledX - width / 2).toBeGreaterThanOrEqual(0);
+      expect(settledX + width / 2).toBeLessThanOrEqual(1024);
+    });
+
+    // An empty store draws one dashed empty-slot ring (radius 15) per tile;
+    // a plaque pushed off-canvas fails this as surely as a tile would.
+    const plaques = mockRegistry.filter(
+      (obj) => obj.kind === "graphics" && obj.arc.mock.calls.some((call) => call[2] === 15),
+    );
+    expect(plaques).toHaveLength(25);
+    plaques.forEach((plaque, index) => {
+      const [x, y] = plaque.setPosition.mock.calls[0] as [number, number];
+      const settledX = x - (index < 10 ? 0 : slideOffset);
+      expect(y - 15).toBeGreaterThanOrEqual(0);
+      expect(y + 15).toBeLessThanOrEqual(768);
+      expect(settledX - 15).toBeGreaterThanOrEqual(0);
+      expect(settledX + 15).toBeLessThanOrEqual(1024);
+    });
+  });
+
   it("launches Story Order from the 22nd tile on the last page", async () => {
     createNarrowHub();
 
