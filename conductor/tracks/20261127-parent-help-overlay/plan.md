@@ -113,7 +113,7 @@
 
 ## Phase R1: Resolve review findings (F1, F2) — covers: NFR-3, AC-9
 
-- **Status:** pending
+- **Status:** in_progress
 - **Touches:** `src/game/hub/gridBuilder.ts`, `src/__tests__/game/hubGrid.test.ts`, `src/components/settings/HelpOverlay.ts`, `src/__tests__/components/settings/HelpOverlay.test.ts`, `conductor/tracks/20261127-parent-help-overlay/verification/phase-R1.md`
 - [ ] **R1.T1: Deduplicate tile-gesture ownership (F1)** — extract the pointerdown/up/out/cancel ownership guard into one shared helper used by wide/paged/filtered builders; preserve all existing guards and behavior. — covers: NFR-3
   - [ ] **R1.T1.1:** Add the shared helper and wire all three builders to it.
