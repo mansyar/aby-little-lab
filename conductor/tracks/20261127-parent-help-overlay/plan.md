@@ -14,28 +14,33 @@
 - **Covers:** FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, NFR-1, NFR-2, NFR-3, NFR-6, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8, AC-9, AC-10, AC-11
 - **Touches:** `src/components/settings/helpContent.ts`, `src/components/settings/HelpOverlay.ts`, `src/__tests__/components/settings/helpContent.test.ts`, `src/__tests__/components/settings/HelpOverlay.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/tracks/20261127-parent-help-overlay/verification/phase-1.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Define the eight-topic content contract** — covers: FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11
-  - [ ] **P1.T1.1:** Create stable ordered IDs: `parental-lock`, `profiles-play-time`, `progress-adaptive`, `privacy-data`, `backup-restore`, `diagnostics`, `install-offline`, `updates`.
-  - [ ] **P1.T1.2:** Author concise `title`, `intro`, and up-to-four-point copy matching the approved behavior.
-- [ ] **P1.T2: Prove content truth and structure** — covers: FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, NFR-3
-  - [ ] **P1.T2.1:** Test unique IDs, approved order, non-empty copy, and the four-point limit.
-  - [ ] **P1.T2.2:** Pin the key lock, play-time, adaptive, privacy, backup, diagnostics, offline, and update claims.
-- [ ] **P1.T3: Implement the standalone overlay** — covers: FR-2, FR-3, FR-12, FR-13
-  - [ ] **P1.T3.1:** Build the 2×4 topic menu and detail card using existing Settings primitives.
-  - [ ] **P1.T3.2:** Implement shared-bucket open/close, backdrop/✕, Back to topics, Previous, and Next.
-  - [ ] **P1.T3.3:** Keep Help read-only and idempotent across repeated open/close cycles.
-- [ ] **P1.T4: Test navigation and lifecycle** — covers: FR-2, FR-3, AC-2, AC-3, AC-9
-  - [ ] **P1.T4.1:** Cover every topic selection, previous/next traversal, first/last boundaries, and return to topics.
-  - [ ] **P1.T4.2:** Verify repeated close/reopen leaves no duplicate objects or listeners.
-- [ ] **P1.T5: Prove layout and safety** — covers: FR-12, FR-13, NFR-2, NFR-6, AC-10, AC-11
-  - [ ] **P1.T5.1:** Assert 96×96 primary hit areas, word-wrap width, reduced-motion-safe feedback, and bounded content layout.
-  - [ ] **P1.T5.2:** Verify Help interactions perform no storage, settings, download, audio, network, or external-navigation operation.
-- [ ] **P1.T6: Run the gate and record evidence** — covers: NFR-3, NFR-4, NFR-5, AC-12
-  - [ ] **P1.T6.1:** Run the exact configured verification chain.
-  - [ ] **P1.T6.2:** Record scope, commands, AC coverage, deviations, and the phase checkpoint.
-  - [ ] **P1.T6.3:** Repair gate-driven living suite counts and coverage in README, TDD, and perf-baseline from primary-measured output, preserving dated historical evidence.
+- [x] **P1.T1: Define the eight-topic content contract** — covers: FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11
+  - [x] **P1.T1.1:** Create stable ordered IDs: `parental-lock`, `profiles-play-time`, `progress-adaptive`, `privacy-data`, `backup-restore`, `diagnostics`, `install-offline`, `updates`.
+  - [x] **P1.T1.2:** Author concise `title`, `intro`, and up-to-four-point copy matching the approved behavior.
+- [x] **P1.T2: Prove content truth and structure** — covers: FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, NFR-3
+  - [x] **P1.T2.1:** Test unique IDs, approved order, non-empty copy, and the four-point limit.
+  - [x] **P1.T2.2:** Pin the key lock, play-time, adaptive, privacy, backup, diagnostics, offline, and update claims.
+- [x] **P1.T3: Implement the standalone overlay** — covers: FR-2, FR-3, FR-12, FR-13
+  - [x] **P1.T3.1:** Build the 2×4 topic menu and detail card using existing Settings primitives.
+  - [x] **P1.T3.2:** Implement shared-bucket open/close, backdrop/✕, Back to topics, Previous, and Next.
+  - [x] **P1.T3.3:** Keep Help read-only and idempotent across repeated open/close cycles.
+- [x] **P1.T4: Test navigation and lifecycle** — covers: FR-2, FR-3, AC-2, AC-3, AC-9
+  - [x] **P1.T4.1:** Cover every topic selection, previous/next traversal, first/last boundaries, and return to topics.
+  - [x] **P1.T4.2:** Verify repeated close/reopen leaves no duplicate objects or listeners.
+- [x] **P1.T5: Prove layout and safety** — covers: FR-12, FR-13, NFR-2, NFR-6, AC-10, AC-11
+  - [x] **P1.T5.1:** Assert 96×96 primary hit areas, word-wrap width, reduced-motion-safe feedback, and bounded content layout.
+  - [x] **P1.T5.2:** Verify Help interactions perform no storage, settings, download, audio, network, or external-navigation operation.
+- [x] **P1.T6: Run the gate and record evidence** — covers: NFR-3, NFR-4, NFR-5, AC-12
+  - [x] **P1.T6.1:** Run the exact configured verification chain.
+  - [x] **P1.T6.2:** Record scope, commands, AC coverage, deviations, and the phase checkpoint.
+  - [x] **P1.T6.3:** Repair gate-driven living suite counts and coverage in README, TDD, and perf-baseline from primary-measured output, preserving dated historical evidence.
+
+- **Result:** verified
+- **Checkpoint:** `a8ec01d56d1d53445554c27e5f98b5d37cc09950`
+- **Evidence:** `conductor/tracks/20261127-parent-help-overlay/verification/phase-1.md`
+- **Deviations:** executor command splitting was recorded and corrected by primary-run exact gates; two test-only matcher defects were repaired; gate-driven living-doc refresh was authorized and completed from measured output.
 
 ## Phase 2: Integrate Help into Settings and prove the browser journey
 

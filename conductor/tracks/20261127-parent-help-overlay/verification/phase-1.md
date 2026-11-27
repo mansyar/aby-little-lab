@@ -101,4 +101,4 @@ No source or test file was changed by this final follow-up; only the three livin
 - **Scope:** the phase diff contains only the four approved source/test files, the three authorized living-document files, the Phase 1 plan authorization, and this evidence file. No Settings integration, E2E bridge, browser journey, asset, dependency, schema, storage, or network file changed.
 - **Acceptance:** AC-3–AC-9 and AC-11 are covered; AC-2 and AC-10 are structurally covered with Settings/visual portions deferred to Phase 2; AC-12 remains partial; AC-1 and AC-13 remain pending their planned phases.
 - **Deviations:** the executor's command splitting and the two test-only matcher defects are recorded above. The stale living-count failure was repaired from primary-measured output; historical evidence was preserved.
-- **Checkpoint:** `(recorded at acceptance)`.
+- **Checkpoint:** `a8ec01d56d1d53445554c27e5f98b5d37cc09950`.
