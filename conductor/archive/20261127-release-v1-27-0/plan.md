@@ -110,27 +110,24 @@
 - **Covers:** FR-8, NFR-2, NFR-6, AC-7, AC-11
 - **Touches:** `docs/release-notes-v1.27.0.md` and `README.md` only if review requires correction; Conductor review/PR/verification state
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; required PR CI jobs; final scope diff inspection
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: Run `conductor-review`** — covers: FR-8, AC-7
-  - [ ] **P4.T1.1: Resolve blocking findings; allow at most two review-fix rounds.**
-  - [ ] **P4.T1.2: Record the verdict and any accepted findings according to workflow policy.**
-- [ ] **P4.T2: Open the release PR** — covers: FR-8
-  - [ ] **P4.T2.1: Use title `chore(release): ship v1.27.0`.**
-  - [ ] **P4.T2.2: Include requirements coverage, measured verification, accepted device gap, pre-authorized tag gate and rollback.**
-- [ ] **P4.T3: Watch release PR CI** — covers: FR-8, AC-7
-  - [ ] **P4.T3.1: Require Quality Gates, both Chromium shards, all three engine jobs and the Browser Journeys rollup to pass.**
-  - [ ] **P4.T3.2: Do not merge while any required check is failed, pending or blocked.**
-- [ ] **P4.T4: Merge after the explicit answer and record evidence** — covers: FR-8, NFR-6, AC-7
-  - [ ] **P4.T4.1: Merge with the configured `merge` method only after the user answers “Merge now”.**
-  - [ ] **P4.T4.2: Record merge commit, CI run, branch cleanup and rollback posture.**
+- [x] **P4.T1: Run `conductor-review`** — covers: FR-8, AC-7
+  - [x] **P4.T1.1: Resolve blocking findings; allow at most two review-fix rounds.**
+  - [x] **P4.T1.2: Record the verdict and any accepted findings according to workflow policy.**
+- [x] **P4.T2: Open the release PR** — covers: FR-8
+  - [x] **P4.T2.1: Use title `chore(release): ship v1.27.0`.**
+  - [x] **P4.T2.2: Include requirements coverage, measured verification, accepted device gap, pre-authorized tag gate and rollback.**
+- [x] **P4.T3: Watch release PR CI** — covers: FR-8, AC-7
+  - [x] **P4.T3.1: Require Quality Gates, both Chromium shards, all three engine jobs and the Browser Journeys rollup to pass.**
+  - [x] **P4.T3.2: Do not merge while any required check is failed, pending or blocked.**
+- [x] **P4.T4: Merge after the explicit answer and record evidence** — covers: FR-8, NFR-6, AC-7
+  - [x] **P4.T4.1: Merge with the configured `merge` method only after the user answers “Merge now”.**
+  - [x] **P4.T4.2: Record merge commit, CI run, branch cleanup and rollback posture.**
 
-<!--
-The primary appends after acceptance:
 **Result:** verified
-**Checkpoint:** <short-sha>
-**Evidence:** conductor/tracks/20261127-release-v1-27-0/verification/phase-4.md
--->
+**Checkpoint:** `019a26cd`
+**Evidence:** conductor/archive/20261127-release-v1-27-0/verification/phase-4.md
 
 ## Phase 5: Pre-authorized tag, deploy and final notes
 
@@ -139,22 +136,28 @@ The primary appends after acceptance:
 - **Covers:** FR-9, FR-10, FR-11, NFR-3, NFR-5, NFR-6, NFR-7, AC-8, AC-9, AC-10
 - **Touches:** `docs/release-notes-v1.27.0.md`, Conductor verification/archive state, git tag
 - **Verification:** recorded device policy; no tag collision; tag on merged `master` HEAD; tag CI green; live URL/build/version/hash verified; `node scripts/validate-docs.js`; `git -c core.whitespace=cr-at-eol diff --check`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P5.T1: Record the targeted device-smoke policy** — covers: FR-9, AC-8
-  - [ ] **P5.T1.1: Record `SKIPPED — accepted gap`; no physical-device, iOS Safari, Android Chrome or Fire tablet pass is claimed.**
-- [ ] **P5.T2: Preflight the tag** — covers: FR-10, NFR-5, AC-9
-  - [ ] **P5.T2.1: Fetch `master`; confirm the release merge is HEAD and the tree is clean.**
-  - [ ] **P5.T2.2: Confirm `v1.27.0` exists neither locally nor on origin.**
-- [ ] **P5.T3: Create and push the tag using the recorded pre-authorization** — covers: FR-10, NFR-5, AC-9
-  - [ ] **P5.T3.1: Annotate `v1.27.0` on merged `master` HEAD.**
-  - [ ] **P5.T3.2: Never move the tag after push; stop if any P5.T2 precondition fails.**
-- [ ] **P5.T4: Verify tag CI and deployment** — covers: FR-10, AC-9
-  - [ ] **P5.T4.1: Require Quality Gates, both Chromium shards, all three engine jobs, the Browser Journeys rollup and Coolify to pass.**
-  - [ ] **P5.T4.2: Verify the live URL serves the release build and reports `1.27.0`; compare the remote and local shell hashes.**
-- [ ] **P5.T5: Finalize notes and close the ship gate** — covers: FR-2, FR-10, FR-11, NFR-3, NFR-7, AC-2, AC-9, AC-10
-  - [ ] **P5.T5.1: Flip `DRAFT` to `FINAL`; record tag commit, CI run, deploy result, live verification and device policy.**
-  - [ ] **P5.T5.2: Update archived ship evidence/state through the documented docs/Conductor-only finalization exception.**
+- [x] **P5.T1: Record the targeted device-smoke policy** — covers: FR-9, AC-8
+  - [x] **P5.T1.1: Record `SKIPPED — accepted gap`; no physical-device, iOS Safari, Android Chrome or Fire tablet pass is claimed.**
+- [x] **P5.T2: Preflight the tag** — covers: FR-10, NFR-5, AC-9
+  - [x] **P5.T2.1: Fetch `master`; confirm the release merge is HEAD and the tree is clean.**
+  - [x] **P5.T2.2: Confirm `v1.27.0` exists neither locally nor on origin.**
+- [x] **P5.T3: Create and push the tag using the recorded pre-authorization** — covers: FR-10, NFR-5, AC-9
+  - [x] **P5.T3.1: Annotate `v1.27.0` on merged `master` HEAD.**
+  - [x] **P5.T3.2: Never move the tag after push; stop if any P5.T2 precondition fails.**
+- [x] **P5.T4: Verify tag CI and deployment** — covers: FR-10, AC-9
+  - [x] **P5.T4.1: Require Quality Gates, both Chromium shards, all three engine jobs, the Browser Journeys rollup and Coolify to pass.**
+  - [x] **P5.T4.2: Verify the live URL serves the release build and reports `1.27.0`; compare the remote and local shell hashes.**
+- [x] **P5.T5: Finalize notes and close the ship gate** — covers: FR-2, FR-10, FR-11, NFR-3, NFR-7, AC-2, AC-9, AC-10
+  - [x] **P5.T5.1: Flip `DRAFT` to `FINAL`; record tag commit, CI run, deploy result, live verification and device policy.**
+  - [x] **P5.T5.2: Update archived ship evidence/state through the documented docs/Conductor-only finalization exception.**
+
+**Result:** verified
+
+**Checkpoint:** `5d1884a4` (immutable annotated tag object)
+
+**Evidence:** conductor/archive/20261127-release-v1-27-0/verification/phase-5.md
 
 ### Post-tag finalization procedure (release exception)
 
