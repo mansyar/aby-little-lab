@@ -37,7 +37,7 @@ The primary appends after acceptance:
 - **Covers:** FR-3, FR-5, FR-6, NFR-1, NFR-3, AC-4, AC-5
 - **Touches:** `src/scenes/RepeatMachineScene.ts`, `src/game/gameRegistry.ts`, `src/game/hubGroups.ts`, `e2e/journeys/repeat-machine.spec.ts`, `e2e/fixtures/game.ts`, `src/__tests__/scenes/repeatMachineScene.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Build the scene** — covers: FR-3, FR-4
   - [ ] **P2.T1.1:** Target dots, authoring controls (action + count 2–4), mascot replay with sound.
