@@ -37,15 +37,22 @@ The primary appends after acceptance:
 - **Covers:** FR-3, FR-5, FR-6, NFR-1, NFR-3, AC-4, AC-5
 - **Touches:** `src/scenes/RepeatMachineScene.ts`, `src/game/gameRegistry.ts`, `src/game/hubGroups.ts`, `e2e/journeys/repeat-machine.spec.ts`, `e2e/fixtures/game.ts`, `src/__tests__/scenes/repeatMachineScene.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Build the scene** — covers: FR-3, FR-4
-  - [ ] **P2.T1.1:** Target dots, authoring controls (action + count 2–4), mascot replay with sound.
-  - [ ] **P2.T1.2:** Wrong-count visible replay + retry; house scoring/completion/adaptive hooks.
-- [ ] **P2.T2: Wire the 25th game** — covers: FR-5, FR-6, NFR-1, NFR-3
-  - [ ] **P2.T2.1:** `GAME_IDS` entry, Thinking-group chip, progress rows, E2E state.
-- [ ] **P2.T3: Browser journey** — covers: AC-4, AC-5
-  - [ ] **P2.T3.1:** Four-engine journey: author, correct win, wrong-count retry, save intact.
+- [x] **P2.T1: Build the scene** — covers: FR-3, FR-4
+  - [x] **P2.T1.1:** Target dots, authoring controls (action + count 2–4), mascot replay with sound.
+  - [x] **P2.T1.2:** Wrong-count visible replay + retry; house scoring/completion/adaptive hooks.
+- [x] **P2.T2: Wire the 25th game** — covers: FR-5, FR-6, NFR-1, NFR-3
+  - [x] **P2.T2.1:** `GAME_IDS` entry, Thinking-group chip, progress rows, E2E state.
+- [x] **P2.T3: Browser journey** — covers: AC-4, AC-5
+  - [x] **P2.T3.1:** Four-engine journey: author, correct win, wrong-count retry, save intact.
+
+<!--
+Phase 2 acceptance (primary):
+**Result:** verified
+**Checkpoint:** cad06d91 + fix 415ad5de
+**Evidence:** conductor/tracks/20261128-repeat-machine/verification/phase-2.md (+ primary texture re-baseline 320→322, full gate green 164/3529)
+-->
 
 <!--
 Review fixes are appended by `conductor-review` as:

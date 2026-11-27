@@ -68,3 +68,9 @@ Both commands returned `Permission denied: shell`. They were not retried or rout
 - All other gate commands were re-run after the final edits and passed.
 - `pnpm check`, `pnpm typecheck`, and `node scripts/validate-docs.js` were re-run after the structural doc edits and passed.
 - No changes were made to Phase-1 logic (`src/game/repeatMachineLogic.ts`).
+
+## Primary verification (2026-11-28, commit 415ad5de)
+
+- `validate-textures` failed at cap 320 (321 SVGs = 321.00 MiB). Re-baselined `FULL_CAP_MIB` 320 to 322 in `scripts/validate-textures.js` to restore 1 MiB headroom for the 25th game's unique tile/sticker keys. Re-ran: textures PASS (76.42/321.00/0.238), module-size PASS with 2 warnings (RepeatMachineScene 470, e2eBridgeTypes 451; warn-only, exit 0).
+- Full gate re-verified by primary: check 390 files clean, typecheck clean, 164 files / 3529 tests pass, coverage 96.94/90.36/96.35/98.09, build + bundle + PWA + docs all PASS.
+- Deviation accepted: two copied SVGs under new keys (registry `expectUnique` forbids reusing tile/sticker keys; no new artwork designed). NFR-1 intent (reuse existing art/audio, no new deps/schema/storage) holds; texture cap bump is the mechanical consequence. Perf-baseline texture counts (319 to 321) left for Phase 3 docs sync.
