@@ -11,10 +11,10 @@
 
 - **Goal:** All 25 tiles + shelf plaques on-canvas in the wide All view at 1024x768 via 5th-row flow with recentered origin.
 - **Depends on:** none
-- **Covers:** FR-1, FR-3, FR-4, AC-1, AC-3, AC-4
+- **Covers:** FR-1, FR-3, FR-4, NFR-1, NFR-2, NFR-3, AC-1, AC-3, AC-4
 - **Touches:** `src/game/hub/gridBuilder.ts`, `src/game/hub/gridLayout.ts`, `src/game/hub/hubGridConstants.ts`, `src/__tests__/scenes/hubScene.test.ts`, `src/__tests__/game/hub*.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Regression test red** — covers: FR-1, AC-1
   - [ ] **P1.T1.1: Extend hubScene bounds assertion to all 25 tiles + shelf plaques at 1024x768 and run to fail**
