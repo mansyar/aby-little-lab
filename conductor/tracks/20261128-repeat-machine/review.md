@@ -81,7 +81,8 @@ Repeat Machine implements the full repeat-N author-then-watch loop with a green 
 | Round | Verdict | Findings | Fixed |
 | --- | --- | --- | --- |
 | 1 | PASS WITH FINDINGS | 1 Medium, 4 Low | — (R1 appended for F2–F5) |
+| R1 re-review | PASS WITH FINDINGS | F2–F5 confirmed fixed (diff + gate); F1 open as follow-up | F2, F3, F4, F5 |
 
 ## Doc sync
 
-- `pending` at review time (F5 README counts are part of R1; full product truth was Phase 3).
+- `updated` — R1 fixed README tree counts (F5); full product truth was Phase 3 (PRD/TDD/changelog/README at 25 games, history intact).

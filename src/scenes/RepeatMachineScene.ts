@@ -27,6 +27,7 @@ import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakSentence } from "../utils/speech";
 import { getAdaptiveBandShift, getSettings } from "../utils/storage";
+import { textStyle } from "../utils/typography";
 import { ChoiceRoundScene } from "./ChoiceRoundScene";
 
 /** Spoken once on entry, and again when Go is pressed with an empty program. */
@@ -161,11 +162,7 @@ export class RepeatMachineScene extends ChoiceRoundScene {
       rect.on("pointerdown", () => this.tapAction(index));
       attachPressFeedback(rect);
       this.add
-        .text(x, y, ACTION_LABELS[action], {
-          fontFamily: "Arial, sans-serif",
-          fontSize: "30px",
-          color: "#2d3748",
-        })
+        .text(x, y, ACTION_LABELS[action], textStyle({ fontSize: "30px", color: "#2d3748" }))
         .setOrigin(0.5);
       this.actionRects.push(rect);
     });
@@ -178,11 +175,7 @@ export class RepeatMachineScene extends ChoiceRoundScene {
       rect.on("pointerdown", () => this.tapCount(index + 2));
       attachPressFeedback(rect);
       this.add
-        .text(x, y, String(index + 2), {
-          fontFamily: "Arial, sans-serif",
-          fontSize: "36px",
-          color: "#2d3748",
-        })
+        .text(x, y, String(index + 2), textStyle({ fontSize: "36px", color: "#2d3748" }))
         .setOrigin(0.5);
       this.countRects.push(rect);
     }

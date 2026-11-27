@@ -34,7 +34,7 @@ export interface GameRegistryEntry {
 }
 
 /**
- * The 23 games in Hub order (PRD §2.2). The order is behaviour, not
+ * The 25 games in Hub order (PRD §2.2). The order is behaviour, not
  * presentation: it is the Hub grid order, the storage order and the order the
  * sticker shelf is filled in.
  *
