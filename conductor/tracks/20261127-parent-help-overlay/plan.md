@@ -88,7 +88,7 @@
 - **Covers:** FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, NFR-5, AC-13
 - **Touches:** `docs/PRD.md`, `docs/TDD.md`, `README.md`, `docs/changelog.md`, `docs/device-testing-checklist.md`, `conductor/tracks/20261127-parent-help-overlay/verification/phase-3.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Document the parent-facing contract** — covers: FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, AC-13
   - [ ] **P3.T1.1:** Add PRD §4.12 **Parent Help** plus its Contents entry.
