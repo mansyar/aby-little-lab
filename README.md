@@ -1,6 +1,6 @@
 # Aby's Little Lab
 
-An ad-free, distraction-free developmental game suite for preschoolers aged 3-5. Twenty-two mini-games targeting cognitive, motor, literacy, numeracy, reasoning, social-emotional, and narrative-sequencing milestones, built with Phaser 4 + TypeScript + Vite as an installable PWA.
+An ad-free, distraction-free developmental game suite for preschoolers aged 3-5. Twenty-four mini-games targeting cognitive, motor, literacy, numeracy, reasoning, social-emotional, and narrative-sequencing milestones, built with Phaser 4 + TypeScript + Vite as an installable PWA.
 
 ## Tech Stack
 
@@ -115,7 +115,7 @@ src/
 
 ## Mini-Games
 
-Twenty-two mini-games in hub order; each links to its spec in [PRD §3](docs/PRD.md#3-game-specifications).
+Twenty-four mini-games in hub order; each links to its spec in [PRD §3](docs/PRD.md#3-game-specifications).
 
 - [Shape Sorter](docs/PRD.md#31-shape-sorter) — cognitive reasoning and categorisation
 - [Animal Trace](docs/PRD.md#32-animal-trace) — fine motor precision and pre-writing
@@ -180,7 +180,7 @@ The Hub is twenty-four storybook tiles, each a 64px icon above a small text labe
 
 Each new visit gives Professor Hoot a textless suggestion — a gentle ring pointing at one game — and spotlights one already-earned sticker on the shelf; the suggestion and the two idle-wiggling tiles avoid the games just played or suggested and reset when the child switches profile, while the spotlight advances one earned sticker per visit in registry order with wrap-around — re-derived per profile, with its cursor resuming for that profile — and falls back to one empty slot when none are earned.
 
-Six chips in the top band — All, Letters, Numbers, Thinking, Play and Stories — filter that board: a chip tap redraws it as that group's own games at 176×196 (three columns, every row centred), tapping All restores the 23-tile board byte-for-byte, and each tap also speaks the group's name. Choosing a group is a layout filter and nothing else: every game keeps its registry entry, sticker and place on the All board, the selection resets to All on the next visit and is never stored, so a child always lands on the familiar grid and reaches any game in at most two taps — the chip, then the game.
+Six chips in the top band — All, Letters, Numbers, Thinking, Play and Stories — filter that board: a chip tap redraws it as that group's own games at 176×196 (three columns, every row centred), tapping All restores the 24-tile board byte-for-byte, and each tap also speaks the group's name. Choosing a group is a layout filter and nothing else: every game keeps its registry entry, sticker and place on the All board, the selection resets to All on the next visit and is never stored, so a child always lands on the familiar grid and reaches any game in at most two taps — the chip, then the game.
 
 Product rules: [PRD §1.5](docs/PRD.md#15-session-flow), [PRD §4.4](docs/PRD.md#44-stickers), [PRD §4.6](docs/PRD.md#46-play-time-limits), [PRD §5.6](docs/PRD.md#56-motion-and-feedback). Implementation: [TDD §5.6](docs/TDD.md#56-profilechip-and-playtimeindicator), [TDD §7.1](docs/TDD.md#71-the-module-list).
 
@@ -235,6 +235,7 @@ One-time setup: a Coolify API token with the `deploy` permission, the app's Depl
 
 | Version | Date | Highlights | Tag |
 |---|---|---|---|
+| **v1.27.0** | 2026-11-27 | Four PRs since v1.26.1: #104 signature content variants reach Word Match, Story Order, Shape Sorter and Feelings Faces playthroughs with full-pool fallbacks, and #105 the Progress Overview shows the current adaptive-band spread (a snapshot, not longitudinal movement). Also two internal, unexecuted documentation PRs: #102 retention validation protocol and #103 blank retention pilot pack. Tag, deploy and device results pending. [Release notes](docs/release-notes-v1.27.0.md) | `v1.27.0` (pending) |
 | **v1.26.1** | 2026-11-26 | One PR since v1.26.0: #100 browser compatibility matrix - WebKit, Firefox and mobile Chromium/touch smoke on each code PR, a blocking `Browser Journeys` rollup so one red engine cannot hide behind green siblings, and a strict evidence helper that rejects retried, flaky, skipped, unexpected or wrong-project reports; plus three smoke-proven portability fixes (guarded `AudioContext` for WebKit, shared texture reservation/release for Firefox, and a state-based long-hold wait for high-refresh devices). Emulated CI engines, not physical-device coverage. [Release notes](docs/release-notes-v1.26.1.md) | `v1.26.1` |
 | **v1.26.0** | 2026-11-25 | Five PRs since v1.25.0: #94 replay novelty (textless Hub suggestions, idle wiggles and a per-visit earned-sticker spotlight), #95 adaptive-difficulty retuning with a parent band readout, #96 November dependency maintenance, #97 Find the Word cold first-tap fix, and #98 headed first-tap p95 evidence with a per-release refresh procedure. [Release notes](docs/release-notes-v1.26.0.md) | `v1.26.0` |
 | **v1.25.0** | 2026-11-23 | One feature track merged since v1.24.0: Content Depth doubles the core learning pools (60 words, 30 stories / 90 panels, 48 scenarios, 24 shapes + cut-outs, two variants each, no repeats per play) with a texture budget guard, plus the strict 400-line module-size guard and a single verbatim changelog. [Release notes](docs/release-notes-v1.25.0.md) | `v1.25.0` |
