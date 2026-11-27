@@ -284,6 +284,7 @@ Release mechanics: bump `package.json` → tag `vX.Y.Z` → push to `master` (CI
 - [perf-baseline.md](docs/perf-baseline.md) - The measured boot, bundle and first-tap budgets
 - [changelog.md](docs/changelog.md) - Dated changelog entries moved verbatim from the Conductor docs
 - [SVG_STYLE.md](docs/SVG_STYLE.md) - The art style every SVG asset is drawn in
+- [release-notes-v1.27.0.md](docs/release-notes-v1.27.0.md) - v1.27.0 release notes (DRAFT: content variants in play and the current adaptive-band spread; retention protocol/pilot pack unexecuted; tag, deploy and device results pending)
 - [release-notes-v1.26.1.md](docs/release-notes-v1.26.1.md) - v1.26.1 release notes (browser compatibility matrix and three portability fixes; CI, deploy and live build verified; physical-device smoke recorded as an accepted gap)
 - [release-notes-v1.26.0.md](docs/release-notes-v1.26.0.md) - v1.26.0 release notes (five shipped PRs; release CI and deployment verified; physical-device smoke recorded as an accepted gap)
 - [release-notes-v1.25.0.md](docs/release-notes-v1.25.0.md) - v1.25.0 release notes (Content Depth plus the two P6 housekeeping items)
