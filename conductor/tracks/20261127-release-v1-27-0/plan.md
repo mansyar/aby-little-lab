@@ -73,7 +73,7 @@
   - `$env:TAP_HEADED='1'; $env:TAP_INERT_IDLE='1'; node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10` on Windows PowerShell; require exit 0, 50 cold / 0 warm samples, exactly 10 per target game and every worst cold total ≤400 ms.
   - `pnpm exec playwright test --list`, then `pnpm test:e2e`, `pnpm test:e2e:webkit`, `pnpm test:e2e:firefox` and `pnpm test:e2e:mobile-chromium` sequentially with zero local retries.
   - `git -c core.whitespace=cr-at-eol diff --check`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Run the integrated full gate and frozen install** — covers: FR-5, AC-4, NFR-2
   - [ ] **P3.T1.1: Capture actual suite, coverage, bundle, module-size, texture, PWA and docs figures.**
