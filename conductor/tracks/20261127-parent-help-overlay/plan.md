@@ -47,7 +47,7 @@
 - **Goal:** Parents can open Help from either Settings page, and a real browser journey traverses all eight topics without changing existing controls or data.
 - **Depends on:** Phase 1
 - **Covers:** FR-1, FR-13, NFR-2, NFR-4, NFR-5, AC-1, AC-10, AC-11, AC-12
-- **Touches:** `src/components/settings/HelpButton.ts`, `src/components/settings/HelpOverlay.ts`, `src/components/SettingsPanel.ts`, `src/game/e2eBridgeTypes.ts`, `src/game/e2eBridge.ts`, `src/game/hub/hubE2E.ts`, `e2e/fixtures/game.ts`, `e2e/journeys/help.spec.ts`, `src/__tests__/components/settings/HelpButton.test.ts`, `src/__tests__/components/SettingsPanel.test.ts`, `src/__tests__/game/e2eBridge.test.ts`, `src/__tests__/scenes/hubScene.test.ts`, `vite.config.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/tracks/20261127-parent-help-overlay/verification/phase-2.md`
+- **Touches:** `src/components/settings/HelpButton.ts`, `src/components/settings/HelpOverlay.ts`, `src/components/SettingsPanel.ts`, `src/game/e2eBridgeTypes.ts`, `src/game/e2eBridge.ts`, `src/game/hub/hubE2E.ts`, `e2e/fixtures/game.ts`, `e2e/journeys/help.spec.ts`, `playwright.config.ts`, `src/__tests__/components/settings/HelpButton.test.ts`, `src/__tests__/components/SettingsPanel.test.ts`, `src/__tests__/game/e2eBridge.test.ts`, `src/__tests__/scenes/hubScene.test.ts`, `vite.config.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/tracks/20261127-parent-help-overlay/verification/phase-2.md`
 - **Verification:**
   - `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
   - `pnpm exec playwright test e2e/journeys/help.spec.ts --project=chromium --project=webkit --project=firefox --project=mobile-chromium`
@@ -68,6 +68,7 @@
 - [ ] **P2.T4: Add and run the browser journey** — covers: FR-1, FR-3, FR-13, NFR-5, AC-1, AC-3, AC-9, AC-11, AC-12
   - [ ] **P2.T4.1:** Open Settings through the real hold gesture, open Help, visit all eight topics, exercise boundaries, close, and verify the save is unchanged.
   - [ ] **P2.T4.2:** Run Chromium, WebKit, Firefox, and mobile Chromium with zero local retries.
+  - [ ] **P2.T4.3:** Include the Help journey in the cross-engine smoke roster so each supported engine actually executes it.
 - [ ] **P2.T5: Run gates and record evidence** — covers: NFR-4, NFR-5, AC-10, AC-12
   - [ ] **P2.T5.1:** Run the exact full gate and four-project Help journey.
   - [ ] **P2.T5.2:** Record measured counts, scope, browser results, deviations, and checkpoint evidence.
