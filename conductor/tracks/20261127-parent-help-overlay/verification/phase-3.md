@@ -110,3 +110,7 @@ complete. Historical records and gap boundaries remain explicit.
 - The executor did not run the gate; the primary did, unchanged, with exit 0. The
   executor committed only this finalized evidence file after that result. AC-12 is
   complete and the phase result is `verified`.
+
+## Primary verification
+
+Verdict: accepted. Primary independently verified scope (5 docs plus this evidence file, matching the Phase 3 Touches; plan-only and user-directed pin deltas excluded), clean CRLF-aware whitespace check, exact gate exit 0 (162 files / 3490 tests, coverage 97.1/91.09/96.35/98.19, 496 modules, shell 190.97 kB printed / 48.43 kB gzip with guard 186.5 kB pass, parent-help 19.38 kB / 7.35 kB, module-size pass with 1 warning, textures pass, PWA 16/0, docs 5/0), four-engine Help journey 8/8 with unchanged saves and zero retries, and media capture pass. AC-13 proved; AC-12 gate confirmation complete. Historical records, retention, device-gap, and longitudinal boundaries preserved. Checkpoint recorded at acceptance.

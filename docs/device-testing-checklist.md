@@ -31,6 +31,15 @@ These checks remain required on real devices before release and are **not satisf
 - [ ] Confirm first-tap game launch, touch accuracy, drag behavior and return-to-Hub on real glass.
 - [ ] Record device model, OS/browser version, app version, date, tester and any limitations.
 
+### Focused manual checks — Parent Help (2026-11-28)
+
+These rows cover the read-only Help overlay added in this track. They are manual checks on top of the automated four-engine Help journey, not evidence of a hardware pass:
+
+- [ ] Hold Settings on the Hub to open the panel, then tap **Help**; close Settings, hold Settings inside a game, and open **Help** there too. The same Help control is present on both Settings pages without a second parental-lock hold.
+- [ ] Open each of the eight topics from the 2 × 4 menu — Parental lock, Profiles & play time, Progress & adaptive difficulty, Privacy & local data, Backup & restore, Diagnostics, Install & offline, Updates — and read the intro and every bullet. Text wraps inside the 480 × 760 panel, controls stay at least 96 × 96 px, and Previous/Next stop at the first and last topic.
+- [ ] Close Help with ✕, with a backdrop tap and with **Back to topics**; confirm closing Settings while Help is open closes Help as well, and that a normal game tile tap works immediately afterwards.
+- [ ] Compare the save before and after the walk (profiles, settings, play time, progress and stickers): Help changes nothing, performs no backup/restore/diagnostics/install/update, and opens no external page or download.
+
 **Physical-device result for this track: PENDING — not run.** No hardware pass is claimed. Historical execution records below remain unchanged and apply only to the releases, devices and dates they name.
 
 ## Execution Record - v1.21.7 (2026-10-25)
