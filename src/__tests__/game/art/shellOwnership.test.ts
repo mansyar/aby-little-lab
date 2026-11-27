@@ -47,6 +47,7 @@ const SHELL_KEYS: readonly string[] = [
   "tile_feelings_faces",
   "tile_robot_path",
   "tile_fix_it_machine",
+  "tile_repeat_machine",
   "sticker_shape_sorter",
   "sticker_animal_trace",
   "sticker_pop_freeze",
@@ -70,6 +71,7 @@ const SHELL_KEYS: readonly string[] = [
   "sticker_story_order",
   "sticker_robot_path",
   "sticker_fix_it_machine",
+  "sticker_repeat_machine",
   "sticker_feelings_faces",
   "mascot_idle",
   "mascot_celebrate",
@@ -246,9 +248,9 @@ const SVG_FILES = new Set(
 );
 
 describe("shell ownership", () => {
-  it("ships exactly the 62 documented shell keys, with no extras or omissions", () => {
-    expect(SHELL_KEYS).toHaveLength(62);
-    expect(new Set(SHELL_KEYS).size).toBe(62);
+  it("ships exactly the 64 documented shell keys, with no extras or omissions", () => {
+    expect(SHELL_KEYS).toHaveLength(64);
+    expect(new Set(SHELL_KEYS).size).toBe(64);
     expect([...shellKeysRegistered].sort()).toEqual([...SHELL_KEYS].sort());
   });
 

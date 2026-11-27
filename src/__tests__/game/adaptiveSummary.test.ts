@@ -159,11 +159,11 @@ describe("summariseAdaptiveSpread — the evidence floor", () => {
     const allGames = ADAPTIVE_GAME_IDS.map((gameId) => [gameId, windowOf(8, 2)] as const);
     const spread = summariseAdaptiveSpread(progressWith(allGames), true);
 
-    expect(ADAPTIVE_GAME_IDS.length).toBe(22);
-    expect(spread.assessed).toBe(22);
-    expect(spread.classic).toBe(22);
+    expect(ADAPTIVE_GAME_IDS.length).toBe(23);
+    expect(spread.assessed).toBe(23);
+    expect(spread.classic).toBe(23);
     expect(spread.line).toBe(
-      "Current bands · 22 games assessed, all at classic · from recent answers",
+      "Current bands · 23 games assessed, all at classic · from recent answers",
     );
   });
 });

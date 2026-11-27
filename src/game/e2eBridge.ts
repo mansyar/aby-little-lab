@@ -7,6 +7,7 @@ import type {
   E2EHubPlayTime,
   E2EHubToast,
   E2ERecoverState,
+  E2ERepeatMachineState,
   E2ERobotPathState,
   E2ERoundGeometry,
   E2ERoundTarget,
@@ -26,6 +27,9 @@ export type {
   E2EHubToast,
   E2EProgressState,
   E2ERecoverState,
+  E2ERepeatMachineChoice,
+  E2ERepeatMachineCount,
+  E2ERepeatMachineState,
   E2ERobotPathPalette,
   E2ERobotPathSlot,
   E2ERobotPathState,
@@ -57,6 +61,7 @@ interface E2ESceneProbe {
   e2eRecoverButton?: () => E2ERecoverState | null;
   e2eRobotPath?: () => E2ERobotPathState | null;
   e2eFixItMachine?: () => E2EFixItMachineState | null;
+  e2eRepeatMachine?: () => E2ERepeatMachineState | null;
 }
 
 /** True when the page was opened by the browser suite. */
@@ -186,6 +191,12 @@ export function initE2EBridge(game: Phaser.Game): void {
     fixItMachine: () => {
       const probe = probeOf(activeScene(game));
       const hook = probe?.e2eFixItMachine;
+      if (typeof hook !== "function") return null;
+      return hook.call(probe);
+    },
+    repeatMachine: () => {
+      const probe = probeOf(activeScene(game));
+      const hook = probe?.e2eRepeatMachine;
       if (typeof hook !== "function") return null;
       return hook.call(probe);
     },

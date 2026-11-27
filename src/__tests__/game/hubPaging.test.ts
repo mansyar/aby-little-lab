@@ -74,7 +74,7 @@ describe("pageTileIndexes", () => {
   });
 
   it("clamps the last page to the tiles that remain", () => {
-    expect(pageTileIndexes(2)).toEqual([20, 21, 22, 23]);
+    expect(pageTileIndexes(2)).toEqual([20, 21, 22, 23, 24]);
   });
 
   it("maps every tile index back to its page", () => {
@@ -91,7 +91,7 @@ describe("pageTileIndexes", () => {
       .flat()
       .sort((a, b) => a - b);
     expect(all).toEqual([...Array(GAME_REGISTRY.length).keys()]);
-    expect(all).toEqual([...Array(24).keys()]);
+    expect(all).toEqual([...Array(25).keys()]);
   });
 
   it("rejects out-of-range pages", () => {
@@ -101,26 +101,26 @@ describe("pageTileIndexes", () => {
 });
 
 describe("page constants", () => {
-  it("splits the registry's 24 tiles into 3 pages (10 + 10 + 4)", () => {
+  it("splits the registry's 25 tiles into 3 pages (10 + 10 + 5)", () => {
     expect(PAGE_SIZE).toBe(10);
-    expect(GAME_REGISTRY).toHaveLength(24);
+    expect(GAME_REGISTRY).toHaveLength(25);
     expect(pageCount()).toBe(3);
-    expect(pageTileIndexes(pageCount() - 1)).toEqual([20, 21, 22, 23]);
+    expect(pageTileIndexes(pageCount() - 1)).toEqual([20, 21, 22, 23, 24]);
   });
 });
 
 describe("a further game", () => {
-  it("needs no paging edit: 10 + 10 + 5 pages", () => {
-    expect(pageCount(25)).toBe(3);
-    expect(pageTileIndexes(2, 25)).toEqual([20, 21, 22, 23, 24]);
+  it("needs no paging edit: 10 + 10 + 6 pages", () => {
+    expect(pageCount(26)).toBe(3);
+    expect(pageTileIndexes(2, 26)).toEqual([20, 21, 22, 23, 24, 25]);
   });
 
   it("maps the new last tile to the last page", () => {
-    expect(pageOf(24)).toBe(2);
+    expect(pageOf(25)).toBe(2);
   });
 
   it("still rejects the page after the last one", () => {
-    expect(() => pageTileIndexes(3, 25)).toThrow(RangeError);
+    expect(() => pageTileIndexes(3, 26)).toThrow(RangeError);
   });
 });
 
@@ -182,25 +182,19 @@ describe("pagedTilePosition", () => {
     });
   });
 
-  it("centres the four-tile last page as one row of four inside the canvas", () => {
+  it("centres the five-tile last page as one row of five inside the canvas", () => {
     const page = pageTileIndexes(pageCount() - 1);
-    expect(page).toHaveLength(4);
-    expect(page).toEqual([20, 21, 22, 23]);
-    const first = pagedTilePosition(0, page.length);
-    const second = pagedTilePosition(1, page.length);
-    const third = pagedTilePosition(2, page.length);
-    const fourth = pagedTilePosition(3, page.length);
-    // Four 176px columns with 20px spacing: 4 x 176 + 3 x 20 = 764 wide box, so
-    // the row is centred and the two middle tiles straddle the canvas centre.
-    expect(first.x).toBeCloseTo(CANVAS.width / 2 - 1.5 * (176 + 20), 6);
-    expect(second.x).toBeCloseTo(CANVAS.width / 2 - 0.5 * (176 + 20), 6);
-    expect(third.x).toBeCloseTo(CANVAS.width / 2 + 0.5 * (176 + 20), 6);
-    expect(fourth.x).toBeCloseTo(CANVAS.width / 2 + 1.5 * (176 + 20), 6);
-    expect(second.x + third.x).toBeCloseTo(CANVAS.width, 6);
-    // All four share the first row's vertical anchor.
-    expect(first.y).toBeCloseTo(pagedTilePosition(0).y, 6);
-    expect(fourth.y).toBeCloseTo(first.y, 6);
-    expect(first.x - first.width / 2).toBeGreaterThan(0);
-    expect(fourth.x + fourth.width / 2).toBeLessThan(CANVAS.width);
+    expect(page).toHaveLength(5);
+    expect(page).toEqual([20, 21, 22, 23, 24]);
+    const centres = page.map((_, slot) => pagedTilePosition(slot, page.length));
+    // Five 176px columns with 20px spacing: 5 x 176 + 4 x 20 = 960 wide box, so
+    // the row is centred and its middle tile sits at the canvas centre.
+    centres.forEach((tile, slot) => {
+      expect(tile.x).toBeCloseTo(CANVAS.width / 2 + (slot - 2) * (176 + 20), 6);
+      expect(tile.y).toBeCloseTo(pagedTilePosition(0).y, 6);
+    });
+    expect(centres[0]?.x - (centres[0]?.width ?? 0) / 2).toBeGreaterThan(0);
+    const last = centres.at(-1);
+    expect((last?.x ?? 0) + (last?.width ?? 0) / 2).toBeLessThan(CANVAS.width);
   });
 });

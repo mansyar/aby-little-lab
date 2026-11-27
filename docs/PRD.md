@@ -374,6 +374,15 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Narration.** Rule line: "Find the wrong card and fix it." No per-round narration.
 - **Art and assets.** Sixteen SVGs travel with the game's own chunk: four machine poses drawn on one shared anchor, six tool pictograms and six toy goals. The tape, tray and Go button are drawn at runtime. Tile and sticker icons.
 
+### 3.25 Repeat Machine
+
+- **Mechanic.** The child picks one move — wave, nod, cheer or curious — and a count from two to four, then presses Go. The mascot replays that move and sound exactly that many times; a row of target dots shows how many the machine wants.
+- **Rounds and rules.** Six rounds with targets 2, 2, 3, 3, 4, 4. The authored action is only a hint; any of the four moves may be repeated, and a replay wins only when its count equals the target.
+- **Feedback.** A wrong count replays visibly, rings the missed target, keeps the authoring and the round intact, and invites another try. A correct replay chimes, fills the progress dot and awards the sticker. First-try wins score two, retries one.
+- **Difficulty.** The count ladder is fixed at 2, 2, 3, 3, 4, 4 with an optional adaptive band shift applied once when the scene opens.
+- **Narration.** Rule line: "Pick a move and a count, then press Go." No per-round narration.
+- **Art and assets.** Reuses the shared mascot moves, sound effects and bubble glyph; tile and sticker icons are registered for the Hub.
+
 ## 4. Cross-game systems
 
 ### 4.1 Shared scene bases and lazy loading

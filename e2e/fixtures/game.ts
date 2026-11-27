@@ -7,6 +7,7 @@ import type {
   E2EHubToast,
   E2EProgressState,
   E2ERecoverState,
+  E2ERepeatMachineState,
   E2ERobotPathState,
   E2ERoundGeometry,
   E2ERoundTarget,
@@ -394,6 +395,50 @@ export async function waitForFixItMachineRound(
 
   const state = await fixItMachineState(page);
   if (!state) throw new Error(`Fix-It Machine round ${round} vanished between polling and reading`);
+  return state;
+}
+
+/**
+ * Repeat Machine's authoring board, or null while another scene is active.
+ *
+ * The scene publishes the target, the child's authored program, and the move /
+ * count card geometry, so a journey can author by tapping real cards instead of
+ * poking scene internals.
+ */
+export function repeatMachineState(page: Page): Promise<E2ERepeatMachineState | null> {
+  return page.evaluate(() => window.__abyE2E?.repeatMachine() ?? null);
+}
+
+/**
+ * Polls until Repeat Machine is on the given round with its cards on screen.
+ *
+ * `target` comes from the round, so the journey never hardcodes the ramp.
+ */
+export async function waitForRepeatMachineRound(
+  page: Page,
+  round: number,
+  timeout = ROUND_TIMEOUT,
+): Promise<E2ERepeatMachineState> {
+  await expect
+    .poll(
+      async () => {
+        const state = await repeatMachineState(page);
+        return (
+          state !== null &&
+          state.round === round &&
+          state.actionOptions.length > 0 &&
+          state.countOptions.length > 0
+        );
+      },
+      {
+        message: `Repeat Machine round ${round} should have its move and count cards`,
+        timeout,
+      },
+    )
+    .toBe(true);
+
+  const state = await repeatMachineState(page);
+  if (!state) throw new Error(`Repeat Machine round ${round} vanished between polling and reading`);
   return state;
 }
 

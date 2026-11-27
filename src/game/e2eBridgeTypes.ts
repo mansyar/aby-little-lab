@@ -1,4 +1,5 @@
 import type { ActionIcon } from "./fixItMachineLogic";
+import type { MoveAction, Program, TargetCount } from "./repeatMachineLogic";
 import type { Direction } from "./robotPathLogic";
 
 /** One canvas-space point the browser suite may act on. */
@@ -305,6 +306,62 @@ export interface E2EFixItMachineState {
   goal: GamePoint;
 }
 
+/** A move card the journey can tap, with the canvas point it occupies. */
+export interface E2ERepeatMachineChoice {
+  index: number;
+  action: MoveAction;
+  x: number;
+  y: number;
+}
+
+/** A repeat-count card the journey can tap. */
+export interface E2ERepeatMachineCount {
+  index: number;
+  count: number;
+  x: number;
+  y: number;
+}
+
+/**
+ * Repeat Machine's authoring board (FR-15): the target, the chosen program,
+ * the performed replay and the geometry a journey taps. Counters are read from
+ * the scene, never inferred from how the hints look.
+ */
+export interface E2ERepeatMachineState {
+  /** Zero-based round index, matching the scene's progress dots. */
+  round: number;
+  /** Dots the child must match this round. */
+  target: TargetCount;
+  /** The round's moves in their authored order. */
+  actions: readonly MoveAction[];
+  /** The four move cards on screen. */
+  actionOptions: E2ERepeatMachineChoice[];
+  /** The three count cards on screen, in count order. */
+  countOptions: E2ERepeatMachineCount[];
+  /** What the child authored, or nulls while a field is unset. */
+  program: Program;
+  /** The last replay's move+sound pairs, exactly count long. */
+  performed: readonly MoveAction[];
+  /** Target dot centres, one per dot shown. */
+  dots: GamePoint[];
+  /** Whether the last replay matched the target. */
+  solved: boolean;
+  /** Runs this round whose count missed the target. */
+  wrongRuns: number;
+  /** Misses this round, including wrong replays. */
+  wrongTaps: number;
+  /** The visual help earned so far: 0, 1 or 2. */
+  hintLevel: number;
+  /** Attempt number of the last replay, starting at one. */
+  attempts: number;
+  /** Points the last replay earned from the rule module. */
+  lastScore: number;
+  /** The Go button's centre. */
+  go: GamePoint;
+  /** The machine's centre. */
+  machine: GamePoint;
+}
+
 /** The hub's play-time state, as the hub itself sees it. */
 export interface E2EHubPlayTime {
   /** Whether the active profile's daily budget is spent, so every tile is locked. */
@@ -380,6 +437,11 @@ export interface E2EBridge {
    * scene, so a journey can only repair the tape while the tape is what it sees.
    */
   fixItMachine(): E2EFixItMachineState | null;
+  /**
+   * Repeat Machine's authoring board while that scene is active. Null in every
+   * other scene, so a journey can only author a program while it sees one.
+   */
+  repeatMachine(): E2ERepeatMachineState | null;
 }
 
 declare global {

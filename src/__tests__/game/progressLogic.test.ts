@@ -60,10 +60,11 @@ describe("progressLogic", () => {
       }
     });
 
-    it("covers all 24 games, with Fix-It Machine last in hub order", () => {
+    it("covers all 25 games, with Repeat Machine last in hub order", () => {
       const map = createDefaultProgressMap();
-      expect(Object.keys(map)).toHaveLength(24);
-      expect(GAME_IDS.at(-1)).toBe("fix-it-machine");
+      expect(Object.keys(map)).toHaveLength(25);
+      expect(GAME_IDS.at(-1)).toBe("repeat-machine");
+      expect(map["repeat-machine"]).toEqual(gp());
       expect(map["fix-it-machine"]).toEqual(gp());
       expect(map["feelings-faces"]).toEqual(gp());
     });

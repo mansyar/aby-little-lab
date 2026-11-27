@@ -72,23 +72,23 @@ describe("HubGrid — classic wide 6x4 grid", () => {
     localStorage.clear();
   });
 
-  it("builds 24 tiles of 144x116 with icons and labels", () => {
+  it("builds 25 tiles of 144x116 with icons and labels", () => {
     const { deps } = makeDeps();
     const grid = new HubGrid(deps);
 
     grid.buildWideGrid();
 
-    expect(rects(144, 116).length).toBe(24);
+    expect(rects(144, 116).length).toBe(25);
     const images = mockRegistry.filter((obj) => obj.kind === "image");
     const texts = mockRegistry.filter((obj) => obj.kind === "text");
-    // 24 icons + 24 sticker slots would be more; the wide grid adds 24 icons.
-    expect(images.length).toBe(24);
-    // 24 game labels (17px) plus the six chip words (14px).
+    // 25 icons + 25 sticker slots would be more; the wide grid adds 25 icons.
+    expect(images.length).toBe(25);
+    // 25 game labels (17px) plus the six chip words (14px).
     const tileLabels = texts.filter(
       (obj) => (obj.args?.[3] as { fontSize?: string })?.fontSize === "17px",
     );
-    expect(tileLabels.length).toBe(24);
-    expect(texts.length).toBe(30);
+    expect(tileLabels.length).toBe(25);
+    expect(texts.length).toBe(31);
   });
 
   it("activates a tile on tap exactly once (navLocked blocks double-taps)", () => {
@@ -149,14 +149,14 @@ describe("HubGrid — classic wide 6x4 grid", () => {
       (obj) => obj.kind === "image" && ((obj.args?.[2] as string) ?? "").startsWith("sticker_"),
     );
     expect(stickers.length).toBe(1);
-    // 23 unearned slots: each dashed ring has 10 arc segments.
+    // 24 unearned slots: each dashed ring has 10 arc segments.
     const slotGraphics = mockRegistry.filter(
       (obj) => obj.kind === "graphics" && (obj.arc as MockFn).mock.calls.length === 10,
     );
     for (const g of slotGraphics) {
       expect(g.arc).toHaveBeenCalledTimes(10);
     }
-    expect(slotGraphics.length).toBe(23);
+    expect(slotGraphics.length).toBe(24);
     // No new art or texture key: one graphics outline, no tween.
     expect(grid.spotlightGraphics).toHaveLength(1);
     expect(grid.spotlightGraphics[0].strokeCircle).toHaveBeenCalledWith(0, 0, 16);
@@ -246,17 +246,17 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
     expect(activate).toHaveBeenCalledWith(10, grid.attractTargets[0]);
   });
 
-  it("builds the four remaining tiles on the last page", () => {
+  it("builds the five remaining tiles on the last page", () => {
     const { deps, activate } = makeDeps();
     const grid = new HubGrid(deps);
     grid.buildPageGrid(2);
 
-    expect(rects(176, 196).length).toBe(4);
+    expect(rects(176, 196).length).toBe(5);
 
     const tiles = grid.attractTargets as unknown as MockObject[];
     tiles[0].handlers.pointerdown?.();
     tiles[0].handlers.pointerup?.();
-    // Page 3 holds games 21-24 (Feelings Faces, Story Order, Robot Path, Fix-It Machine).
+    // Page 3 holds games 21-25 (Feelings Faces, Story Order, Robot Path, Fix-It Machine, Repeat Machine).
     expect(activate).toHaveBeenCalledWith(20, tiles[0]);
 
     grid.navLocked = false;
@@ -539,7 +539,7 @@ describe("HubGrid — entrance readiness", () => {
     expect(grid.entranceSettled, "tiles at scale 0 cannot be hit").toBe(false);
 
     const landings = entranceCallbacks(scene);
-    expect(landings.length, "one entrance per tile gates input").toBe(24);
+    expect(landings.length, "one entrance per tile gates input").toBe(25);
 
     for (const land of landings.slice(0, -1)) land();
     expect(grid.entranceSettled, "one tile still entering is still a dead board").toBe(false);
@@ -640,7 +640,7 @@ describe("HubGrid — group chips and the filtered board", () => {
     ]);
   });
 
-  it("restores the 24-tile All board, byte-identical to the pre-track grid", () => {
+  it("restores the 25-tile All board with the original tile positions", () => {
     const { deps } = makeDeps();
     const grid = new HubGrid(deps);
     grid.classifyViewport();
@@ -649,7 +649,7 @@ describe("HubGrid — group chips and the filtered board", () => {
     grid.setGroup("all");
 
     const tiles = rects(144, 116);
-    expect(tiles).toHaveLength(24);
+    expect(tiles).toHaveLength(25);
     // The same origin the pre-track grid computed (see gridLayout.test.ts).
     expect(tiles[0]?.args?.slice(0, 2)).toEqual([97, 177]);
     expect(tiles[21]?.args?.slice(0, 2)).toEqual([595, 591]);

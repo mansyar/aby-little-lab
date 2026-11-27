@@ -232,6 +232,12 @@ export const AUDIO_IDENTITIES: Partial<Record<GameId, AudioIdentity>> = {
     tempo: 1.05,
     contours: { correct: [0, 3, 7], incorrect: [0, -2], win: [0, 3, 7, 12] },
   },
+  "repeat-machine": {
+    pitchOffsetSemitones: -3,
+    waveform: "sine",
+    tempo: 1.25,
+    contours: { correct: [0, 4, 7], incorrect: [0, -7], win: [0, 4, 7, 12] },
+  },
 };
 
 function clamp(value: number, min: number, max: number): number {

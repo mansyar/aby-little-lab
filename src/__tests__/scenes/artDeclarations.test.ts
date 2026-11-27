@@ -182,7 +182,7 @@ function sceneNameOf(path: string): string {
   return file.slice(0, -".ts".length);
 }
 
-/** The 24 game scenes, read as text. */
+/** The 25 game scenes, read as text. */
 const SCENES: readonly SceneSource[] = Object.entries(SCENE_SOURCES)
   .map(([path, source]) => ({ name: sceneNameOf(path), source }))
   .filter((scene) => !NON_GAME_SCENES.includes(scene.name))
@@ -237,6 +237,7 @@ const NON_ART_GAME_MODULES: readonly string[] = [
   "contentVariants",
   "dragBoard",
   "random",
+  "repeatMachineLogic",
   "wordMatchArt",
 ];
 
@@ -366,13 +367,13 @@ function sorted(ids: Iterable<string>): string[] {
 }
 
 describe("game scene art declarations", () => {
-  it("discovers all 24 game scenes, so a new one cannot escape the scan", () => {
+  it("discovers all 25 game scenes, so a new one cannot escape the scan", () => {
     const discovered = Object.keys(SCENE_SOURCES).map(sceneNameOf);
 
     // The inventory itself is the tripwire: a further game changes this number,
     // and its own declaration checks run in the same pass.
-    expect(SCENES).toHaveLength(24);
-    expect(new Set(SCENES.map((scene) => scene.name)).size).toBe(24);
+    expect(SCENES).toHaveLength(25);
+    expect(new Set(SCENES.map((scene) => scene.name)).size).toBe(25);
 
     // Every exclusion is a scene the glob really found; a stale name here
     // would let a non-game module slip into the game-scene checks.

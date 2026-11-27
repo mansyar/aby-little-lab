@@ -446,9 +446,10 @@ describe("ART_KEYS_BY_GAME — per-game art-key source (P1.T1)", () => {
     "story-order": [{ assets: STORY_PANEL_ASSETS }],
     "robot-path": [{ assets: ROBOT_PATH_ASSETS }],
     "fix-it-machine": [{ assets: FIX_IT_MACHINE_ASSETS }],
+    "repeat-machine": [glyphs],
   };
 
-  it("covers all 24 registry games and nothing else", () => {
+  it("covers all 25 registry games and nothing else", () => {
     const registryIds = GAME_REGISTRY.map((entry) => entry.gameId).sort();
     expect(Object.keys(ART_KEYS_BY_GAME).sort()).toEqual(registryIds);
     expect(Object.keys(EXPECTED_GROUPS).sort()).toEqual(registryIds);

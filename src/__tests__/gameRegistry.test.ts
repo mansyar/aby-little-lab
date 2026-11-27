@@ -18,7 +18,7 @@ import { GAME_IDS, type GameId } from "../types";
 /**
  * Registry and derived-tile guards (FR-1, FR-2, FR-8).
  *
- * The registry is the single declaration of the 24 games, so this suite holds
+ * The registry is the single declaration of the 25 games, so this suite holds
  * the contract in three directions: the declaration itself (order, uniqueness,
  * purity), the derived `GAME_TILES` against the exact pre-registry array, and
  * the type-level coverage proof that lives in the module (a missing `GameId`
@@ -51,6 +51,7 @@ const PRD_ORDER: readonly GameId[] = [
   "story-order",
   "robot-path",
   "fix-it-machine",
+  "repeat-machine",
 ];
 
 /**
@@ -225,6 +226,12 @@ const PRE_TRACK_GAME_TILES: readonly GameTile[] = [
     label: "Fix-It Machine",
     tileKey: "tile_fix_it_machine",
   },
+  {
+    sceneKey: "RepeatMachine",
+    gameId: "repeat-machine",
+    label: "Repeat Machine",
+    tileKey: "tile_repeat_machine",
+  },
 ];
 
 /** Every `from "…"` specifier in a module's source text. */
@@ -303,7 +310,7 @@ describe("the group field", () => {
     }
   });
 
-  it("keeps the 5/5/8/4/2 totals the spec states", () => {
+  it("keeps the 5/5/9/4/2 totals the spec states", () => {
     const counts = HUB_GROUPS.map((group) => ({
       id: group.id,
       count: GAME_REGISTRY.filter((entry) => entry.group === group.id).length,
@@ -312,7 +319,7 @@ describe("the group field", () => {
     expect(counts).toEqual([
       { id: "letters", count: 5 },
       { id: "numbers", count: 5 },
-      { id: "thinking", count: 8 },
+      { id: "thinking", count: 9 },
       { id: "play", count: 4 },
       { id: "stories", count: 2 },
     ]);
@@ -339,7 +346,7 @@ describe("stickerKeyForGame", () => {
   });
 });
 
-describe("the 24 game invariants", () => {
+describe("the 25 game invariants", () => {
   it("keeps GAME_IDS in registry order", () => {
     expect(GAME_IDS).toEqual(GAME_REGISTRY.map((game) => game.gameId));
   });

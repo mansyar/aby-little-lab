@@ -16,6 +16,7 @@ import { NumberOrderScene } from "../../scenes/NumberOrderScene";
 import { OddOneOutScene } from "../../scenes/OddOneOutScene";
 import { PatternBuilderScene } from "../../scenes/PatternBuilderScene";
 import { PopFreezeScene } from "../../scenes/PopFreezeScene";
+import { RepeatMachineScene } from "../../scenes/RepeatMachineScene";
 import { RobotPathScene } from "../../scenes/RobotPathScene";
 import { ShadowMatchScene } from "../../scenes/ShadowMatchScene";
 import { ShapeSorterScene } from "../../scenes/ShapeSorterScene";
@@ -26,7 +27,7 @@ import { WordBuilderScene } from "../../scenes/WordBuilderScene";
 import { WordMatchScene } from "../../scenes/WordMatchScene";
 
 /**
- * Stub the 24 scene modules so invoking the real dynamic-import loaders
+ * Stub the 25 scene modules so invoking the real dynamic-import loaders
  * never pulls Phaser scenes into happy-dom — each loader should resolve
  * to its module's named scene export.
  */
@@ -102,12 +103,15 @@ vi.mock("../../scenes/FixItMachineScene", () => ({
 vi.mock("../../scenes/RobotPathScene", () => ({
   RobotPathScene: class RobotPathSceneStub {},
 }));
+vi.mock("../../scenes/RepeatMachineScene", () => ({
+  RepeatMachineScene: class RepeatMachineSceneStub {},
+}));
 
 /** Fake scene class returned by test loaders. */
 class FakeScene {}
 
 describe("sceneRegistry", () => {
-  it("maps exactly the 24 game scene keys", () => {
+  it("maps exactly the 25 game scene keys", () => {
     expect(Object.keys(sceneLoaders).sort()).toEqual([
       "AddItUp",
       "Alphabet",
@@ -126,6 +130,7 @@ describe("sceneRegistry", () => {
       "OddOneOut",
       "PatternBuilder",
       "PopFreeze",
+      "RepeatMachine",
       "RobotPath",
       "ShadowMatch",
       "ShapeSorter",
@@ -198,6 +203,7 @@ describe("sceneRegistry", () => {
       StoryOrder: StoryOrderScene,
       RobotPath: RobotPathScene,
       FixItMachine: FixItMachineScene,
+      RepeatMachine: RepeatMachineScene,
     };
 
     expect(Object.keys(sceneLoaders).sort()).toEqual(Object.keys(expectedByKey).sort());

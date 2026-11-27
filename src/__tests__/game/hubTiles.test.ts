@@ -3,14 +3,14 @@ import { PAGE_SIZE, pageCount } from "../../game/hubPaging";
 import { GAME_TILES } from "../../game/hubTiles";
 
 describe("GAME_TILES", () => {
-  it("holds exactly 24 tiles with unique gameIds, sceneKeys, and tileKeys", () => {
-    expect(GAME_TILES).toHaveLength(24);
+  it("holds exactly 25 tiles with unique gameIds, sceneKeys, and tileKeys", () => {
+    expect(GAME_TILES).toHaveLength(25);
     const gameIds = new Set(GAME_TILES.map((t) => t.gameId));
     const sceneKeys = new Set(GAME_TILES.map((t) => t.sceneKey));
     const tileKeys = new Set(GAME_TILES.map((t) => t.tileKey));
-    expect(gameIds.size).toBe(24);
-    expect(sceneKeys.size).toBe(24);
-    expect(tileKeys.size).toBe(24);
+    expect(gameIds.size).toBe(25);
+    expect(sceneKeys.size).toBe(25);
+    expect(tileKeys.size).toBe(25);
   });
 
   it("derives the hub page count from the tile list, not a constant", () => {
@@ -45,6 +45,7 @@ describe("GAME_TILES", () => {
       "story-order": "tile_story_order",
       "robot-path": "tile_robot_path",
       "fix-it-machine": "tile_fix_it_machine",
+      "repeat-machine": "tile_repeat_machine",
     };
     for (const tile of GAME_TILES) {
       expect(tile.tileKey).toBe(expected[tile.gameId]);
@@ -74,7 +75,7 @@ describe("GAME_TILES", () => {
     }
   });
 
-  it("keeps Feelings Faces as tile 21 and appends Story Order 22, Robot Path 23, Fix-It Machine 24", () => {
+  it("keeps Feelings Faces as tile 21 and appends Story Order 22, Robot Path 23, Fix-It Machine 24, Repeat Machine 25", () => {
     const feelings = GAME_TILES[20];
     expect(feelings?.gameId).toBe("feelings-faces");
     expect(feelings?.sceneKey).toBe("FeelingsFaces");
@@ -91,9 +92,14 @@ describe("GAME_TILES", () => {
     expect(robot?.sceneKey).toBe("RobotPath");
     expect(robot?.label).toBe("Robot Path");
 
+    const fixIt = GAME_TILES[23];
+    expect(fixIt?.gameId).toBe("fix-it-machine");
+    expect(fixIt?.sceneKey).toBe("FixItMachine");
+    expect(fixIt?.label).toBe("Fix-It Machine");
+
     const last = GAME_TILES.at(-1);
-    expect(last?.gameId).toBe("fix-it-machine");
-    expect(last?.sceneKey).toBe("FixItMachine");
-    expect(last?.label).toBe("Fix-It Machine");
+    expect(last?.gameId).toBe("repeat-machine");
+    expect(last?.sceneKey).toBe("RepeatMachine");
+    expect(last?.label).toBe("Repeat Machine");
   });
 });

@@ -431,7 +431,7 @@ describe("Hub engagement sticker shelf", () => {
     // Fresh profile: nothing earned -> 24 dashed outlines, no ghost thumbnails.
     expect(getStickerImages(scene)).toHaveLength(0);
     const slots = getEmptySlots(scene);
-    expect(slots).toHaveLength(24);
+    expect(slots).toHaveLength(25);
     for (const slot of slots) {
       expect(getMockFn(slot.setInteractive)).not.toHaveBeenCalled();
       expect(getMockFn(slot.arc).mock.calls.length).toBeGreaterThanOrEqual(5);
@@ -555,7 +555,7 @@ describe("Hub engagement sticker shelf", () => {
     const oldStickerImages = getStickerImages(scene);
     expect(oldStickerImages).toHaveLength(1);
     const oldSlots = getEmptySlots(scene);
-    expect(oldSlots).toHaveLength(23);
+    expect(oldSlots).toHaveLength(24);
 
     // The real panel calls resetProgress() before notifying the Hub; mirror it.
     resetProgress();
@@ -573,7 +573,7 @@ describe("Hub engagement sticker shelf", () => {
     const liveSlots = getEmptySlots(scene).filter(
       (obj) => getMockFn(obj.destroy).mock.calls.length === 0,
     );
-    expect(liveSlots).toHaveLength(24);
+    expect(liveSlots).toHaveLength(25);
     const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
     for (const obj of liveSlots) {
       const targetsSticker = (call: { targets?: unknown }): boolean => {

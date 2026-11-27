@@ -95,6 +95,8 @@ export const ART_GROUPS_BY_GAME: Readonly<Record<string, readonly string[]>> = {
   // loader exactly like Story Order's panels.
   "robot-path": ["robot"],
   "fix-it-machine": ["machine"],
+  // Drawn with the shared bubble glyph; no scene-local art to lazy-load.
+  "repeat-machine": ["glyphs"],
 };
 
 /** Resolves the SVG markup behind one art key, caching tables and markup. */
