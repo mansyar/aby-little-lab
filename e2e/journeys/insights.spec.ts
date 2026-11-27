@@ -140,7 +140,7 @@ test("a parent reads the three insight statements on the first Progress page", a
 
   const overview = await progressState(page);
   if (!overview) throw new Error("the Progress overlay closed before it was read");
-  expect(overview.pageCount).toBe(5);
+  expect(overview.pageCount).toBe(6);
 
   const lines = overview.lines;
   expect(lines, "the Overview should print all three statements").toHaveLength(3);
@@ -150,7 +150,7 @@ test("a parent reads the three insight statements on the first Progress page", a
 
   // Reach: two games played inside the seven-day window, on the two days the
   // seeded activity draws, with five lifetime wins of eight started sessions.
-  expect(lines[0]).toContain("2 of 24 games");
+  expect(lines[0]).toContain("2 of 25 games");
   expect(lines[0]).toContain("2 days this week");
   expect(lines[0]).toContain("5 completions in all");
   expect(lines[0]).toContain("63% of started games finished");
