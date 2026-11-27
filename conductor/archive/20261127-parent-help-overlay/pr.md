@@ -11,6 +11,7 @@ Add a static, offline, parent-gated, read-only Help overlay inside Settings: eig
 - **Spec:** `conductor/archive/20261127-parent-help-overlay/spec.md`
 - **Plan:** `conductor/archive/20261127-parent-help-overlay/plan.md`
 - **Review:** `conductor/archive/20261127-parent-help-overlay/review.md`
+- **Pull request:** [#107](https://github.com/mansyar/aby-little-lab/pull/107)
 
 ## What happened
 
