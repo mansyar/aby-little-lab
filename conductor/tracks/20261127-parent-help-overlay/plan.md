@@ -12,7 +12,7 @@
 - **Goal:** A standalone Help overlay renders eight truthful topic cards with deterministic navigation and no side effects.
 - **Depends on:** none
 - **Covers:** FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, NFR-1, NFR-2, NFR-3, NFR-6, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8, AC-9, AC-10, AC-11
-- **Touches:** `src/components/settings/helpContent.ts`, `src/components/settings/HelpOverlay.ts`, `src/__tests__/components/settings/helpContent.test.ts`, `src/__tests__/components/settings/HelpOverlay.test.ts`, `conductor/tracks/20261127-parent-help-overlay/verification/phase-1.md`
+- **Touches:** `src/components/settings/helpContent.ts`, `src/components/settings/HelpOverlay.ts`, `src/__tests__/components/settings/helpContent.test.ts`, `src/__tests__/components/settings/HelpOverlay.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/tracks/20261127-parent-help-overlay/verification/phase-1.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 - **Status:** in_progress
 
@@ -35,6 +35,7 @@
 - [ ] **P1.T6: Run the gate and record evidence** — covers: NFR-3, NFR-4, NFR-5, AC-12
   - [ ] **P1.T6.1:** Run the exact configured verification chain.
   - [ ] **P1.T6.2:** Record scope, commands, AC coverage, deviations, and the phase checkpoint.
+  - [ ] **P1.T6.3:** Repair gate-driven living suite counts and coverage in README, TDD, and perf-baseline from primary-measured output, preserving dated historical evidence.
 
 ## Phase 2: Integrate Help into Settings and prove the browser journey
 
