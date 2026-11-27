@@ -45,6 +45,52 @@ import { createShelfSticker, PAGED_STICKER_DISPLAY_SIZE } from "./stickerShelf";
  * they advance stay owned by `HubGrid`, whose public surface is unchanged.
  */
 
+/** Shared tile gesture: a release navigates only after a matching press. */
+function wireTileGesture(
+  grid: HubGrid,
+  tile: Phaser.GameObjects.Rectangle,
+  index: number,
+  blocked: () => boolean = () => false,
+): void {
+  let releaseBlocked = false;
+  let pressed = false;
+  tile.on("pointerdown", () => {
+    pressed = true;
+    releaseBlocked = grid.deps.gestureBlocked();
+  });
+  for (const event of ["pointerout", "pointercancel"] as const) {
+    tile.on(event, () => {
+      pressed = false;
+      releaseBlocked = false;
+    });
+  }
+  tile.on("pointerup", () => {
+    const hadPress = pressed;
+    pressed = false;
+    if (!hadPress) return;
+    if (grid.deps.isTimeUp()) return;
+    if (grid.navLocked || blocked()) return;
+    if (releaseBlocked || grid.deps.gestureBlocked()) return;
+    grid.navLocked = true;
+    grid.deps.activateTile(index, tile);
+  });
+}
+
+/** Clears the per-build lists and entrance counter for a fresh board. */
+function resetBuildLists(grid: HubGrid, tiles: "wide" | "page"): void {
+  if (tiles === "wide") grid.wideObjects = [];
+  else grid.pageObjects = [];
+  grid.stickerImages = [];
+  grid.emptySlotGraphics = [];
+  grid.attractTargets = [];
+  grid.entranceIndex = 0;
+}
+
+/** A rebuild after the daily cap must lock its fresh tiles too. */
+function lockTilesIfTimeUp(grid: HubGrid): void {
+  if (grid.deps.isTimeUp()) grid.applyTimeUpLock();
+}
+
 /** Destroys every object owned by the wide grid (tiles + shelf). */
 export function destroyWideGrid(grid: HubGrid): void {
   for (const obj of grid.wideObjects) obj.destroy();
@@ -71,11 +117,7 @@ export function destroyPageGrid(grid: HubGrid): void {
  */
 export function buildWideGrid(grid: HubGrid): void {
   const scene = grid.deps.scene;
-  grid.wideObjects = [];
-  grid.stickerImages = [];
-  grid.emptySlotGraphics = [];
-  grid.attractTargets = [];
-  grid.entranceIndex = 0;
+  resetBuildLists(grid, "wide");
   const settleEntrance = grid.beginEntrances(GAME_TILES.length);
   const origin = wideGridOrigin(scene.cameras.main.width, scene.cameras.main.height);
 
@@ -87,33 +129,8 @@ export function buildWideGrid(grid: HubGrid): void {
     tile.setStrokeStyle(4, 0x2d3748);
     tile.setInteractive();
     grid.attractTargets.push(tile as Phaser.GameObjects.Rectangle);
-    let releaseBlocked = false;
-    let pressed = false;
-    tile.on("pointerdown", () => {
-      pressed = true;
-      releaseBlocked = grid.deps.gestureBlocked();
-    });
-    for (const event of ["pointerout", "pointercancel"] as const) {
-      tile.on(event, () => {
-        pressed = false;
-        releaseBlocked = false;
-      });
-    }
-    // Navigate on release so the press squish is visible while holding;
-    // releasing outside the tile (pointerout/pointercancel) cancels.
-    // Locked tiles (daily limit reached) swallow the tap entirely.
-    tile.on("pointerup", () => {
-      const hadPress = pressed;
-      pressed = false;
-      // A modal can consume pointerdown while Phaser still delivers pointerup
-      // to this tile. That release owns no tile gesture, so it cannot navigate.
-      if (!hadPress) return;
-      if (grid.deps.isTimeUp() || grid.navLocked || releaseBlocked || grid.deps.gestureBlocked()) {
-        return;
-      }
-      grid.navLocked = true;
-      grid.deps.activateTile(i, tile);
-    });
+    // Release-to-navigate keeps the press squish visible; out/cancel drops it.
+    wireTileGesture(grid, tile, i);
     grid.wideObjects.push(tile);
 
     const iconDisplay = GAME_TILES[i].iconDisplay ?? TILE_ICON_DISPLAY;
@@ -154,11 +171,7 @@ export function buildWideGrid(grid: HubGrid): void {
     createShelfSticker(grid, i, x, y);
   }
 
-  if (grid.deps.isTimeUp()) {
-    // A resize rebuild after the daily limit is reached must lock the new
-    // tiles too — the limit is profile-wide, not per layout.
-    grid.applyTimeUpLock();
-  }
+  lockTilesIfTimeUp(grid);
 
   // The chip row is built once per grid lifetime, after the tiles: the board's
   // object order stays the order the launch tests and the bridge read.
@@ -175,13 +188,9 @@ export function buildWideGrid(grid: HubGrid): void {
  */
 export function buildPageGrid(grid: HubGrid, page: number, slideFrom: number | null = null): void {
   const scene = grid.deps.scene;
-  grid.pageObjects = [];
-  grid.stickerImages = [];
-  grid.emptySlotGraphics = [];
-  // Idle attract + time-up locking only ever target the visible page.
-  grid.attractTargets = [];
-  // Page-local entrance stagger, so page 2 does not inherit page 1's delay.
-  grid.entranceIndex = 0;
+  // Idle attract + time-up locking only target the visible page; the entrance
+  // stagger is page-local, so page 2 does not inherit page 1's delay.
+  resetBuildLists(grid, "page");
   const reducedMotion = isReducedMotion();
 
   const indexes = pageTileIndexes(page);
@@ -198,38 +207,8 @@ export function buildPageGrid(grid: HubGrid, page: number, slideFrom: number | n
     tile.setStrokeStyle(4, 0x2d3748);
     tile.setInteractive();
     grid.attractTargets.push(tile as Phaser.GameObjects.Rectangle);
-    let releaseBlocked = false;
-    let pressed = false;
-    tile.on("pointerdown", () => {
-      pressed = true;
-      releaseBlocked = grid.deps.gestureBlocked();
-    });
-    for (const event of ["pointerout", "pointercancel"] as const) {
-      tile.on(event, () => {
-        pressed = false;
-        releaseBlocked = false;
-      });
-    }
-    // Same release-to-navigate contract as the wide grid; a horizontal drag
-    // (swipe) releases the gesture to the page flip instead of the tile.
-    tile.on("pointerup", () => {
-      const hadPress = pressed;
-      pressed = false;
-      // Without a matching tile pointerdown this release belongs to a modal,
-      // not to the tile, even if the modal has already been destroyed.
-      if (!hadPress) return;
-      if (
-        grid.deps.isTimeUp() ||
-        grid.navLocked ||
-        grid.swipes.swiping ||
-        releaseBlocked ||
-        grid.deps.gestureBlocked()
-      ) {
-        return;
-      }
-      grid.navLocked = true;
-      grid.deps.activateTile(globalIndex, tile);
-    });
+    // A horizontal swipe releases the gesture to the page flip, not the tile.
+    wireTileGesture(grid, tile, globalIndex, () => grid.swipes.swiping);
     grid.pageObjects.push(tile);
 
     const icon = scene.add.image(x, y + PAGED_ICON_Y_OFFSET, GAME_TILES[globalIndex].tileKey);
@@ -279,11 +258,7 @@ export function buildPageGrid(grid: HubGrid, page: number, slideFrom: number | n
     }
   });
 
-  if (grid.deps.isTimeUp()) {
-    // A flip after the daily limit is reached must lock the incoming page
-    // too — the limit is profile-wide, not per page.
-    grid.applyTimeUpLock();
-  }
+  lockTilesIfTimeUp(grid);
 
   grid.ensureGroupChips();
 }
@@ -300,11 +275,7 @@ export function buildPageGrid(grid: HubGrid, page: number, slideFrom: number | n
  */
 export function buildFilteredGrid(grid: HubGrid): void {
   const scene = grid.deps.scene;
-  grid.pageObjects = [];
-  grid.stickerImages = [];
-  grid.emptySlotGraphics = [];
-  grid.attractTargets = [];
-  grid.entranceIndex = 0;
+  resetBuildLists(grid, "page");
 
   const indexes = visibleTileIndexes(grid.selection);
   const settleEntrance = grid.beginEntrances(indexes.length);
@@ -316,37 +287,8 @@ export function buildFilteredGrid(grid: HubGrid): void {
     tile.setStrokeStyle(4, 0x2d3748);
     tile.setInteractive();
     grid.attractTargets.push(tile as Phaser.GameObjects.Rectangle);
-    let releaseBlocked = false;
-    let pressed = false;
-    tile.on("pointerdown", () => {
-      pressed = true;
-      releaseBlocked = grid.deps.gestureBlocked();
-    });
-    for (const event of ["pointerout", "pointercancel"] as const) {
-      tile.on(event, () => {
-        pressed = false;
-        releaseBlocked = false;
-      });
-    }
-    // Same release-to-navigate contract as the All grids; locked tiles swallow
-    // the tap and a swipe belongs to the page gesture instead.
-    tile.on("pointerup", () => {
-      const hadPress = pressed;
-      pressed = false;
-      // An unmatched pointerup is a modal release, never a tile tap.
-      if (!hadPress) return;
-      if (
-        grid.deps.isTimeUp() ||
-        grid.navLocked ||
-        grid.swipes.swiping ||
-        releaseBlocked ||
-        grid.deps.gestureBlocked()
-      ) {
-        return;
-      }
-      grid.navLocked = true;
-      grid.deps.activateTile(globalIndex, tile);
-    });
+    // Locked tiles swallow the tap; a swipe belongs to the page gesture.
+    wireTileGesture(grid, tile, globalIndex, () => grid.swipes.swiping);
     grid.pageObjects.push(tile);
 
     const iconDisplay = GAME_TILES[globalIndex].iconDisplay ?? PAGED_ICON_DISPLAY;
@@ -387,11 +329,7 @@ export function buildFilteredGrid(grid: HubGrid): void {
     createShelfSticker(grid, globalIndex, pos.x, pos.y, pos.height, PAGED_STICKER_DISPLAY_SIZE);
   });
 
-  if (grid.deps.isTimeUp()) {
-    // The cap is profile-wide: a filter chosen after it was reached must draw
-    // already-locked tiles, not a fresh tappable board.
-    grid.applyTimeUpLock();
-  }
+  lockTilesIfTimeUp(grid);
 
   grid.ensureGroupChips();
 }

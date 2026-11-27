@@ -817,4 +817,39 @@ describe("HubGrid — group chips and the filtered board", () => {
       grid.setGroup("numbers");
     });
   });
+
+  it("shares one gesture owner that out/cancel releases across wide, paged and filtered grids", () => {
+    const releaseAfterCancel = (build: (grid: HubGrid) => void): void => {
+      const { deps, activate } = makeDeps();
+      const grid = new HubGrid(deps);
+      build(grid);
+
+      const tile = grid.attractTargets[0] as unknown as MockObject;
+      // One owner per tile proves all three builders use the shared helper.
+      for (const event of ["pointerdown", "pointerup", "pointerout", "pointercancel"]) {
+        expect(
+          tile.allHandlers.filter((handler) => handler.name === event),
+          `${event} must be wired exactly once`,
+        ).toHaveLength(1);
+      }
+      for (const cancelEvent of ["pointerout", "pointercancel"]) {
+        tile.handlers.pointerdown?.();
+        tile.handlers[cancelEvent]?.();
+        tile.handlers.pointerup?.();
+        expect(activate, `${cancelEvent} cancels`).not.toHaveBeenCalled();
+      }
+
+      // The same shared owner still activates once on an ordinary press/release.
+      tile.handlers.pointerdown?.();
+      tile.handlers.pointerup?.();
+      expect(activate).toHaveBeenCalledTimes(1);
+    };
+
+    releaseAfterCancel((grid) => grid.buildWideGrid());
+    releaseAfterCancel((grid) => grid.buildPageGrid(1));
+    releaseAfterCancel((grid) => {
+      grid.classifyViewport();
+      grid.setGroup("numbers");
+    });
+  });
 });

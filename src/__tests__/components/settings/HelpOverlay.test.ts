@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { HelpOverlay, type HelpOverlayState } from "../../../components/settings/HelpOverlay";
 import { HELP_TOPICS } from "../../../components/settings/helpContent";
+import { DISABLED_COLOR } from "../../../components/settings/primitives";
 import type { MockFn } from "../../helpers/phaserMock";
 import { type MockObject, MockScene, mockRegistry } from "../../helpers/phaserMock";
 
@@ -23,6 +24,11 @@ function tap(obj: MockObject): void {
   const handlers = obj.allHandlers.filter((entry) => entry.name === "pointerdown");
   if (handlers.length === 0) throw new Error("no pointerdown handler");
   for (const entry of handlers) entry.cb();
+}
+
+/** Pointerdown handlers on an object; disabled controls register none. */
+function pointerDownHandlers(obj: MockObject): MockFn[] {
+  return obj.allHandlers.filter((entry) => entry.name === "pointerdown").map((entry) => entry.cb);
 }
 
 /** The single live control with the given label. */
@@ -214,7 +220,7 @@ describe("HelpOverlay", () => {
     expect(liveTexts("Previous")).toHaveLength(0);
   });
 
-  it("makes the last topic's Next null and ignores taps on inactive boundaries", () => {
+  it("makes the last topic's Next null and inert", () => {
     const { overlay } = setup();
     tap(control(HELP_TOPICS[7]?.title ?? ""));
     const last = overlay.e2eState();
@@ -222,9 +228,45 @@ describe("HelpOverlay", () => {
     expect(last?.controls.next).toBeNull();
     expect(last?.controls.prev).not.toBeNull();
 
-    tap(control("Next"));
+    // A disabled boundary has no press handler, so no tap can move the topic.
+    expect(pointerDownHandlers(control("Next"))).toHaveLength(0);
     expect(overlay.e2eState()?.topicIndex).toBe(7);
     expect(overlay.e2eState()?.title).toBe("Updates");
+  });
+
+  it("gives disabled Previous/Next no press handler while enabled controls stay interactive", () => {
+    const { overlay } = setup();
+    tap(control(HELP_TOPICS[0]?.title ?? ""));
+    const first = overlay.e2eState();
+    expect(first?.controls.prev).toBeNull();
+    expect(first?.controls.next).not.toBeNull();
+
+    const disabledPrev = control("Previous");
+    expect(pointerDownHandlers(disabledPrev)).toHaveLength(0);
+    expect(disabledPrev.setInteractive).not.toHaveBeenCalled();
+    const prevStyle = disabledPrev.args?.[3] as Record<string, unknown>;
+    expect(prevStyle.color).toBe(DISABLED_COLOR);
+
+    const enabledNext = control("Next");
+    expect(pointerDownHandlers(enabledNext).length).toBeGreaterThan(0);
+    expect(enabledNext.setInteractive).toHaveBeenCalledTimes(1);
+    tap(enabledNext);
+    expect(overlay.e2eState()?.topicIndex).toBe(1);
+
+    tap(control("Back to topics"));
+    tap(control(HELP_TOPICS[7]?.title ?? ""));
+    const last = overlay.e2eState();
+    expect(last?.controls.prev).not.toBeNull();
+    expect(last?.controls.next).toBeNull();
+
+    const enabledPrev = control("Previous");
+    expect(pointerDownHandlers(enabledPrev).length).toBeGreaterThan(0);
+    expect(enabledPrev.setInteractive).toHaveBeenCalledTimes(1);
+    const disabledNext = control("Next");
+    expect(pointerDownHandlers(disabledNext)).toHaveLength(0);
+    expect(disabledNext.setInteractive).not.toHaveBeenCalled();
+    const nextStyle = disabledNext.args?.[3] as Record<string, unknown>;
+    expect(nextStyle.color).toBe(DISABLED_COLOR);
   });
 
   it("closes from the ✕ control and from the backdrop", () => {

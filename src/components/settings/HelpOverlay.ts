@@ -221,7 +221,7 @@ export class HelpOverlay {
     return text;
   }
 
-  /** Adds a pressable control and returns the centre it was drawn at. */
+  /** Adds a pressable control (or a passive, greyed one) and returns its centre. */
   private drawControl(
     x: number,
     y: number,
@@ -229,11 +229,14 @@ export class HelpOverlay {
     width: number,
     color: string,
     onClick: () => void,
+    enabled = true,
   ): Point {
     const text = this.drawText(x, y, label, { color, fontSize: "24px" });
-    text.setInteractive(centredHitArea(width, CARD_HEIGHT));
-    text.on("pointerdown", onClick);
-    attachPressFeedback(text);
+    if (enabled) {
+      text.setInteractive(centredHitArea(width, CARD_HEIGHT));
+      text.on("pointerdown", onClick);
+      attachPressFeedback(text);
+    }
     return { x: text.x, y: text.y };
   }
 
@@ -356,6 +359,7 @@ export class HelpOverlay {
           this.render();
         }
       },
+      hasPrevious,
     );
     this.controls.prev = hasPrevious ? previousPoint : null;
 
@@ -372,6 +376,7 @@ export class HelpOverlay {
           this.render();
         }
       },
+      hasNext,
     );
     this.controls.next = hasNext ? nextPoint : null;
   }
