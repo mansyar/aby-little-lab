@@ -76,7 +76,7 @@ Review fixes are appended by `conductor-review` as:
 - **Covers:** FR-8, NFR-4, NFR-5, AC-7
 - **Touches:** `docs/PRD.md`, `docs/TDD.md`, `docs/changelog.md`, `README.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Sync docs** — covers: FR-8, AC-7
   - [ ] **P3.T1.1:** PRD/TDD/changelog entries; README 24→25 with history unchanged.
