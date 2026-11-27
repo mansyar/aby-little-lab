@@ -87,3 +87,15 @@ Phase 3 acceptance (primary):
 **Checkpoint:** a1fa6a59
 **Evidence:** conductor/tracks/20261128-repeat-machine/verification/phase-3.md (full gate green 164/3529, primary code tripwire fixes)
 -->
+
+## Phase R1: Review Fixes (round 1)
+
+- **Goal:** Resolve review findings F2, F3, F4, F5 (F1 deferred to issue + roadmap follow-up: layout redesign needing a product decision).
+- **Depends on:** Phase 3 (verified a1fa6a59; review round 1 PASS WITH FINDINGS)
+- **Covers:** F2, F3, F4, F5
+- **Touches:** `src/game/gameRegistry.ts`, `src/game/hub/gridLayout.ts`, `src/scenes/RepeatMachineScene.ts`, `README.md`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
+- **Status:** pending
+
+- [ ] **R1.T1: Resolve F2, F3, F5 (stale counts/comments)** — covers: F2, F3, F5
+- [ ] **R1.T2: Resolve F4 (shared textStyle)** — covers: F4
