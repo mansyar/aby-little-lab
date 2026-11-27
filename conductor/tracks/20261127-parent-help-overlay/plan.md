@@ -47,12 +47,12 @@
 - **Goal:** Parents can open Help from either Settings page, and a real browser journey traverses all eight topics without changing existing controls or data.
 - **Depends on:** Phase 1
 - **Covers:** FR-1, FR-13, NFR-2, NFR-4, NFR-5, AC-1, AC-10, AC-11, AC-12
-- **Touches:** `src/components/settings/HelpButton.ts`, `src/components/SettingsPanel.ts`, `src/game/e2eBridgeTypes.ts`, `src/game/e2eBridge.ts`, `src/game/hub/hubE2E.ts`, `e2e/fixtures/game.ts`, `e2e/journeys/help.spec.ts`, `src/__tests__/components/SettingsPanel.test.ts`, `src/__tests__/game/e2eBridge.test.ts`, `conductor/tracks/20261127-parent-help-overlay/verification/phase-2.md`
+- **Touches:** `src/components/settings/HelpButton.ts`, `src/components/settings/HelpOverlay.ts`, `src/components/SettingsPanel.ts`, `src/game/e2eBridgeTypes.ts`, `src/game/e2eBridge.ts`, `src/game/hub/hubE2E.ts`, `e2e/fixtures/game.ts`, `e2e/journeys/help.spec.ts`, `src/__tests__/components/settings/HelpButton.test.ts`, `src/__tests__/components/SettingsPanel.test.ts`, `src/__tests__/game/e2eBridge.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/tracks/20261127-parent-help-overlay/verification/phase-2.md`
 - **Verification:**
   - `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
   - `pnpm exec playwright test e2e/journeys/help.spec.ts --project=chromium --project=webkit --project=firefox --project=mobile-chromium`
   - Primary visual inspection at 1024×768 and 844×390; media stays uncommitted under `.conductor/media/20261127-parent-help-overlay/`.
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Add the Settings header entry point** — covers: FR-1, NFR-4, AC-1
   - [ ] **P2.T1.1:** Implement a 96×96 Help button in a focused component.
@@ -71,6 +71,7 @@
 - [ ] **P2.T5: Run gates and record evidence** — covers: NFR-4, NFR-5, AC-10, AC-12
   - [ ] **P2.T5.1:** Run the exact full gate and four-project Help journey.
   - [ ] **P2.T5.2:** Record measured counts, scope, browser results, deviations, and checkpoint evidence.
+  - [ ] **P2.T5.3:** Refresh living suite, coverage, build, and browser-roster figures in README, TDD, and perf-baseline from primary-measured output, preserving dated historical evidence.
 
 ## Phase 3: Synchronize product and engineering truth
 
