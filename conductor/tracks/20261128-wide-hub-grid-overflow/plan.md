@@ -14,16 +14,19 @@
 - **Covers:** FR-1, FR-3, FR-4, NFR-1, NFR-2, NFR-3, AC-1, AC-3, AC-4
 - **Touches:** `src/game/hub/gridBuilder.ts`, `src/game/hub/gridLayout.ts`, `src/game/hub/hubGridConstants.ts`, `src/__tests__/scenes/hubScene.test.ts`, `src/__tests__/game/hub*.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
+**Result:** verified
+**Checkpoint:** 2321bea1
+**Evidence:** conductor/tracks/20261128-wide-hub-grid-overflow/verification/phase-1.md
 
-- [ ] **P1.T1: Regression test red** — covers: FR-1, AC-1
-  - [ ] **P1.T1.1: Extend hubScene bounds assertion to all 25 tiles + shelf plaques at 1024x768 and run to fail**
-- [ ] **P1.T2: Implement 5th-row flow with recentered origin** — covers: FR-1, FR-3
-  - [ ] **P1.T2.1: Overflow rule in wide-grid layout (6/6/6/6 + 1 in-canvas)**
-  - [ ] **P1.T2.2: Recenter board origin for the 5-row board**
-- [ ] **P1.T3: Green + golden updates** — covers: FR-4, AC-3, AC-4
-  - [ ] **P1.T3.1: Regression test passes; update affected hub golden expectations**
-  - [ ] **P1.T3.2: Full gate green, texture figures unchanged**
+- [x] **P1.T1: Regression test red** — covers: FR-1, AC-1
+  - [x] **P1.T1.1: Extend hubScene bounds assertion to all 25 tiles + shelf plaques at 1024x768 and run to fail**
+- [x] **P1.T2: Implement 5th-row flow with recentered origin** — covers: FR-1, FR-3
+  - [x] **P1.T2.1: Overflow rule in wide-grid layout (6/6/6/6 + 1 in-canvas)**
+  - [x] **P1.T2.2: Recenter board origin for the 5-row board**
+- [x] **P1.T3: Green + golden updates** — covers: FR-4, AC-3, AC-4
+  - [x] **P1.T3.1: Regression test passes; update affected hub golden expectations**
+  - [x] **P1.T3.2: Full gate green, texture figures unchanged**
 
 <!--
 The primary appends after acceptance:
