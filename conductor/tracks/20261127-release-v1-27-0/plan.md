@@ -110,7 +110,7 @@
 - **Covers:** FR-8, NFR-2, NFR-6, AC-7, AC-11
 - **Touches:** `docs/release-notes-v1.27.0.md` and `README.md` only if review requires correction; Conductor review/PR/verification state
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; required PR CI jobs; final scope diff inspection
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Run `conductor-review`** — covers: FR-8, AC-7
   - [ ] **P4.T1.1: Resolve blocking findings; allow at most two review-fix rounds.**
