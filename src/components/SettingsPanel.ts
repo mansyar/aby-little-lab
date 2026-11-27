@@ -1,10 +1,17 @@
 import type Phaser from "phaser";
-import type { E2EBackupState, E2EProgressState, E2ESettingsToggle } from "../game/e2eBridge";
+import type {
+  E2EBackupState,
+  E2EHelpState,
+  E2EProgressState,
+  E2ESettingsToggle,
+} from "../game/e2eBridge";
 import { getInstallPromptTracker, type InstallTracker } from "../utils/pwaInstall";
 import { getSettings, isPersistenceDegraded } from "../utils/storage";
 import { textStyle } from "../utils/typography";
 import { allowPinchZoom, restorePinchZoom } from "../utils/viewportZoom";
 import { BackupPanel } from "./settings/BackupPanel";
+import { HelpButton } from "./settings/HelpButton";
+import { HelpOverlay } from "./settings/HelpOverlay";
 import { InstallRow } from "./settings/InstallRow";
 import { ProfilesOverlay } from "./settings/ProfilesOverlay";
 import { ProgressOverlay } from "./settings/ProgressOverlay";
@@ -50,15 +57,13 @@ const BACKUP_TITLE = "Backup";
 export class SettingsPanel {
   private readonly scene: Phaser.Scene;
   private readonly objects: Phaser.GameObjects.GameObject[] = [];
-  /**
-   * Everything the page on screen owns. Destroyed and rebuilt on every switch,
-   * so no row from the other page keeps a live hit band over the canvas.
-   */
+  /** Rebuilt on every switch so no stale row keeps a live hit band. */
   private readonly pageObjects: Phaser.GameObjects.GameObject[] = [];
   private readonly overlayObjects: Phaser.GameObjects.GameObject[] = [];
   private readonly modalObjects: Phaser.GameObjects.GameObject[] = [];
   private readonly progressOverlay: ProgressOverlay;
   private readonly profilesOverlay: ProfilesOverlay;
+  private readonly helpOverlay: HelpOverlay;
   private readonly installRow: InstallRow;
   private readonly voiceRow: VoiceRow;
   private readonly resetModal: ResetModal;
@@ -72,6 +77,8 @@ export class SettingsPanel {
   private readonly title: Phaser.GameObjects.Text;
   /** The ✕, raised above rows it shares a corner with on each rebuild. */
   private readonly closeButton: Phaser.GameObjects.Text;
+  /** The persistent Help control, mirrored from the ✕ in the header. */
+  private readonly helpButton: HelpButton;
   /** The page switch's label, relabelled on each switch. */
   private readonly switchLabel: Phaser.GameObjects.Text;
   /** The switch card's centre, captured from the layout arguments. */
@@ -89,13 +96,8 @@ export class SettingsPanel {
   };
 
   /**
-   * Creates the settings panel using the current persisted audio settings.
-   * @param installTracker - Install tracker to read; defaults to the
-   *   app-lifetime tracker that boot started, because the install event fires
-   *   once per page load and would otherwise be missed. An injected tracker
-   *   wins, which is how tests pin the install state.
-   * @param onProgressReset - Called after a confirmed progress reset so the
-   *   parent scene can re-render anything derived from the sticker collection.
+   * Creates the panel from the current settings. An injected install tracker
+   * wins over the app-lifetime default; `onProgressReset` refreshes stickers.
    */
   constructor(
     scene: Phaser.Scene,
@@ -112,6 +114,7 @@ export class SettingsPanel {
     });
     this.installTracker = installTracker;
     this.progressOverlay = new ProgressOverlay({ scene, overlayObjects: this.overlayObjects });
+    this.helpOverlay = new HelpOverlay({ scene, overlayObjects: this.overlayObjects });
     this.installRow = new InstallRow({
       scene,
       objects: this.pageObjects,
@@ -132,8 +135,8 @@ export class SettingsPanel {
       installRow: this.installRow,
       voiceRow: this.voiceRow,
       resetModal: this.resetModal,
-      onOpenProfiles: () => this.openProfilesOverlay(),
-      onOpenProgress: () => this.openProgressOverlay(),
+      onOpenProfiles: () => this.profilesOverlay.open(),
+      onOpenProgress: () => this.progressOverlay.open(),
     });
     // Parents read the panel's text on phones; relax the pinch-zoom lock only
     // while the panel is open, restoring it on close.
@@ -142,9 +145,7 @@ export class SettingsPanel {
     const centerX = width / 2;
     const centerY = height / 2;
     const settings = getSettings();
-    // FR-5: read once, at open time. No polling and no subscription: a parent
-    // sees the state of the session they are in, and a write the store accepts
-    // later clears the flag for the next open rather than editing this panel.
+    // FR-5: one open-time snapshot, never polled or subscribed.
     this.persistenceDegraded = isPersistenceDegraded();
 
     const backdrop = scene.add
@@ -170,9 +171,7 @@ export class SettingsPanel {
       .setOrigin(0.5);
     this.title = title;
     this.objects.push(title);
-    // FR-5: one quiet line while the session cannot persist. It is deliberately
-    // not interactive - the condition has not gone away, so there is nothing
-    // here for a parent to dismiss and no hit area that could be tapped.
+    // Quiet, non-interactive notice while persistence is unavailable.
     if (this.persistenceDegraded) {
       this.objects.push(
         scene.add
@@ -204,6 +203,14 @@ export class SettingsPanel {
     closeButton.on("pointerdown", () => this.destroy());
     this.objects.push(closeButton);
     this.closeButton = closeButton;
+    // Help is a sibling of the ✕ in the persistent header, available on both pages.
+    this.helpButton = new HelpButton({
+      scene,
+      objects: this.objects,
+      centerX,
+      centerY,
+      onOpen: () => this.helpOverlay.open(),
+    });
     // The page switch lives in the empty band above the notice and the title,
     // and never moves: it is the same card on both pages, relabelled to say
     // where the next tap goes.
@@ -251,6 +258,8 @@ export class SettingsPanel {
   /** Destroys the modal, the install overlay, and all display objects. */
   destroy(): void {
     this.destroyed = true;
+    // Closing Settings closes Help too, before the shared bucket is torn down.
+    this.helpOverlay.close();
     const synth = window.speechSynthesis;
     if (synth && typeof synth.removeEventListener === "function") {
       synth.removeEventListener("voiceschanged", this.voiceChangedHandler);
@@ -263,48 +272,28 @@ export class SettingsPanel {
     for (const object of this.overlayObjects) object.destroy();
     this.overlayObjects.length = 0;
     for (const object of this.objects) object.destroy();
-    // The tracker belongs to the page, not to this panel: it holds the only
-    // listener for an event that fires once per load, so closing Settings must
-    // not stop the capture. Do not restore a destroy() call here.
+    // The tracker belongs to the page, not this panel; never destroy it.
     restorePinchZoom();
   }
 
-  /**
-   * Whether the panel is still on screen. Read-only, and asked of the panel
-   * rather than of whoever holds it: a backdrop tap closes the panel by
-   * destroying it, so a holder's reference can outlive the panel it names.
-   */
+  /** Liveness independent of a holder that outlives the panel. */
   e2eOpen(): boolean {
     return !this.destroyed;
   }
 
-  /**
-   * Whether this panel was built while the device could not persist, which is
-   * exactly when the notice is on screen. Published for the browser suite so a
-   * journey proves the parent-facing half from state rather than pixels.
-   */
+  /** Whether the open-time storage check failed, which is when the notice shows. */
   e2eDegraded(): boolean {
     return this.persistenceDegraded;
   }
 
-  /**
-   * The toggle rows with the canvas point their whole card answers to and the
-   * state the child's tap would flip. Empty before creation finishes, which is
-   * never observable from outside the constructor.
-   */
+  /** Each toggle row's live card centre and the state a tap would flip. */
   e2eToggles(): E2ESettingsToggle[] {
     return this.settingsRows.e2eToggles();
   }
 
   /**
-   * The second page — its page number, its switch point, its three rows and the
-   * line that says what happened — as the panel is holding them right now.
-   *
-   * A journey moves between pages with this and taps a row by its published
-   * centre, so it never copies a layout number. Every value is a live read:
-   * `page` is the page on screen, `backupRows` is empty while the other page is
-   * up because those rows no longer exist, and `backupResult` is the panel's
-   * own memory of the last thing it told a parent.
+   * The second page as held right now: number, switch point, rows and result.
+   * All values are live reads; a journey taps published centres, not constants.
    */
   backupState(): E2EBackupState {
     const backup = this.backupPanel.state();
@@ -326,33 +315,25 @@ export class SettingsPanel {
   }
 
   /**
-   * Destroys everything the page on screen owns and builds the current page.
-   *
-   * The rows are destroyed rather than hidden: an invisible row keeps its
-   * interactive object, and Phaser would still route a tap over the canvas to
-   * it. Nothing interactive survives a switch.
+   * Rebuilds the current page. Rows are destroyed, not hidden: an invisible row
+   * would still answer taps over the canvas after a page switch.
    */
   private buildPage(settings: ReturnType<typeof getSettings>): void {
     this.clearPage();
     const { width, height } = this.scene.cameras.main;
     const centerX = width / 2;
     const centerY = height / 2;
-    // One ROW_PITCH apart, which is also each row's hit band: the stack starts
-    // at -47 so the top row clears the title and version footer, and the bottom
-    // card ends at +379, inside the 760px panel.
+    // One ROW_PITCH apart; the stack clears the header and fits the panel.
     const rowY = (index: number): number => centerY + FIRST_ROW_OFFSET + index * ROW_PITCH;
     if (this.page === 0) {
       this.settingsRows.build(settings, centerX, rowY);
     } else {
       this.backupPanel.build(centerX, rowY);
     }
-    // The ✕ box shares its top-right corner with a row - page one's BGM band,
-    // page two's export row - and the rows are created after the ✕, so at equal
-    // depth a row would win that corner and fire the wrong control. Raising the
-    // ✕ above the rows settles it, and only above the rows: the overlays open
-    // later and must still cover it, which a depth above theirs would break.
-    // Every page rebuilds its rows, so this runs after each page's own.
+    // Both persistent header controls are raised above the rows, never above
+    // overlays that must cover them.
     this.scene.children.bringToTop(this.closeButton);
+    this.helpButton.raise();
   }
 
   /** Destroys the page on screen, so nothing from it can answer a tap. */
@@ -366,11 +347,7 @@ export class SettingsPanel {
     this.backupPanel.clear();
   }
 
-  /**
-   * The "Progress" row's canvas centre, or null before the row is built. The
-   * row's own rectangle is what a parent's finger lands on, so a journey that
-   * taps this point taps the control.
-   */
+  /** The "Progress" row's live canvas centre, or null before it is built. */
   e2eProgressRow(): { x: number; y: number } | null {
     return this.settingsRows.e2eProgressRow();
   }
@@ -380,17 +357,33 @@ export class SettingsPanel {
     return this.progressOverlay.e2eState();
   }
 
-  /** Delegates to the extracted ProgressOverlay component. */
-  private openProgressOverlay(): void {
-    this.progressOverlay.open();
+  /** The Help control's live centre; null once Settings has closed. */
+  e2eHelpButton(): { x: number; y: number } | null {
+    return this.destroyed ? null : this.helpButton.point();
   }
 
-  /**
-   * Opens the profile manager overlay: one row per profile (avatar + Delete)
-   * plus unused avatars for adding new profiles (up to 4). Rebuilds itself
-   * after add/delete so the list always reflects persisted state.
-   */
-  private openProfilesOverlay(): void {
-    this.profilesOverlay.open();
+  /** The Help overlay's drawn state, or null when Help or Settings is closed. */
+  e2eHelp(): E2EHelpState | null {
+    const state = this.helpOverlay.e2eState();
+    if (this.destroyed || state === null) return null;
+    const point = (p: { x: number; y: number }): { x: number; y: number } => ({
+      x: p.x,
+      y: p.y,
+    });
+    return {
+      screen: state.screen,
+      topicId: state.topicId,
+      topicIndex: state.topicIndex,
+      topicCount: state.topicCount,
+      title: state.title,
+      lines: [...state.lines],
+      topics: state.topics.map((topic) => ({ ...topic })),
+      controls: {
+        close: point(state.controls.close),
+        back: state.controls.back ? point(state.controls.back) : null,
+        prev: state.controls.prev ? point(state.controls.prev) : null,
+        next: state.controls.next ? point(state.controls.next) : null,
+      },
+    };
   }
 }

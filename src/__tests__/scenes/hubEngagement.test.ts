@@ -336,6 +336,7 @@ describe("Hub engagement tile press feedback", () => {
       completeHubEntrances(scene);
 
       const tile = getRectangles(scene)[i];
+      fireAllObjectEvents(tile, "pointerdown");
       fireAllObjectEvents(tile, "pointerup");
       // Flush the mocked lazy-loader microtask before fading out.
       await new Promise((resolve) => setTimeout(resolve, 0));

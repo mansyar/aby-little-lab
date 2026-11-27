@@ -71,6 +71,8 @@ function noPanelSettings(): E2ESettingsState {
     toggles: [],
     progressRow: null,
     progress: null,
+    helpButton: null,
+    help: null,
     degraded: false,
     page: 0,
     switchPage: { x: 0, y: 0 },

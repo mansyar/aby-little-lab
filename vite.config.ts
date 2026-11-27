@@ -58,6 +58,10 @@ export default defineConfig(() => ({
               name: "phaser",
               test: /[\\/]node_modules[\\/]phaser[\\/]/,
             },
+            {
+              name: "parent-help",
+              test: /[\\/]src[\\/]components[\\/]settings[\\/](HelpOverlay|helpContent)\.ts$/,
+            },
           ],
         },
       },

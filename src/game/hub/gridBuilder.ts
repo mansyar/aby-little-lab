@@ -87,11 +87,30 @@ export function buildWideGrid(grid: HubGrid): void {
     tile.setStrokeStyle(4, 0x2d3748);
     tile.setInteractive();
     grid.attractTargets.push(tile as Phaser.GameObjects.Rectangle);
+    let releaseBlocked = false;
+    let pressed = false;
+    tile.on("pointerdown", () => {
+      pressed = true;
+      releaseBlocked = grid.deps.gestureBlocked();
+    });
+    for (const event of ["pointerout", "pointercancel"] as const) {
+      tile.on(event, () => {
+        pressed = false;
+        releaseBlocked = false;
+      });
+    }
     // Navigate on release so the press squish is visible while holding;
     // releasing outside the tile (pointerout/pointercancel) cancels.
     // Locked tiles (daily limit reached) swallow the tap entirely.
     tile.on("pointerup", () => {
-      if (grid.deps.isTimeUp() || grid.navLocked) return;
+      const hadPress = pressed;
+      pressed = false;
+      // A modal can consume pointerdown while Phaser still delivers pointerup
+      // to this tile. That release owns no tile gesture, so it cannot navigate.
+      if (!hadPress) return;
+      if (grid.deps.isTimeUp() || grid.navLocked || releaseBlocked || grid.deps.gestureBlocked()) {
+        return;
+      }
       grid.navLocked = true;
       grid.deps.activateTile(i, tile);
     });
@@ -179,10 +198,35 @@ export function buildPageGrid(grid: HubGrid, page: number, slideFrom: number | n
     tile.setStrokeStyle(4, 0x2d3748);
     tile.setInteractive();
     grid.attractTargets.push(tile as Phaser.GameObjects.Rectangle);
+    let releaseBlocked = false;
+    let pressed = false;
+    tile.on("pointerdown", () => {
+      pressed = true;
+      releaseBlocked = grid.deps.gestureBlocked();
+    });
+    for (const event of ["pointerout", "pointercancel"] as const) {
+      tile.on(event, () => {
+        pressed = false;
+        releaseBlocked = false;
+      });
+    }
     // Same release-to-navigate contract as the wide grid; a horizontal drag
     // (swipe) releases the gesture to the page flip instead of the tile.
     tile.on("pointerup", () => {
-      if (grid.deps.isTimeUp() || grid.navLocked || grid.swipes.swiping) return;
+      const hadPress = pressed;
+      pressed = false;
+      // Without a matching tile pointerdown this release belongs to a modal,
+      // not to the tile, even if the modal has already been destroyed.
+      if (!hadPress) return;
+      if (
+        grid.deps.isTimeUp() ||
+        grid.navLocked ||
+        grid.swipes.swiping ||
+        releaseBlocked ||
+        grid.deps.gestureBlocked()
+      ) {
+        return;
+      }
       grid.navLocked = true;
       grid.deps.activateTile(globalIndex, tile);
     });
@@ -272,10 +316,34 @@ export function buildFilteredGrid(grid: HubGrid): void {
     tile.setStrokeStyle(4, 0x2d3748);
     tile.setInteractive();
     grid.attractTargets.push(tile as Phaser.GameObjects.Rectangle);
+    let releaseBlocked = false;
+    let pressed = false;
+    tile.on("pointerdown", () => {
+      pressed = true;
+      releaseBlocked = grid.deps.gestureBlocked();
+    });
+    for (const event of ["pointerout", "pointercancel"] as const) {
+      tile.on(event, () => {
+        pressed = false;
+        releaseBlocked = false;
+      });
+    }
     // Same release-to-navigate contract as the All grids; locked tiles swallow
     // the tap and a swipe belongs to the page gesture instead.
     tile.on("pointerup", () => {
-      if (grid.deps.isTimeUp() || grid.navLocked || grid.swipes.swiping) return;
+      const hadPress = pressed;
+      pressed = false;
+      // An unmatched pointerup is a modal release, never a tile tap.
+      if (!hadPress) return;
+      if (
+        grid.deps.isTimeUp() ||
+        grid.navLocked ||
+        grid.swipes.swiping ||
+        releaseBlocked ||
+        grid.deps.gestureBlocked()
+      ) {
+        return;
+      }
       grid.navLocked = true;
       grid.deps.activateTile(globalIndex, tile);
     });

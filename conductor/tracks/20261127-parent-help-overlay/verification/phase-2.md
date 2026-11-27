@@ -613,9 +613,13 @@ eight Settings rows and Backup behavior remain unchanged; Help performs no stora
 download, audio, network or external-navigation action, and the track adds no child-facing UI,
 hosted content, localization, dependency, asset, storage or schema change.
 
-Acceptance: AC-1–AC-12 are proved by the unit/integration suites and the four-engine browser
+Acceptance: AC-1-AC-12 are proved by the unit/integration suites and the four-engine browser
 journey. AC-13 remains Phase 3 work and is not claimed here. This finalization touched and
 committed only this evidence file; no rerun, other file edit or extra commit was made. There
-are no deviations from the approved contract — the earlier blocked statuses, denied commands
+are no deviations from the approved contract - the earlier blocked statuses, denied commands
 and stale-`dist`/lifecycle diagnoses above are recorded process history, not open deviations.
 No blockers remain.
+
+## Primary verification
+
+Verdict: accepted. Primary independently verified scope (26 working-tree Phase 2 paths plus this evidence file, matching the authorized Touches; plan-only deltas excluded), clean CRLF-aware whitespace check, focused suites (8 files / 247 tests; then 3 files / 110 tests after repairs), exact full gate exit 0 (162 files / 3490 tests, coverage 97.1/91.09/96.35/98.19, 496 modules, shell 190.97 kB printed / 48.43 kB gzip with guard 186.5 kB, parent-help 19.38 kB / 7.35 kB, module-size pass with 1 warning, textures pass, PWA 16/0, docs 5/0), genuine four-engine Help journey 8/8 with unchanged saves and zero retries, media capture pass, and docs validator 5/0. AC-1 through AC-12 proved; AC-13 remains Phase 3. Checkpoint recorded at acceptance.

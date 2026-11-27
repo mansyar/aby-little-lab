@@ -97,6 +97,7 @@ describe("HubGrid — classic wide 6x4 grid", () => {
     grid.buildWideGrid();
 
     const tile = grid.attractTargets[0] as unknown as MockObject;
+    tile.handlers.pointerdown?.();
     tile.handlers.pointerup?.();
     tile.handlers.pointerup?.();
 
@@ -112,6 +113,7 @@ describe("HubGrid — classic wide 6x4 grid", () => {
     grid.applyTimeUpLock();
 
     const tile = grid.attractTargets[0] as unknown as MockObject;
+    tile.handlers.pointerdown?.();
     tile.handlers.pointerup?.();
 
     expect(activate).not.toHaveBeenCalled();
@@ -237,6 +239,7 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
     expect(rects(176, 196).length).toBe(10);
 
     const tile = grid.attractTargets[0] as unknown as MockObject;
+    tile.handlers.pointerdown?.();
     tile.handlers.pointerup?.();
 
     // Page 2 starts at game index 10 (How Many?).
@@ -251,11 +254,13 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
     expect(rects(176, 196).length).toBe(4);
 
     const tiles = grid.attractTargets as unknown as MockObject[];
+    tiles[0].handlers.pointerdown?.();
     tiles[0].handlers.pointerup?.();
     // Page 3 holds games 21-24 (Feelings Faces, Story Order, Robot Path, Fix-It Machine).
     expect(activate).toHaveBeenCalledWith(20, tiles[0]);
 
     grid.navLocked = false;
+    tiles[1].handlers.pointerdown?.();
     tiles[1].handlers.pointerup?.();
     expect(activate).toHaveBeenLastCalledWith(21, tiles[1]);
   });
@@ -616,6 +621,7 @@ describe("HubGrid — group chips and the filtered board", () => {
     ]);
 
     const tiles = grid.attractTargets as unknown as MockObject[];
+    tiles[4]?.handlers.pointerdown?.();
     tiles[4]?.handlers.pointerup?.();
     expect(activate).toHaveBeenCalledWith(19, grid.attractTargets[4]);
   });
@@ -759,5 +765,56 @@ describe("HubGrid — group chips and the filtered board", () => {
     expect(grid.spotlightGraphics).toHaveLength(1);
     grid.rerenderStickerShelf();
     expect(grid.spotlightGraphics).toHaveLength(1);
+  });
+
+  it("does not navigate on a blocked tile release in wide, paged and filtered grids", () => {
+    const releaseWhileBlocked = (build: (grid: HubGrid) => void): void => {
+      let blocked = true;
+      const { deps, activate } = makeDeps({ gestureBlocked: () => blocked });
+      const grid = new HubGrid(deps);
+      build(grid);
+
+      const tile = grid.attractTargets[0] as unknown as MockObject;
+      tile.handlers.pointerdown?.();
+      // The modal can be destroyed between down and up, so only down-time
+      // ownership may suppress the release.
+      blocked = false;
+      tile.handlers.pointerup?.();
+
+      expect(activate).not.toHaveBeenCalled();
+    };
+
+    releaseWhileBlocked((grid) => grid.buildWideGrid());
+    releaseWhileBlocked((grid) => grid.buildPageGrid(1));
+    releaseWhileBlocked((grid) => {
+      grid.classifyViewport();
+      grid.setGroup("numbers");
+    });
+  });
+
+  it("ignores a tile release with no matching tile press in wide, paged and filtered grids", () => {
+    const releaseWithoutPress = (build: (grid: HubGrid) => void): void => {
+      const { deps, activate } = makeDeps();
+      const grid = new HubGrid(deps);
+      build(grid);
+
+      const tile = grid.attractTargets[0] as unknown as MockObject;
+      // Phaser's top-only hit testing can hand pointerup to the tile underneath
+      // when a modal consumed pointerdown. That release owns no tile gesture.
+      tile.handlers.pointerup?.();
+      expect(activate).not.toHaveBeenCalled();
+
+      // An ordinary press and release on the same tile still activates once.
+      tile.handlers.pointerdown?.();
+      tile.handlers.pointerup?.();
+      expect(activate).toHaveBeenCalledTimes(1);
+    };
+
+    releaseWithoutPress((grid) => grid.buildWideGrid());
+    releaseWithoutPress((grid) => grid.buildPageGrid(1));
+    releaseWithoutPress((grid) => {
+      grid.classifyViewport();
+      grid.setGroup("numbers");
+    });
   });
 });

@@ -1,4 +1,5 @@
 import { SettingsPanel } from "../../components/SettingsPanel";
+import { HELP_TOPICS } from "../../components/settings/helpContent";
 import {
   AVATAR_TEXTURE_SIZE,
   OVERLAY_ALPHA,
@@ -698,6 +699,7 @@ describe("SettingsPanel row geometry", () => {
     const scene = createScene();
     const panel = new SettingsPanel(scene as never, createFakeInstallTracker("installable"));
     const close = findTextByLabel(scene, "✕") as MockGameObject;
+    const help = findTextByLabel(scene, "Help") as MockGameObject;
 
     // Page two's export row shares the same corner as page one's BGM band, and
     // it is built after the ✕, so the invariant has to be restored by every
@@ -706,11 +708,14 @@ describe("SettingsPanel row geometry", () => {
     triggerPointerdown(card);
     expect(panel.backupState().page).toBe(1);
 
-    expect(scene.children.bringToTop).toHaveBeenCalledTimes(2);
-    expect(scene.children.bringToTop).toHaveBeenLastCalledWith(close);
+    expect(scene.children.bringToTop).toHaveBeenCalledTimes(4);
+    expect(scene.children.bringToTop).toHaveBeenNthCalledWith(1, close);
+    expect(scene.children.bringToTop).toHaveBeenNthCalledWith(2, help);
+    expect(scene.children.bringToTop).toHaveBeenNthCalledWith(3, close);
+    expect(scene.children.bringToTop).toHaveBeenNthCalledWith(4, help);
     const exportIndex = scene.add.text.mock.calls.findIndex((call) => call[2] === "Save a backup");
     expect(exportIndex).toBeGreaterThanOrEqual(0);
-    expect(scene.children.bringToTop.mock.invocationCallOrder[1]).toBeGreaterThan(
+    expect(scene.children.bringToTop.mock.invocationCallOrder[2]).toBeGreaterThan(
       scene.add.text.mock.invocationCallOrder[exportIndex],
     );
   });
@@ -985,6 +990,166 @@ describe("SettingsPanel browser-suite probes", () => {
 
     const adaptive = panel.e2eToggles().find((toggle) => toggle.id === "adaptive");
     expect(adaptive?.on).toBe(false);
+  });
+});
+
+describe("SettingsPanel Parent Help integration", () => {
+  /** Phaser texts carry x/y; this double only records them in the call args. */
+  function positionTexts(scene: MockScene): void {
+    scene.add.text.mock.results.forEach((result, index) => {
+      const [x, y] = scene.add.text.mock.calls[index] as unknown as [number, number];
+      const object = result.value as MockGameObject & { x: number; y: number };
+      object.x = x;
+      object.y = y;
+    });
+  }
+
+  /** Opens Help through its real header control. */
+  function openHelp(scene: MockScene): void {
+    positionTexts(scene);
+    triggerPointerdown(findTextByLabel(scene, "Help") as MockGameObject);
+    positionTexts(scene);
+  }
+
+  /** Closes the last drawn ✕ — the overlay's, never the panel's. */
+  function closeHelp(scene: MockScene): void {
+    triggerPointerdown(findLastTextByLabel(scene, "✕") as MockGameObject);
+  }
+
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  it("keeps one 96px header Help control in the same place on both pages", () => {
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    openHelp(scene);
+    closeHelp(scene);
+
+    const point = panel.e2eHelpButton();
+    const help = findTextByLabel(scene, "Help") as MockGameObject;
+    expect(scene.children.bringToTop).toHaveBeenCalledWith(help);
+    expect(point).toEqual({ x: 512 - PANEL_WIDTH / 2 + 36, y: 384 - 105 });
+    const band = hitRectFor(scene, "Help");
+    expect(band.right - band.left).toBe(96);
+    expect(band.bottom - band.top).toBe(96);
+    expect(listenerCount(findTextByLabel(scene, "Help") as MockGameObject, "pointerdown")).toBe(2);
+
+    triggerPointerdown(findTextByLabel(scene, "Backup & restore ›") as MockGameObject);
+    expect(panel.backupState().page).toBe(1);
+    expect(panel.e2eHelpButton()).toEqual(point);
+    expect(hitRectFor(scene, "Help")).toEqual(band);
+    expect(scene.children.bringToTop).toHaveBeenCalledTimes(4);
+    expect(scene.children.bringToTop).toHaveBeenLastCalledWith(help);
+  });
+
+  it("opens Help above either page and reveals the same page on close", () => {
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    openHelp(scene);
+
+    expect(panel.e2eHelp()).toMatchObject({
+      screen: "topics",
+      topicId: null,
+      topicIndex: -1,
+      topicCount: 8,
+      title: "Parent Help",
+    });
+    expect(panel.backupState().page).toBe(0);
+
+    const topic = HELP_TOPICS[2];
+    if (!topic) throw new Error("expected a third help topic");
+    triggerPointerdown(findTextByLabel(scene, topic.title) as MockGameObject);
+    positionTexts(scene);
+    expect(panel.e2eHelp()).toMatchObject({
+      screen: "topic",
+      topicId: topic.id,
+      topicIndex: 2,
+      title: topic.title,
+    });
+    closeHelp(scene);
+    expect(panel.e2eHelp()).toBeNull();
+    expect(panel.backupState().page).toBe(0);
+
+    triggerPointerdown(findTextByLabel(scene, "Backup & restore ›") as MockGameObject);
+    openHelp(scene);
+    expect(panel.e2eHelp()?.screen).toBe("topics");
+    expect(panel.backupState().page).toBe(1);
+    closeHelp(scene);
+    expect(panel.backupState().page).toBe(1);
+  });
+
+  it("closes on the backdrop without changing the page underneath", () => {
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    const rowCards = (): unknown[] =>
+      getRectangles(scene)
+        .filter(({ args }) => args?.[2] === ROW_HIT_WIDTH && args?.[3] === 68)
+        .map(({ args }) => args);
+    const rowsBefore = rowCards();
+    openHelp(scene);
+
+    const backdrop = getRectangles(scene).find(({ args }) => args?.[5] === OVERLAY_ALPHA);
+    expect(backdrop).toBeDefined();
+    if (!backdrop) throw new Error("expected the Help backdrop");
+    expect(panel.e2eHelp()?.topics).toHaveLength(8);
+    triggerPointerdown(backdrop.object as MockGameObject);
+
+    expect(panel.e2eHelp()).toBeNull();
+    expect(rowCards()).toEqual(rowsBefore);
+    expect(panel.e2eToggles().map((toggle) => toggle.id)).toEqual(["bgm", "sfx", "adaptive"]);
+  });
+
+  it("survives repeated cycles without duplicating the menu or its listeners", () => {
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    for (let cycle = 0; cycle < 3; cycle += 1) {
+      openHelp(scene);
+      expect(panel.e2eHelp()?.topics.map((topic) => topic.id)).toEqual(
+        HELP_TOPICS.map((topic) => topic.id),
+      );
+      closeHelp(scene);
+      expect(panel.e2eHelp()).toBeNull();
+    }
+
+    expect(listenerCount(findTextByLabel(scene, "Help") as MockGameObject, "pointerdown")).toBe(2);
+    expect(scene.add.text.mock.calls.filter((call) => call[2] === "Parent Help")).toHaveLength(3);
+  });
+
+  it("destroys Help along with Settings and then publishes no Help state", () => {
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    openHelp(scene);
+    const backdrop = getRectangles(scene).find(({ args }) => args?.[5] === OVERLAY_ALPHA);
+    if (!backdrop) throw new Error("expected the Help backdrop");
+
+    panel.destroy();
+
+    expect(panel.e2eOpen()).toBe(false);
+    expect(panel.e2eHelpButton()).toBeNull();
+    expect(panel.e2eHelp()).toBeNull();
+    expect((backdrop.object as MockGameObject).destroy).toHaveBeenCalledTimes(1);
+  });
+
+  it("leaves settings and the saved data untouched across all eight topics", () => {
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    const togglesBefore = panel.e2eToggles();
+    const saveBefore = localStorage.getItem("abby-little-lab:v2");
+    openHelp(scene);
+
+    for (const topic of HELP_TOPICS) {
+      triggerPointerdown(findTextByLabel(scene, topic.title) as MockGameObject);
+      positionTexts(scene);
+      expect(panel.e2eHelp()?.topicId).toBe(topic.id);
+      triggerPointerdown(findLastTextByLabel(scene, "Back to topics") as MockGameObject);
+      positionTexts(scene);
+    }
+    closeHelp(scene);
+
+    expect(panel.e2eToggles()).toEqual(togglesBefore);
+    expect(localStorage.getItem("abby-little-lab:v2")).toBe(saveBefore);
   });
 });
 
