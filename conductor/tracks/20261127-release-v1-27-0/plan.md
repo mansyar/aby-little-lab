@@ -41,7 +41,7 @@
 - **Covers:** FR-2, FR-3, FR-4, NFR-3, NFR-4, AC-2, AC-3, AC-11
 - **Touches:** `README.md`, `docs/release-notes-v1.27.0.md`, `conductor/tracks/20261127-release-v1-27-0/verification/phase-2.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; targeted README count/link inspection; `git -c core.whitespace=cr-at-eol diff --check`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Add the README release-table row** — covers: FR-3, AC-3
   - [ ] **P2.T1.1: Add a newest-first `v1.27.0` row dated 2026-11-27 with the notes link.**
