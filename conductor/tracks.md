@@ -305,4 +305,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Surface adaptive-band movement on the Progress Overview** - [20261127-progress-band-movement](./archive/20261127-progress-band-movement/index.md) - feature - high
 - [x] **Track: Release v1.27.0** — [20261127-release-v1-27-0](./archive/20261127-release-v1-27-0/index.md) — chore — high
 - [x] **Track: Add a parent Help overlay explaining controls, data, backup, and play-time** - [20261127-parent-help-overlay](./archive/20261127-parent-help-overlay/index.md) - feature - medium
-- [~] **Track: Add game 25: a Repeat Machine for loops** — [20261128-repeat-machine](./tracks/20261128-repeat-machine/index.md) — feature — medium
+- [x] **Track: Add game 25: a Repeat Machine for loops** — [20261128-repeat-machine](./tracks/20261128-repeat-machine/index.md) — feature — medium

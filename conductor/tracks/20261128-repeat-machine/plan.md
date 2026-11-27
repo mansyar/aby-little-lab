@@ -103,6 +103,6 @@ Phase 3 acceptance (primary):
 <!--
 R1 acceptance (primary):
 **Result:** verified
-**Checkpoint:** <r1-commit>
+**Checkpoint:** e6e75df5
 **Evidence:** conductor/tracks/20261128-repeat-machine/verification/phase-R1.md (full gate green 164/3529; 8/10 by fixer, 2 validators by primary on identical tree)
 -->
