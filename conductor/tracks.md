@@ -303,4 +303,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Retention Pilot Pack** - [20261126-retention-pilot-pack](./archive/20261126-retention-pilot-pack/index.md) - chore - medium
 - [x] **Track: Wire the four signature content variants into real playthroughs** — [20261126-wire-content-variants](./archive/20261126-wire-content-variants/index.md) - feature - high
 - [x] **Track: Surface adaptive-band movement on the Progress Overview** - [20261127-progress-band-movement](./archive/20261127-progress-band-movement/index.md) - feature - high
-- [ ] **Track: Release v1.27.0** — [20261127-release-v1-27-0](./tracks/20261127-release-v1-27-0/index.md) — chore — high
+- [~] **Track: Release v1.27.0** — [20261127-release-v1-27-0](./tracks/20261127-release-v1-27-0/index.md) — chore — high
