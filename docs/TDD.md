@@ -452,14 +452,15 @@ Game art leaves the shell by two mechanisms, and both are ordinary static module
 | --- | --- | --- |
 | Boot textures | 57 (24 tiles, 24 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
 | Game art | 12 groups, 151 keys; nine emit chunks of 3.1–19.4 kB and `cutouts`, `shadows`, `faces` inline into their only consumer | build output |
-| Shell entry | 182.5 kB as `validate-bundle.js` reports it (186.85 kB as Vite prints it), gated at 200 kB | `node scripts/validate-bundle.js` |
+| Shell entry | 186.5 kB as `validate-bundle.js` reports it (`index-BXMw_AwN.js`, 190.97 kB as Vite prints it, 48.43 kB gzip), gated at 200 kB | `node scripts/validate-bundle.js` |
+| Parent Help chunk | `parent-help-CO1457oM.js`, 19.38 kB / 7.35 kB gzip; the named `parent-help` group keeps Help copy out of the shell | build output |
 | Phaser vendor chunk | 1335.0 kB as the validator reports it (the same bytes, binary versus decimal units) | `node scripts/validate-bundle.js` |
 | Story Order chunk | ~40.3 kB, includes all 90 panel SVGs | build output |
-| Precache entries | 61 (1794.50 KiB) | `precache  61 entries` from the PWA build step |
+| Precache entries | 66 (1890.52 KiB) | `precache  66 entries` from the PWA build step |
 
 The shell carries the four eagerly registered scenes, the components the Hub and its settings overlays use, the utilities they import and the 62 shell textures as strings. The build hoists whatever the lazy scenes share into its own chunk instead, so the shared bases do not ride the shell (the per-chunk figures below are also listed in [PRD §7.2](./PRD.md#72-shell-and-game-chunks), which owns them): `GameSceneBase` 11.85 kB, `ChoiceRoundScene` 2.08 kB, `GroupMathScene` 2.03 kB, `dragJuice` 1.03 kB, `dragBoard` 5.87 kB, and shared game logic such as `wordLogic` 1.95 kB, `countLogic` 0.81 kB and `shapeSorterLogic` 0.68 kB. Game scenes and art groups are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
 
-The current build emits 51 JavaScript chunks: 24 game scenes, nine art-group chunks (the other three groups inline into their only consumer), the three shared bases, the two drag shells, the shared game-logic chunks, the Phaser vendor chunk, the workbox helper and the shell entry. The structural acceptance is an inspection of `dist/assets`: the entry chunk carries zero game-scene constructor registrations, so every `super({ key: ... })` it holds belongs to Boot, Preload, Hub or Recover.
+The current build emits 54 JavaScript chunks from 496 modules: 24 game scenes, nine art-group chunks (the other three groups inline into their only consumer), the three shared bases, the two drag shells, the shared game-logic chunks, the Phaser vendor chunk, the workbox helper, the shell entry and the `parent-help` Help chunk. The structural acceptance is an inspection of `dist/assets`: the entry chunk carries zero game-scene constructor registrations, so every `super({ key: ... })` it holds belongs to Boot, Preload, Hub or Recover.
 
 ---
 
@@ -754,7 +755,7 @@ advanced round without sleeping on a timer.
 
 ## 5. Components
 
-Seventeen modules live in `src/components/`. Most are plain classes that take a `Phaser.Scene`; `ArtLoadingCue.ts` and `GameLoadCue.ts` are factories that return a handle, because each cue owns its own tweens and its own shutdown hook. None extends a scene.
+Twenty-four modules live in `src/components/` (eleven at the top level and thirteen under `settings/`). Most are plain classes that take a `Phaser.Scene`; `ArtLoadingCue.ts` and `GameLoadCue.ts` are factories that return a handle, because each cue owns its own tweens and its own shutdown hook. None extends a scene.
 
 ### 5.1 RoundNarrator
 
@@ -819,6 +820,15 @@ While the panel is open `allowPinchZoom()` relaxes the `user-scalable=no` viewpo
 | `ResetModal.ts` | two-step destructive confirm (`Reset all stickers?` with Cancel/Reset); on success calls `resetProgress()`, leaves settings untouched, sets the row to `Progress cleared`, and calls the panel's `onProgressReset` so the Hub shelf re-renders immediately |
 | `VoiceRow.ts` | voice chip cycling and preview |
 | `InstallRow.ts` | install state row read from the app-lifetime tracker — `installable`, `ios-howto` or hidden |
+| `HelpButton.ts` | the persistent 96 × 96 Help control raised beside the ✕ in the header on both pages; publishes its live centre to the bridge |
+| `helpContent.ts` | the eight static topic definitions (`HELP_TOPICS`, `HelpTopicId`, `HelpTopic`): one short intro and at most four bullets each, in fixed menu order |
+| `HelpOverlay.ts` | the read-only Help screens: a 2 × 4 topic menu and a detail screen with Back, Previous, Next and ✕, all drawn inside the shared 480 × 760 panel |
+
+**Parent Help lifecycle and boundaries.** `SettingsPanel` constructs one `HelpButton`, one `HelpOverlay` and one shared `overlayObjects` bucket. The button is a sibling of the persistent ✕, so it survives page switches, is re-raised after every `buildPage()`, and calls `helpOverlay.open()` on tap; it inherits the Settings gate and requires no second hold. `HelpOverlay.open()` resets an already-open overlay to the topic menu; `close()` clears the screen, the selected topic and every drawn object in the bucket. Closing Settings calls `helpOverlay.close()` before the shared buckets are destroyed, and `destroy()` of the overlay cancels its pending input handlers. Grid cards use 200 × 96 px hit areas on a 96 px row pitch; detail bullets live at `POINT_ROW_START = -105` with `POINT_ROW_PITCH = 90` and wrap at 420–430 px. Navigation stays inside Help: **Back to topics** returns to the menu, **Previous**/**Next** walk the fixed `HELP_TOPICS` order with their controls null at the first and last detail, and no Settings page switch is offered while a topic is open. All eight topics are local, static copy bundled in the `parent-help` chunk: no storage, settings, download, audio, network or external-navigation call is reachable from Help, and no second overlay can be opened over it.
+
+**E2E state.** The read-only bridge publishes `e2eHelpButton()` (the control centre, `null` once Settings closes) and `e2eHelp()` (`E2EHelpState`: `screen` of `topics` or `topic`, `topicId`, `topicIndex`, `topicCount`, `topics` centres and `controls` points for close/back/prev/next). Both are `null` when Help or Settings is closed, so journeys tap drawn points rather than copied constants and can assert each close path. `SettingsPanel.e2eOpen()` reports liveness from the panel itself (`!destroyed`) rather than from a holder that outlives it.
+
+**Regression protections from this track.** All three hub grid builders (`gridBuilder.ts` for wide, paged and filtered grids) capture `gestureBlocked()` at tile `pointerdown` and refuse an unmatched `pointerup`. Without that capture, WebKit and Firefox delivered the release after Settings closed to the How Many tile underneath, mutating its play/activity record while the save snapshot still looked unchanged. Matching-press repairs in `hubScene.test.ts`, `hubSceneLoad.test.ts`, `firstWordsIntegration.test.ts`, `feelingsFacesFlow.test.ts`, `hubEngagement.test.ts`, `hubPlayTime.test.ts` and `navigation.test.ts` now dispatch `pointerdown` before `pointerup` for ordinary tile taps, so the guard cannot starve real play. `HubScene` reads `settingsPanel?.e2eOpen()` for gesture ownership, so a destroyed panel stops blocking play immediately. The four-engine Help journey (`e2e/journeys/help.spec.ts`, in `CORE_SMOKE_TEST_MATCH`) walks all eight topics and checks both close paths with unchanged saves.
 
 `src/utils/pwaInstall.ts` splits into an injectable core and a thin browser adapter. `createInstallTracker(deps)` is the core: it takes the user agent, the standalone predicate and the two listener methods as an object, decides between the three states, and is what the suites drive. `createBrowserInstallTracker()` is the only place `window` and `navigator` are read, and it goes inert where they are absent or partial - a scene suite's partial `window` stub gets a tracker that reports `hidden` and attaches nothing rather than a throw.
 
@@ -1329,13 +1339,13 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-159 test files, 3,454 tests (verified 2026-11-27). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+162 test files, 3,492 tests (verified 2026-11-27). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules. Both slides of each signature pair are exercised with seeded RNGs in the game-logic suites and in the matching scene/flow suites, so a test pins the slide instead of leaving it to chance; the thin story and shape fallback paths are asserted there as well.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-27) is statements 97.11 %, branches 91.01 %, functions 96.4 % and lines 98.25 % across 159 files and 3,454 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-27) is statements 97.1 %, branches 91.09 %, functions 96.35 % and lines 98.19 % across 162 files and 3,492 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 60 words never forces.
 
@@ -1354,14 +1364,14 @@ happy-dom supplies no canvas, no audio graph and no screen. The following are de
 
 | Project | Role | Selection | Profile |
 | --- | --- | --- | --- |
-| `chromium` | Full journey regression | 26 cases / 19 specs; ignores `e2e/smoke/**` | Bundled Chromium, desktop 1280×720 |
-| `webkit` | Safari-engine proxy | 8 cases / 6 specs from the core smoke | Bundled WebKit, desktop 1280×720 |
-| `firefox` | Firefox engine coverage | 8 cases / 6 specs from the core smoke | Bundled Firefox, desktop 1280×720 |
-| `mobile-chromium` | Phone-shaped Chromium/touch proxy | 8 cases / 6 specs from the core smoke | Bundled Chromium, 844×390, `isMobile: true`, `hasTouch: true` |
+| `chromium` | Full journey regression | 28 cases / 20 specs; ignores `e2e/smoke/**` | Bundled Chromium, desktop 1280×720 |
+| `webkit` | Safari-engine proxy | 10 cases / 7 specs from the core smoke | Bundled WebKit, desktop 1280×720 |
+| `firefox` | Firefox engine coverage | 10 cases / 7 specs from the core smoke | Bundled Firefox, desktop 1280×720 |
+| `mobile-chromium` | Phone-shaped Chromium/touch proxy | 10 cases / 7 specs from the core smoke | Bundled Chromium, 844×390, `isMobile: true`, `hasTouch: true` |
 
-The Chromium roster covers boot, all 24 launches (driven as two halves in parallel workers, with a guard that the halves partition the registry), three rounds on each of the seven mechanic families, sticker award, the parental gate, the Learning Progress overview, settings persistence, the daily cap, a backup carried to a second browser, a device whose storage refuses every write, an offline relaunch and a crash recovered into a working app with its log downloaded as a file. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
+The Chromium roster covers boot, all 24 launches (driven as two halves in parallel workers, with a guard that the halves partition the registry), three rounds on each of the seven mechanic families, sticker award, the parental gate, the Learning Progress overview, settings persistence, the daily cap, a backup carried to a second browser, a device whose storage refuses every write, an offline relaunch, the parent Help walk from Settings on both pages, and a crash recovered into a working app with its log downloaded as a file. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
 
-**Core smoke selection.** The three matrix projects select exactly six files: `journeys/boot.spec.ts`, `journeys/launch-all.spec.ts`, `journeys/first-sounds.spec.ts`, `journeys/shape-sorter.spec.ts`, `journeys/offline.spec.ts` and `smoke/sticker-persistence.spec.ts`. Together they prove boot, the registry partition and all 24 game launch/return checks, three First Sounds speech rounds, three Shape Sorter drag rounds, one earned sticker surviving reload, and offline Hub/game relaunch. The full Chromium project excludes `e2e/smoke/**`; the matrix projects do not select its other journey files. Dated local verification on 2026-11-25 used Playwright 1.65.1 with bundled Chromium 159.0.8154.6, Firefox 159.0 and WebKit 27.2; the first-attempt results and durations are recorded in `conductor/tracks/20261125-browser-matrix/verification/phase-3.md`.
+**Core smoke selection.** The three matrix projects select exactly seven files: `journeys/boot.spec.ts`, `journeys/launch-all.spec.ts`, `journeys/first-sounds.spec.ts`, `journeys/shape-sorter.spec.ts`, `journeys/offline.spec.ts`, `journeys/help.spec.ts` and `smoke/sticker-persistence.spec.ts`. Together they prove boot, the registry partition and all 24 game launch/return checks, three First Sounds speech rounds, three Shape Sorter drag rounds, one earned sticker surviving reload, offline Hub/game relaunch, and the parent Help walk (all eight topics, both close paths and an unchanged save on every engine). The full Chromium project excludes `e2e/smoke/**`; the matrix projects do not select its other journey files. Dated local verification on 2026-11-25 used Playwright 1.65.1 with bundled Chromium 159.0.8154.6, Firefox 159.0 and WebKit 27.2; the first-attempt results and durations are recorded in `conductor/tracks/20261125-browser-matrix/verification/phase-3.md`.
 
 What this layer observes that the unit layer cannot:
 

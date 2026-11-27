@@ -74,6 +74,9 @@ export function settings(v: HubE2EState): E2ESettingsState {
     // panel losing focus, so neither is gated on the panel staying open.
     progressRow: panel ? panel.e2eProgressRow() : null,
     progress: panel ? panel.e2eProgress() : null,
+    // Help is published only while its own panel is up, never as a stale state.
+    helpButton: open && panel ? panel.e2eHelpButton() : null,
+    help: open && panel ? panel.e2eHelp() : null,
     // The notice is the panel's own open-time snapshot, so the journey reads
     // the same value that decided what the parent sees.
     degraded: open && panel ? panel.e2eDegraded() : false,

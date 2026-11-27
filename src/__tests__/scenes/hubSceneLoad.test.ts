@@ -8,6 +8,7 @@ import {
   getTextObject,
   mockEnsureSceneLoaded,
   settleLoad,
+  triggerPointerdownOn,
   triggerPointerupOn,
   triggerShutdown,
 } from "../helpers/sceneFlowHarness";
@@ -180,6 +181,13 @@ describe("Hub scene load", () => {
     cue.handlers.pointerup?.();
   }
 
+  /** Taps a game tile with the press and release the ownership guard expects. */
+  function tapTile(scene: HubScene, index: number): void {
+    const tile = getRectangles(scene)[index];
+    triggerPointerdownOn(tile);
+    triggerPointerupOn(tile);
+  }
+
   /**
    * Gives a mocked tile the runtime centre a real Phaser Rectangle carries.
    * The double records its constructor args but does not copy them to x/y.
@@ -228,7 +236,7 @@ describe("Hub scene load", () => {
     scene.create();
     const grid = gridOf(scene);
 
-    triggerPointerupOn(getRectangles(scene)[0]);
+    tapTile(scene, 0);
     // The tap takes the lock before the load starts, exactly as production does.
     expect(grid.navLocked).toBe(true);
 
@@ -262,7 +270,7 @@ describe("Hub scene load", () => {
     // is the only 96x96 rectangle the Hub builds.
     expect(cueRectOf(scene)).toBeUndefined();
 
-    triggerPointerupOn(getRectangles(scene)[0]);
+    tapTile(scene, 0);
     await settleLoad(loadSceneWithRetry);
 
     expect(mockEnsureSceneLoaded).toHaveBeenCalledTimes(2);
@@ -285,7 +293,7 @@ describe("Hub scene load", () => {
     const scene = new HubScene();
     scene.create();
 
-    triggerPointerupOn(getRectangles(scene)[0]);
+    tapTile(scene, 0);
     await settleLoad(loadSceneWithRetry);
 
     expect(mockEnsureSceneLoaded).toHaveBeenCalledTimes(1);
@@ -316,7 +324,7 @@ describe("Hub scene load", () => {
     const firstTile = getRectangles(scene)[0];
     placeTile(firstTile, 146, 268);
 
-    triggerPointerupOn(firstTile);
+    tapTile(scene, 0);
     await settleLoad(loadSceneWithRetry);
 
     // The cue is visible, centred on the tile the child actually tapped.
@@ -326,7 +334,7 @@ describe("Hub scene load", () => {
     // And the grid is unlocked, so a different tile still reaches the Hub.
     expect(grid.navLocked).toBe(false);
 
-    triggerPointerupOn(getRectangles(scene)[1]);
+    tapTile(scene, 1);
     expect(grid.navLocked).toBe(true);
 
     await settleLoad(loadSceneWithRetry);
@@ -341,7 +349,7 @@ describe("Hub scene load", () => {
     const scene = new HubScene();
     scene.create();
 
-    triggerPointerupOn(getRectangles(scene)[0]);
+    tapTile(scene, 0);
     await settleLoad(loadSceneWithRetry);
 
     const cue = cueOf(scene);
@@ -375,7 +383,7 @@ describe("Hub scene load", () => {
     scene.create();
     const grid = gridOf(scene);
 
-    triggerPointerupOn(getRectangles(scene)[0]);
+    tapTile(scene, 0);
     await settleLoad(loadSceneWithRetry);
     expect(cueOf(scene)?.isActive()).toBe(true);
     expect(mockEnsureSceneLoaded).toHaveBeenCalledTimes(2);
@@ -389,7 +397,7 @@ describe("Hub scene load", () => {
 
     // A second tile during the retry reaches the grid and is refused: the lock
     // it checks, and the launch flag behind it, are both held.
-    triggerPointerupOn(getRectangles(scene)[1]);
+    tapTile(scene, 1);
     expect(mockEnsureSceneLoaded).toHaveBeenCalledTimes(3);
 
     release();
@@ -410,7 +418,7 @@ describe("Hub scene load", () => {
     scene.create();
     const before = storageSnapshot();
 
-    triggerPointerupOn(getRectangles(scene)[0]);
+    tapTile(scene, 0);
     await settleLoad(loadSceneWithRetry);
 
     expect(console.warn).toHaveBeenCalledTimes(2);
@@ -426,12 +434,12 @@ describe("Hub scene load", () => {
     const scene = new HubScene();
     scene.create();
 
-    triggerPointerupOn(getRectangles(scene)[0]);
+    tapTile(scene, 0);
     await settleLoad(loadSceneWithRetry);
     const cue = cueOf(scene);
     expect(cue?.isActive()).toBe(true);
 
-    triggerPointerupOn(getRectangles(scene)[1]);
+    tapTile(scene, 1);
     await settleLoad(loadSceneWithRetry);
 
     // The second failure reuses the cue instead of stacking another.
@@ -457,7 +465,7 @@ describe("Hub scene load", () => {
     };
     scene.create();
 
-    triggerPointerupOn(getRectangles(scene)[0]);
+    tapTile(scene, 0);
     await settleLoad(loadSceneWithRetry);
     const cue = cueOf(scene);
     const cueRect = cueRectOf(scene);
@@ -477,7 +485,7 @@ describe("Hub scene load", () => {
     const scene = new HubScene();
     scene.create();
 
-    triggerPointerupOn(getRectangles(scene)[0]);
+    tapTile(scene, 0);
     await settleLoad(loadSceneWithRetry);
     const cue = cueOf(scene);
     const cueRect = cueRectOf(scene);
@@ -497,7 +505,7 @@ describe("Hub scene load", () => {
     const scene = new HubScene();
     scene.create();
 
-    triggerPointerupOn(getRectangles(scene)[0]);
+    tapTile(scene, 0);
     await settleLoad(loadSceneWithRetry);
     const cue = cueOf(scene);
     const cueRect = cueRectOf(scene);
@@ -517,7 +525,7 @@ describe("Hub scene load", () => {
     const scene = new HubScene();
     scene.create();
 
-    triggerPointerupOn(getRectangles(scene)[0]);
+    tapTile(scene, 0);
     expect(() => triggerShutdown(scene)).not.toThrow();
 
     // The load still settles quietly; the Hub has nothing left to do with it.
@@ -536,7 +544,7 @@ describe("Hub scene load", () => {
     const scene = new HubScene();
     scene.create();
 
-    triggerPointerupOn(getRectangles(scene)[0]);
+    tapTile(scene, 0);
     expect(() => triggerShutdown(scene)).not.toThrow();
 
     await expect(settleLoad(loadSceneWithRetry)).resolves.toBeUndefined();
@@ -555,7 +563,7 @@ describe("Hub scene load", () => {
     const scene = new HubScene();
     scene.create();
 
-    triggerPointerupOn(getRectangles(scene)[0]);
+    tapTile(scene, 0);
     triggerShutdown(scene);
     // Phaser reuses the instance: the next visit runs `create()` again, which
     // is exactly what used to reset a shutdown boolean and let a stale load
@@ -578,7 +586,7 @@ describe("Hub scene load", () => {
     scene.create();
     const grid = gridOf(scene);
 
-    triggerPointerupOn(getRectangles(scene)[0]);
+    tapTile(scene, 0);
     await settleLoad(loadSceneWithRetry);
     const cue = cueOf(scene);
     expect(cue?.isActive()).toBe(true);

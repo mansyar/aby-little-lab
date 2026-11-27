@@ -142,7 +142,7 @@ export class HubScene extends Phaser.Scene {
       isTimeUp: () => this.playTime.isTimeUp(),
       activateTile: (tileIndex, tile) => this.activateTile(tileIndex, tile),
       onUserGesture: () => this.attract.resetIdleAttract(),
-      gestureBlocked: () => Boolean(this.profileChip.isOpen() || this.settingsPanel),
+      gestureBlocked: () => Boolean(this.profileChip.isOpen() || this.settingsPanel?.e2eOpen()),
       onBoardChange: () => {
         this.hideLoadCue();
         this.replayCue.refreshCue();

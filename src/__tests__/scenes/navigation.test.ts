@@ -395,6 +395,7 @@ describe("HubScene", () => {
       scene.create();
 
       const tile = getRectangles(scene)[i];
+      fireAllObjectEvents(tile, "pointerdown");
       fireAllObjectEvents(tile, "pointerup");
       // The tile handler awaits the (mocked) lazy scene loader before
       // transitioning, so flush the pending microtask before fading out.
@@ -415,6 +416,7 @@ describe("HubScene", () => {
 
     // First visit: launch Shape Sorter.
     const firstVisitRectCount = getRectangles(scene).length;
+    fireAllObjectEvents(getRectangles(scene)[0], "pointerdown");
     fireAllObjectEvents(getRectangles(scene)[0], "pointerup");
     await new Promise((resolve) => setTimeout(resolve, 0));
     completeFadeOuts(scene);
@@ -429,6 +431,7 @@ describe("HubScene", () => {
     scene.create();
 
     // Second visit: tap a DIFFERENT tile (second rect of the new batch).
+    fireAllObjectEvents(getRectangles(scene)[firstVisitRectCount + 1], "pointerdown");
     fireAllObjectEvents(getRectangles(scene)[firstVisitRectCount + 1], "pointerup");
     await new Promise((resolve) => setTimeout(resolve, 0));
     completeFadeOuts(scene);
@@ -441,6 +444,7 @@ describe("HubScene", () => {
     const scene = new HubScene();
     scene.create();
 
+    triggerPointerdownOn(getRectangles(scene)[0]);
     triggerAllPointerups(scene);
 
     expect(mockAudio.resume).toHaveBeenCalled();
@@ -450,6 +454,7 @@ describe("HubScene", () => {
     const scene = new HubScene();
     scene.create();
 
+    triggerPointerdownOn(getRectangles(scene)[0]);
     triggerAllPointerups(scene);
 
     expect(mockSpeech.unlockSpeechForUserGesture).toHaveBeenCalled();
@@ -459,6 +464,7 @@ describe("HubScene", () => {
     const scene = new HubScene();
     scene.create();
 
+    triggerPointerdownOn(getRectangles(scene)[0]);
     triggerAllPointerups(scene);
 
     expect(mockAudio.playBGM).toHaveBeenCalled();

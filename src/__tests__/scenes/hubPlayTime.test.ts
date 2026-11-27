@@ -207,6 +207,7 @@ describe("Hub play-time enforcement", () => {
     const scene = new HubScene();
     scene.create();
 
+    triggerPointerdownOn(getRectangles(scene)[0]);
     triggerAllPointerups(scene);
     await new Promise((resolve) => setTimeout(resolve, 0));
     completeFadeOuts(scene);
@@ -272,6 +273,7 @@ describe("Hub play-time enforcement", () => {
     const scene = new HubScene();
     scene.create();
 
+    triggerPointerdownOn(getRectangles(scene)[0]);
     triggerAllPointerups(scene);
     await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -298,6 +300,7 @@ describe("Hub play-time enforcement", () => {
     const scene = new HubScene();
     scene.create();
 
+    triggerPointerdownOn(getRectangles(scene)[0]);
     triggerAllPointerups(scene);
     await new Promise((resolve) => setTimeout(resolve, 0));
     completeFadeOuts(scene);
@@ -317,6 +320,7 @@ describe("Hub play-time enforcement", () => {
     const scene = new HubScene();
     scene.create();
 
+    triggerPointerdownOn(getRectangles(scene)[0]);
     triggerAllPointerups(scene);
     // The nudge now follows a resolved load instead of preceding it.
     await new Promise((resolve) => setTimeout(resolve, 0));

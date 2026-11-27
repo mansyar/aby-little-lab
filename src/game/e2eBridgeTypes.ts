@@ -81,6 +81,31 @@ export interface E2EProgressState {
   next: { x: number; y: number };
 }
 
+/** The Parent Help overlay exactly as it is drawing itself. */
+export interface E2EHelpState {
+  /** The topic menu or one topic's detail page. */
+  screen: "topics" | "topic";
+  /** Stable topic id from `helpContent`, or null on the menu. */
+  topicId: string | null;
+  /** Zero-based index of the open topic, or -1 on the menu. */
+  topicIndex: number;
+  /** Number of topics in the menu. */
+  topicCount: number;
+  /** The heading currently drawn. */
+  title: string;
+  /** The text lines currently drawn, in draw order. */
+  lines: string[];
+  /** The eight menu cards, in draw order, with the centres a tap answers to. */
+  topics: { id: string; title: string; x: number; y: number }[];
+  /** Drawn controls; `back`, `prev` and `next` are null on inactive boundaries. */
+  controls: {
+    close: GamePoint;
+    back: GamePoint | null;
+    prev: GamePoint | null;
+    next: GamePoint | null;
+  };
+}
+
 /**
  * The second Settings page — backup, restore and the crash log — as the panel
  * is showing it.
@@ -127,6 +152,10 @@ export interface E2ESettingsState extends E2EBackupState {
   progressRow: { x: number; y: number } | null;
   /** The Progress overlay while it is open; null when it is closed. */
   progress: E2EProgressState | null;
+  /** The persistent header Help control's centre while the panel is open. */
+  helpButton: GamePoint | null;
+  /** The Parent Help overlay while it is open; null when Help or Settings is closed. */
+  help: E2EHelpState | null;
   /**
    * Whether the panel was built while the device could not persist — the same
    * snapshot that decides whether its notice is on screen. False when the panel

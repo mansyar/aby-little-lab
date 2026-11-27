@@ -118,7 +118,14 @@ vi.mock("../../components/PwaToast", () => ({
 
 vi.mock("../../components/SettingsPanel", () => ({
   SettingsPanel: class {
-    destroy = vi.fn();
+    private open = true;
+    destroy(): void {
+      this.open = false;
+    }
+    /** Matches production: liveness, not holder presence. */
+    e2eOpen(): boolean {
+      return this.open;
+    }
   },
 }));
 
@@ -197,6 +204,7 @@ vi.mock("../../utils/storage", async (importOriginal) => {
 });
 
 import { createArtLoadingCue } from "../../components/ArtLoadingCue";
+import { SettingsPanel } from "../../components/SettingsPanel";
 import { music } from "../../game/art/music";
 import { preloadArtGroups } from "../../game/art/registry";
 import { shapes } from "../../game/art/shapes";
@@ -352,6 +360,7 @@ describe("HubScene paged grid (narrow viewports)", () => {
     const afterFlip = pagedRects().length;
     expect(afterFlip).toBe(20); // outgoing page lingers (slide timer mocked)
     const pageOneFirst = pagedRects()[10];
+    pageOneFirst.handlers.pointerdown?.();
     pageOneFirst.handlers.pointerup?.();
     // The play is charged only once the load resolved.
     await settleLoad(loadSceneWithRetry);
@@ -396,6 +405,7 @@ describe("HubScene paged grid (narrow viewports)", () => {
     pageDots()[2].handlers.pointerup?.();
     const incoming = pagedRects().slice(10);
     expect(incoming).toHaveLength(4);
+    incoming[1].handlers.pointerdown?.();
     incoming[1].handlers.pointerup?.();
     await settleLoad(loadSceneWithRetry);
 
@@ -408,6 +418,7 @@ describe("HubScene paged grid (narrow viewports)", () => {
     pageDots()[2].handlers.pointerup?.();
     const incoming = pagedRects().slice(10);
     expect(incoming).toHaveLength(4);
+    incoming[2].handlers.pointerdown?.();
     incoming[2].handlers.pointerup?.();
     await settleLoad(loadSceneWithRetry);
 
@@ -555,6 +566,7 @@ describe("HubScene paged grid (narrow viewports)", () => {
       mockRegistry.filter(
         (obj) => obj.kind === "rectangle" && obj.args?.[2] === 96 && obj.args?.[3] === 96,
       );
+    pagedRects()[0].handlers.pointerdown?.();
     pagedRects()[0].handlers.pointerup?.();
     await settleLoad(loadSceneWithRetry);
     const cueFloor = cueFloors().at(-1);
@@ -633,6 +645,31 @@ describe("HubScene paged grid (narrow viewports)", () => {
       dotsBefore,
     );
   });
+
+  it("lets Settings own grid gestures only while its panel reports open", () => {
+    const scene = createNarrowHub();
+    const probe = scene as unknown as {
+      settingsPanel?: { destroy: () => void; e2eOpen: () => boolean };
+      grid: { deps: { gestureBlocked: () => boolean } };
+    };
+
+    // The profile chip stays closed, so no overlay owns the gesture yet.
+    expect(probe.grid.deps.gestureBlocked()).toBe(false);
+
+    const Panel = SettingsPanel as unknown as new () => {
+      destroy: () => void;
+      e2eOpen: () => boolean;
+    };
+    const panel = new Panel();
+    probe.settingsPanel = panel;
+    expect(probe.grid.deps.gestureBlocked()).toBe(true);
+
+    // Ordinary Settings destruction leaves the Hub's field in place; gesture
+    // ownership must follow the panel's liveness, not its object presence.
+    panel.destroy();
+    expect(panel.e2eOpen()).toBe(false);
+    expect(probe.grid.deps.gestureBlocked()).toBe(false);
+  });
 });
 
 describe("HubScene session-start recording", () => {
@@ -656,8 +693,11 @@ describe("HubScene session-start recording", () => {
     const scene = new HubScene();
     scene.create();
 
+    const pressTile = getHandler("rectangle", "pointerdown");
     const tapTile = getHandler("rectangle", "pointerup");
+    expect(pressTile).toBeDefined();
     expect(tapTile).toBeDefined();
+    pressTile?.();
     tapTile?.();
     await settleLoad(loadSceneWithRetry);
 
@@ -676,7 +716,9 @@ describe("HubScene session-start recording", () => {
       (obj) => obj.kind === "rectangle" && obj.handlers.pointerup,
     );
     expect(tapTiles.length).toBeGreaterThanOrEqual(2);
+    tapTiles[0].handlers.pointerdown?.();
     tapTiles[0].handlers.pointerup?.();
+    tapTiles[1].handlers.pointerdown?.();
     tapTiles[1].handlers.pointerup?.();
     await settleLoad(loadSceneWithRetry);
 
@@ -688,9 +730,13 @@ describe("HubScene session-start recording", () => {
     const scene = new HubScene();
     scene.create();
 
+    const pressTile = getHandler("rectangle", "pointerdown");
     const tapTile = getHandler("rectangle", "pointerup");
+    expect(pressTile).toBeDefined();
     expect(tapTile).toBeDefined();
+    pressTile?.();
     tapTile?.();
+    pressTile?.();
     tapTile?.();
     await settleLoad(loadSceneWithRetry);
 
@@ -1186,6 +1232,7 @@ describe("HubScene idle prewarm", () => {
 
     const tile = navTiles()[0];
     if (!tile) throw new Error("no nav tile found");
+    tile.handlers.pointerdown?.();
     tile.handlers.pointerup?.();
 
     expect(controller.cancel).toHaveBeenCalled();
@@ -1500,6 +1547,7 @@ describe("HubScene idle art prewarm", () => {
 
     const tile = navTiles()[0];
     if (!tile) throw new Error("no nav tile found");
+    tile.handlers.pointerdown?.();
     tile.handlers.pointerup?.();
 
     expect(controller.cancel).toHaveBeenCalled();
@@ -1808,6 +1856,8 @@ describe("HubScene e2e hub tiles", () => {
       toggles: [],
       progressRow: null,
       progress: null,
+      helpButton: null,
+      help: null,
       degraded: false,
       page: 0,
       switchPage: { x: 0, y: 0 },

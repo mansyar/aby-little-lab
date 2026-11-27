@@ -37,6 +37,7 @@ Aby's Little Lab is a set of 23 preschool mini-games delivered as one installabl
   - [4.9 Preferred voice](#49-preferred-voice)
   - [4.10 Install and update](#410-install-and-update)
   - [4.11 Replay variety](#411-replay-variety)
+- [4.12 Parent Help](#412-parent-help)
 - [5. Interaction, touch and motion](#5-interaction-touch-and-motion)
   - [5.1 Visual language](#51-visual-language)
   - [5.2 Touch targets](#52-touch-targets)
@@ -464,6 +465,14 @@ Updates are prompt-based. A new service worker is downloaded but not activated u
 
 Four games draw a content slide once per playthrough, before the first round: Find the Word between `animals-and-food` and `everyday-objects`, Story Order between `growing-things` and `everyday-changes`, Shape Sorter between `curvy` and `angular`, and Feelings Faces between `outdoors-and-play` and `home-and-friends`. `src/game/contentVariants.ts` holds the frozen id arrays and the pure `pickVariantId` selector. Each of the four scenes makes exactly one draw from the RNG it already uses for that playthrough, so a seed fixes the slide and no scene uses `Math.random` for it. This replaces the opt-in behaviour described in the v1.25.0 release notes: both slides of each pair now reach real play with an even 50/50 chance, without a setting, a stored field or a new game. Round counts, scoring, completion, adaptive bands and every per-game invariant stay the same. Two slides are thin: `growing-things` cannot fill the obvious half of an easy or classic Story Order mix, and `curvy` holds only eight shapes, so each falls back to its game's normal pool for that draw; the word and scenario pairs serve every band without a fallback. This satisfies the recorded "no more games before deeper pools" stance for these four games — the pools already shipped are visible in play, and no twenty-fifth game is promised.
 
+### 4.12 Parent Help
+
+Parent Help is concise, read-only guidance for the parent, available from **Settings** on the Hub and inside a game. A persistent Help button beside the ✕ in the Settings header opens it on either page; Help inherits the Settings gate and needs no second parental-lock hold. The panel is the same 480 × 760 panel used by Settings, with 96 × 96 px-or-larger targets and 420–430 px wrapping.
+
+The menu is a 2 × 4 grid of eight topic cards: **Parental lock**, **Profiles & play time**, **Progress & adaptive difficulty**, **Privacy & local data**, **Backup & restore**, **Diagnostics**, **Install & offline**, and **Updates**. Each card opens a detail screen with a short introduction and at most four bullets; detail screens offer **Back to topics**, **Previous**, **Next** and **✕**, with boundary controls hidden at the ends. Tapping the backdrop or ✕ closes Help, and closing Settings closes Help with it. Help never replaces the Settings screen: no page switch is available while a topic is open.
+
+Help describes only shipped behaviour and stays offline. It never changes a setting, a save, a profile, play time, progress, storage, download, audio, network state or external navigation. In particular it does not perform a backup or restore, run diagnostics, install the app or apply an update: those actions stay in their existing rows and flows. All copy is static and bundled with the app — no hosted content, localization, dependency, asset, storage or schema change — and it makes no claim of hardware validation, regulatory compliance, retention studies or longitudinal adaptive measurement.
+
 ## 5. Interaction, touch and motion
 
 ### 5.1 Visual language
@@ -595,7 +604,7 @@ The build produces three kinds of JavaScript:
 - **A separate Phaser vendor chunk**, so engine bytes are cached across releases and an app update downloads only the shell delta. The build must contain exactly one such chunk.
 - **One chunk per game**, plus the chunks the build hoists out of them because several games share the code: `GameSceneBase`, `ChoiceRoundScene`, `GroupMathScene`, `dragJuice`, `dragBoard` and shared game logic such as `wordLogic`, `countLogic` and `shapeSorterLogic`. The shared bases do not ride in the shell.
 
-Measured from the current build, the shell entry is 186.4 kB as `validate-bundle.js` reports it (190.89 kB as Vite prints it) against the 200 kB gate, the Phaser chunk is 1335.0 kB, and the build emits 51 JavaScript chunks in all: the 24 game scenes, nine art-group chunks, the shared bases and logic, the Phaser vendor chunk, the workbox helper and the shell entry. Game chunks range from about 1.4 kB to about 40 kB, the largest being Story Order because it carries its own 90 panel drawings. `validate-bundle.js` prints these numbers on every build, so they can be re-measured rather than trusted from this document.
+Measured from the current build (2026-11-27), the shell entry is `index-BXMw_AwN.js` at 186.5 kB as `validate-bundle.js` reports it (190.97 kB as Vite prints it, 48.43 kB gzip) against the 200 kB gate, the Phaser chunk is 1335.0 kB, and the build emits 54 JavaScript chunks in all from 496 modules: the 24 game scenes, nine art-group chunks, the shared bases and logic, the Phaser vendor chunk, the workbox helper, the shell entry and the `parent-help-CO1457oM.js` Help chunk (19.38 kB, 7.35 kB gzip, split as the named `parent-help` group). The service worker precaches 66 entries (1890.52 KiB). Game chunks range from about 1.4 kB to about 40 kB, the largest being Story Order because it carries its own 90 panel drawings. `validate-bundle.js` prints these numbers on every build, so they can be re-measured rather than trusted from this document.
 
 ### 7.3 Art that travels with a game
 

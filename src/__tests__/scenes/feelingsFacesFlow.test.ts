@@ -243,6 +243,7 @@ describe("Feelings Faces hub entry", () => {
     const tiles = getRectangles(hub).filter((obj) =>
       getMockFn(obj.on).mock.calls.some((call) => call[0] === "pointerup"),
     );
+    fireAllObjectEvents(tiles[20], "pointerdown");
     fireAllObjectEvents(tiles[20], "pointerup");
     // The tile handler awaits the (mocked) lazy scene loader before transitioning.
     await new Promise((resolve) => setTimeout(resolve, 0));

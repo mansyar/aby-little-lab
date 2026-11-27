@@ -2,7 +2,7 @@
 description: Reviews a Conductor track diff for correctness, requirements coverage, and style. Read-only; returns structured findings.
 mode: subagent
 color: "#e0a800"
-model: opencode-go/hungerg-free
+model: opencode-go/muse-spark-1.3-contributor
 permissions:
   - action: "*"
     resource: "*"

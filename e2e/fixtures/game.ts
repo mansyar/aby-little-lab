@@ -1,6 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 import type {
   E2EFixItMachineState,
+  E2EHelpState,
   E2EHubGroups,
   E2EHubPlayTime,
   E2EHubToast,
@@ -116,6 +117,8 @@ export function settingsState(page: Page): Promise<E2ESettingsState> {
         toggles: [],
         progressRow: null,
         progress: null,
+        helpButton: null,
+        help: null,
         degraded: false,
         page: 0,
         switchPage: { x: 0, y: 0 },
@@ -129,6 +132,11 @@ export function settingsState(page: Page): Promise<E2ESettingsState> {
 /** The Learning Progress overlay as it is drawing it, or null while it is closed. */
 export function progressState(page: Page): Promise<E2EProgressState | null> {
   return page.evaluate(() => window.__abyE2E?.settings().progress ?? null);
+}
+
+/** The Parent Help overlay as it is drawing it, or null while it is closed. */
+export function helpState(page: Page): Promise<E2EHelpState | null> {
+  return page.evaluate(() => window.__abyE2E?.settings().help ?? null);
 }
 
 /** The hub's chip row and the selection it is filtering by. */
