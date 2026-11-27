@@ -13,7 +13,7 @@ import preloadSceneSource from "../../../scenes/PreloadScene.ts?raw";
 /**
  * Art ownership guard (FR-8, AC-4).
  *
- * The boot shell ships the 62-key shell set and nothing else: no module of the
+ * The boot shell ships the 64-key shell set and nothing else: no module of the
  * art registry, no SVG whose key belongs to a game group, no game-owned art
  * module. `storyOrderArt.test.ts` asserts the single-module case; this suite
  * states the rule for all 145 moved keys and for the Story Order panels.

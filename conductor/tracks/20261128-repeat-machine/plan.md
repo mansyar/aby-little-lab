@@ -78,5 +78,12 @@ Review fixes are appended by `conductor-review` as:
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 - **Status:** in_progress
 
-- [ ] **P3.T1: Sync docs** — covers: FR-8, AC-7
-  - [ ] **P3.T1.1:** PRD/TDD/changelog entries; README 24→25 with history unchanged.
+- [x] **P3.T1: Sync docs** — covers: FR-8, AC-7
+  - [x] **P3.T1.1:** PRD/TDD/changelog entries; README 24→25 with history unchanged.
+
+<!--
+Phase 3 acceptance (primary):
+**Result:** verified
+**Checkpoint:** <phase-3-commit>
+**Evidence:** conductor/tracks/20261128-repeat-machine/verification/phase-3.md (full gate green 164/3529, primary code tripwire fixes)
+-->

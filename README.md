@@ -1,6 +1,6 @@
 # Aby's Little Lab
 
-An ad-free, distraction-free developmental game suite for preschoolers aged 3-5. Twenty-four mini-games targeting cognitive, motor, literacy, numeracy, reasoning, social-emotional, and narrative-sequencing milestones, built with Phaser 4 + TypeScript + Vite as an installable PWA.
+An ad-free, distraction-free developmental game suite for preschoolers aged 3-5. Twenty-five mini-games targeting cognitive, motor, literacy, numeracy, reasoning, social-emotional, and narrative-sequencing milestones, built with Phaser 4 + TypeScript + Vite as an installable PWA.
 
 ## Tech Stack
 
@@ -48,18 +48,18 @@ pnpm test:coverage
 
 Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **3,529 tests across 164 files**, all green (verified 2026-11-28).
 
-Above the unit layer sits the browser journey suite. `pnpm test:e2e` builds `dist` and drives the full Chromium roster: 26 cases across 19 specs, including boot, all 24 launches, the mechanic families, sticker and persistence flows, the parental gate, backup/restore, offline relaunch and storage-failure recovery. It sees real hit areas on a letterboxed canvas, real storage and service-worker behaviour, and frame timing that happy-dom cannot model. Chromium deliberately ignores `e2e/smoke/**`, so smoke-only checks cannot silently enlarge the full suite.
+Above the unit layer sits the browser journey suite. `pnpm test:e2e` builds `dist` and drives the full Chromium roster: 29 cases across 21 specs, including boot, all 25 launches, the mechanic families, sticker and persistence flows, the parental gate, backup/restore, offline relaunch and storage-failure recovery. It sees real hit areas on a letterboxed canvas, real storage and service-worker behaviour, and frame timing that happy-dom cannot model. Chromium deliberately ignores `e2e/smoke/**`, so smoke-only checks cannot silently enlarge the full suite.
 
 The compatibility matrix keeps that full roster Chromium-only and gives the other engines a focused smoke:
 
 | Project | Role | Selection | Profile |
 | --- | --- | --- | --- |
-| `chromium` | Full regression suite | 28 cases / 20 specs; ignores `e2e/smoke/**` | Desktop Chromium, 1280×720 |
+| `chromium` | Full regression suite | 29 cases / 21 specs; ignores `e2e/smoke/**` | Desktop Chromium, 1280×720 |
 | `webkit` | Safari-engine proxy | 10 cases / 7 specs | Desktop WebKit, 1280×720 |
 | `firefox` | Firefox engine coverage | 10 cases / 7 specs | Desktop Firefox, 1280×720 |
 | `mobile-chromium` | Phone-shaped Chromium/touch proxy | 10 cases / 7 specs | 844×390, `isMobile: true`, `hasTouch: true` |
 
-The seven smoke files are `boot`, `launch-all`, `first-sounds`, `shape-sorter`, `offline`, `help` and `sticker-persistence`. Together they prove boot, the registry partition and all 24 launches/returns, three speech rounds, three drag rounds, an earned sticker surviving reload, offline Hub/game relaunch, and the parent Help walk. The 2026-11-27 Help journey passed 8/8 — both Help cases on Chromium, WebKit, Firefox and mobile Chromium — with unchanged save snapshots and zero retries. Dated local verification on 2026-11-25 recorded Playwright 1.65.1 with bundled Chromium 159.0.8154.6, Firefox 159.0 and WebKit 27.2. First-attempt results were Chromium 26/26 (3.8 min), WebKit 8/8 (1.8 min), Firefox 8/8 (2.1 min) and mobile Chromium 8/8 (2.3 min), all with zero retries. The track-PR CI run remains the authoritative release evidence.
+The seven smoke files are `boot`, `launch-all`, `first-sounds`, `shape-sorter`, `offline`, `help` and `sticker-persistence`. Together they prove boot, the registry partition and all 25 launches/returns, three speech rounds, three drag rounds, an earned sticker surviving reload, offline Hub/game relaunch, and the parent Help walk. The 2026-11-27 Help journey passed 8/8 — both Help cases on Chromium, WebKit, Firefox and mobile Chromium — with unchanged save snapshots and zero retries. Dated local verification on 2026-11-25 recorded Playwright 1.65.1 with bundled Chromium 159.0.8154.6, Firefox 159.0 and WebKit 27.2. First-attempt results were Chromium 26/26 (3.8 min), WebKit 8/8 (1.8 min), Firefox 8/8 (2.1 min) and mobile Chromium 8/8 (2.3 min), all with zero retries. The track-PR CI run remains the authoritative release evidence.
 
 Run a project locally with:
 
@@ -115,7 +115,7 @@ src/
 
 ## Mini-Games
 
-Twenty-four mini-games in hub order; each links to its spec in [PRD §3](docs/PRD.md#3-game-specifications).
+Twenty-five mini-games in hub order; each links to its spec in [PRD §3](docs/PRD.md#3-game-specifications).
 
 - [Shape Sorter](docs/PRD.md#31-shape-sorter) — cognitive reasoning and categorisation
 - [Animal Trace](docs/PRD.md#32-animal-trace) — fine motor precision and pre-writing
@@ -145,7 +145,7 @@ Twenty-four mini-games in hub order; each links to its spec in [PRD §3](docs/PR
 
 ## Parental Lock & Touch UX
 
-Settings access and every game's Back button are gated by a **hold-for-3-seconds** parental lock: a continuous press on a 96×96px target, a green ring filling from twelve o'clock, one hold at a time, and release, pointer-out or pointer-cancel leaving no partial state. The same 96px targets cover the replay glyph in all twenty-four games. Behind that hold sit the version footer, Reset Progress, Install, the profile manager and the play-time limits.
+Settings access and every game's Back button are gated by a **hold-for-3-seconds** parental lock: a continuous press on a 96×96px target, a green ring filling from twelve o'clock, one hold at a time, and release, pointer-out or pointer-cancel leaving no partial state. The same 96px targets cover the replay glyph in all twenty-five games. Behind that hold sit the version footer, Reset Progress, Install, the profile manager and the play-time limits.
 
 The parental **Learning Progress** panel opens on an Overview page rather than a game list: three plain sentences — how many games and days this week with the lifetime completion count, the overall accuracy with the strongest and hardest game, and the current streak with how often the daily cap was reached — above the seven-day activity strip. The per-game pages (plays, accuracy, looks — for a game that records search taps —, last played, mastery stars) sit one page behind, and everything is derived from the save file on the device, so no reading leaves it.
 
@@ -169,7 +169,7 @@ needs non-touch access or text alternatives. The decision record is
 
 ## Motion & Feedback
 
-One motion system drives the app: a 300ms crossfade into a 180ms fade-in on every navigation, the same ten-ray celebration in all twenty-four games with the sticker reveal ~400ms later, a 95% press squish with a `Back.out` settle, and reduced motion that shortens durations, drops particles and disables press feedback while gameplay stays whole. Narration owns the foreground: music ducks to 8% over a 120ms ramp, a 15s watchdog restores it, and a hidden document pauses music, speech and the play clock.
+One motion system drives the app: a 300ms crossfade into a 180ms fade-in on every navigation, the same ten-ray celebration in all twenty-five games with the sticker reveal ~400ms later, a 95% press squish with a `Back.out` settle, and reduced motion that shortens durations, drops particles and disables press feedback while gameplay stays whole. Narration owns the foreground: music ducks to 8% over a 120ms ramp, a 15s watchdog restores it, and a hidden document pauses music, speech and the play clock.
 
 Product rules: [PRD §5.6](docs/PRD.md#56-motion-and-feedback), [PRD §5.7](docs/PRD.md#57-reduced-motion), [PRD §6.4](docs/PRD.md#64-audio-focus). Implementation: [TDD §8.3](docs/TDD.md#83-background-music-ducking-and-the-watchdog), [TDD §9](docs/TDD.md#9-motion-and-feedback).
 
@@ -179,11 +179,11 @@ Every game shares one feedback language: a 95% press squish, the correct chime w
 
 ## Hub Experience
 
-The Hub is twenty-four storybook tiles, each a 64px icon above a small text label with a sticker shelf beneath, entering in a 40ms stagger and breathing while idle (a gentle 2.5% scale pulse, not a vertical bob); after ~25s without input two tiles wiggle to a two-note chime that repeats every ~10s. The avatar chip switches profile without a PIN, and the play-time arc, hourglass nudge and moon badge follow the active limit and refresh on every switch.
+The Hub is twenty-five storybook tiles, each a 64px icon above a small text label with a sticker shelf beneath, entering in a 40ms stagger and breathing while idle (a gentle 2.5% scale pulse, not a vertical bob); after ~25s without input two tiles wiggle to a two-note chime that repeats every ~10s. The avatar chip switches profile without a PIN, and the play-time arc, hourglass nudge and moon badge follow the active limit and refresh on every switch.
 
 Each new visit gives Professor Hoot a textless suggestion — a gentle ring pointing at one game — and spotlights one already-earned sticker on the shelf; the suggestion and the two idle-wiggling tiles avoid the games just played or suggested and reset when the child switches profile, while the spotlight advances one earned sticker per visit in registry order with wrap-around — re-derived per profile, with its cursor resuming for that profile — and falls back to one empty slot when none are earned.
 
-Six chips in the top band — All, Letters, Numbers, Thinking, Play and Stories — filter that board: a chip tap redraws it as that group's own games at 176×196 (three columns, every row centred), tapping All restores the 24-tile board byte-for-byte, and each tap also speaks the group's name. Choosing a group is a layout filter and nothing else: every game keeps its registry entry, sticker and place on the All board, the selection resets to All on the next visit and is never stored, so a child always lands on the familiar grid and reaches any game in at most two taps — the chip, then the game.
+Six chips in the top band — All, Letters, Numbers, Thinking, Play and Stories — filter that board: a chip tap redraws it as that group's own games at 176×196 (three columns, every row centred), tapping All restores the 25-tile board byte-for-byte, and each tap also speaks the group's name. Choosing a group is a layout filter and nothing else: every game keeps its registry entry, sticker and place on the All board, the selection resets to All on the next visit and is never stored, so a child always lands on the familiar grid and reaches any game in at most two taps — the chip, then the game.
 
 Product rules: [PRD §1.5](docs/PRD.md#15-session-flow), [PRD §4.4](docs/PRD.md#44-stickers), [PRD §4.6](docs/PRD.md#46-play-time-limits), [PRD §5.6](docs/PRD.md#56-motion-and-feedback). Implementation: [TDD §5.6](docs/TDD.md#56-profilechip-and-playtimeindicator), [TDD §7.1](docs/TDD.md#71-the-module-list).
 
@@ -207,7 +207,7 @@ Product rules: [PRD §1.4](docs/PRD.md#14-platforms-install-and-offline), [PRD �
 
 ## Bundle Code Splitting (2026-08-02)
 
-Only Boot, Preload and Hub load at startup; the other twenty-four scenes arrive through `ensureSceneLoaded()` on a tile tap, ahead of the crossfade, and each game's art rides its own chunk. Build output (shell and chunk figures re-measured 2026-11-27): a 190.97 kB `index-BXMw_AwN.js` shell entry as Vite prints it (48.43 kB gzip; 186.5 kB via `validate-bundle`) against the 200 kB gate and 54 JavaScript chunks from 496 modules, including the `parent-help-CO1457oM.js` Help chunk (19.38 kB / 7.35 kB gzip); the service worker precaches 66 entries (1890.52 KiB). Cold boot was 419.5 ms on 2026-10-20 against the 3 s gate; the 2026-10-22 re-measurement returned medians of 1392 / 1132 / 1115 ms, and this track's boot smoke check the same day returned a 1.25 s median — every run inside the gate, on a host roughly 3× slower than the 2026-10-20 one. Cold first tap: the 82 ms recorded on 2026-10-20 is the increment the lazy-art change added over a built pre-track baseline (`f377bf8`) — the quantity the 400 ms budget was set against, and met on that basis — not an absolute cost. The absolute cold-first-tap measurement on 2026-10-22 put the median across five games at 351–392 ms and the worst game at 462–640 ms on this host, so the 400 ms budget is not demonstrated by that measurement; [`docs/perf-baseline.md`](docs/perf-baseline.md) keeps the per-run numbers.
+Only Boot, Preload and Hub load at startup; the other twenty-five scenes arrive through `ensureSceneLoaded()` on a tile tap, ahead of the crossfade, and each game's art rides its own chunk. Build output (shell and chunk figures re-measured 2026-11-27): a 190.97 kB `index-BXMw_AwN.js` shell entry as Vite prints it (48.43 kB gzip; 186.5 kB via `validate-bundle`) against the 200 kB gate and 54 JavaScript chunks from 496 modules, including the `parent-help-CO1457oM.js` Help chunk (19.38 kB / 7.35 kB gzip); the service worker precaches 66 entries (1890.52 KiB). Cold boot was 419.5 ms on 2026-10-20 against the 3 s gate; the 2026-10-22 re-measurement returned medians of 1392 / 1132 / 1115 ms, and this track's boot smoke check the same day returned a 1.25 s median — every run inside the gate, on a host roughly 3× slower than the 2026-10-20 one. Cold first tap: the 82 ms recorded on 2026-10-20 is the increment the lazy-art change added over a built pre-track baseline (`f377bf8`) — the quantity the 400 ms budget was set against, and met on that basis — not an absolute cost. The absolute cold-first-tap measurement on 2026-10-22 put the median across five games at 351–392 ms and the worst game at 462–640 ms on this host, so the 400 ms budget is not demonstrated by that measurement; [`docs/perf-baseline.md`](docs/perf-baseline.md) keeps the per-run numbers.
 
 Product rules: [PRD §4.1](docs/PRD.md#41-shared-scene-bases-and-lazy-loading), [PRD §7](docs/PRD.md#7-performance-and-asset-budget). Implementation, measurements and art ownership: [TDD §3.5](docs/TDD.md#35-in-chunk-art), [TDD §3.6](docs/TDD.md#36-what-the-budget-costs).
 

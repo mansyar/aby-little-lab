@@ -112,8 +112,9 @@ export function destroyPageGrid(grid: HubGrid): void {
 }
 
 /**
- * Builds the 6x4 wide grid — rows 6/6/6/4 over 22 tiles at 144px, for
- * desktop and tablet viewports.
+ * Builds the 6x4 wide grid — rows 6/6/6/6 over the first 24 tiles at 144px, for
+ * desktop and tablet viewports. The 25th tile falls on a fifth row below the
+ * fold and is reached through the Thinking chip filter.
  */
 export function buildWideGrid(grid: HubGrid): void {
   const scene = grid.deps.scene;

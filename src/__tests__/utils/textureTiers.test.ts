@@ -49,7 +49,7 @@ const GROUPS: readonly ArtGroup[] = [
 /** Every key the app can ask for: the shell's set plus every group's. */
 const APP_ASSETS = [...SHELL_ASSETS, ...GROUPS.flatMap((group) => group.assets)];
 
-/** The 207 distinct keys behind `APP_ASSETS` (the six avatars appear in both). */
+/** The 209 distinct keys behind `APP_ASSETS` (the six avatars appear in both). */
 const APP_ASSET_COUNT = 209;
 
 describe("textureSizeFor tier mapping", () => {

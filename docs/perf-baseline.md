@@ -1003,17 +1003,17 @@ half did. Details in TDD §10.5.
 ## Texture budget re-baseline — content-depth_20261121 — 2026-11-21
 
 **This note supersedes the 39/178 MiB figures on line 206 after pool expansion.** The 2026-10-17
-measurement covers 170 SVGs; the shipped tree now has 319 after the word, shape, story and
-scenario pools grew. The absolute caps are re-baselined to the measured tree with small round-number
+measurement covers 170 SVGs; the shipped tree now has 321 after the word, shape, story,
+scenario and repeat-machine tile pools grew. The absolute caps are re-baselined to the measured tree with small round-number
 headroom; the structural ratio check is the real anti-bloat guard and must never regress.
 
 | Measurement | Value | Source |
 | --- | --- | --- |
-| Shipped SVG files | 319 (34 icon / 283 card / 2 hero by `textureTiers.ts` rules) | `node scripts/validate-textures.js` |
-| Typical tiered GPU bytes | **76.07 MiB** (cap **80 MiB**) | `node scripts/validate-textures.js` |
-| Full uniform 512² bytes | **319.00 MiB** (cap **320 MiB**) | `node scripts/validate-textures.js` |
+| Shipped SVG files | 321 (35 icon / 284 card / 2 hero by `textureTiers.ts` rules) | `node scripts/validate-textures.js` |
+| Typical tiered GPU bytes | **76.42 MiB** (cap **80 MiB**) | `node scripts/validate-textures.js` |
+| Full uniform 512² bytes | **321.00 MiB** (cap **322 MiB**) | `node scripts/validate-textures.js` |
 | Tier ratio (typical / full) | **0.238** (hard cap **0.5**) | `node scripts/validate-textures.js` |
-| Unit suite after this track (current living value, verified 2026-11-27) | 164 files / 3,529 tests | `pnpm exec vitest run` |
+| Unit suite after this track (current living value, verified 2026-11-28) | 164 files / 3,529 tests | `pnpm test -- --run` |
 
 `scripts/validate-textures.js` enumerates every `src/assets/svg/**/*.svg`, resolves each key's tier
 with the same ordered prefix rules as `src/utils/textureTiers.ts` (`tile_`, `group_`, `sm_shadow_`,
