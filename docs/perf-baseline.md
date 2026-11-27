@@ -1,8 +1,52 @@
 # Performance Baseline — Boot-Time Asset Profiling
 
-> **Live figures — refreshed 2026-11-27.** The figures here describe the current tree: Vite 8.3.8 built 493 modules; shell entry `index-ljU3tdMP.js` is 196.3 kB via `validate-bundle` (200.98 kB as Vite prints it, 51.50 kB gzip), with **53** JavaScript chunks and **65** PWA precache entries (1880.45 KiB). The suite is 159 test files / 3,454 tests across 97.12 % statements, 91.05 % branches, 96.4 % functions and 98.25 % lines across repeated identical runs. The current release-candidate browser matrix is green locally with zero retries across the full Chromium journey suite and the WebKit, Firefox and mobile Chromium smoke projects; the earlier 2026-11-16 Chromium-only record remains history. The first-tap verdict was remeasured on 2026-11-26: 50 cold / 0 warm headed cold-control samples, aggregate cold p95 response / finished / total 58.4 / 37.6 / 332.3 ms, cold median total 235.4 ms, and worst cold total 383.8 ms (Memory Match), all inside the unchanged 400 ms gate; see [First-tap p95 baseline after the Word Match fix (2026-11-24)](#first-tap-p95-baseline-after-the-word-match-fix-2026-11-24) for the earlier baseline. Historical sections retain their dated build, coverage, browser and first-tap figures. The four suite-count rows explicitly labeled as current living values were refreshed on 2026-11-27 for docs truth, not taken from those dated sessions. Where a historical figure disagrees with this header, the header is current truth and the record is history.
+> **Live figures — refreshed 2026-11-27.** The figures here describe the current tree at final Phase 3 checkpoint `74c1618e`; the heavy measurements were taken at pre-squash snapshot `65fe7286f0b0e37493268c0e299c469d47129211`, whose runtime/package bytes are identical (later changes were documentation/evidence only): Vite 8.3.8 built 493 modules; shell entry `index-DF9s1m1B.js` is 196.3 kB via `validate-bundle` (200.98 kB as Vite prints it, 51.54 kB gzip), with **53** JavaScript chunks and **65** PWA precache entries (1880.45 KiB). The suite is 159 test files / 3,454 tests across 97.11 % statements, 91.01 % branches, 96.4 % functions and 98.25 % lines. The current release-candidate browser matrix is green locally with zero first-attempt retries: 50/50 passes across Chromium (26), WebKit (8), Firefox (8) and mobile Chromium (8); the earlier 2026-11-16 Chromium-only record remains history. The first-tap verdict was remeasured on 2026-11-27: 50 cold / 0 warm headed cold-control samples, aggregate cold p95 response / finished / total 78.5 / 61.1 / 256.4 ms, cold median total 190.8 ms, and worst cold total 283.8 ms (Add It Up), all inside the unchanged 400 ms gate; see [v1.27.0 release candidate (2026-11-27)](#v1270-release-candidate-2026-11-27) for this run and [First-tap p95 baseline after the Word Match fix (2026-11-24)](#first-tap-p95-baseline-after-the-word-match-fix-2026-11-24) for the earlier baseline. Historical sections retain their dated build, coverage, browser and first-tap figures. The four suite-count rows explicitly labeled as current living values were refreshed on 2026-11-27 for docs truth, not taken from those dated sessions. Where a historical figure disagrees with this header, the header is current truth and the record is history.
 >
 > The standing debts live in the README's Known Issues, and the planned work behind these numbers lives in [`conductor/roadmap.md` §10](../conductor/roadmap.md#10-roadmap).
+
+## v1.27.0 release candidate (2026-11-27)
+
+Track `20261127-release-v1-27-0`, Phase 3. Measured pre-squash candidate head
+`65fe7286f0b0e37493268c0e299c469d47129211`; final checkpoint `74c1618e` has
+identical runtime/package bytes. The exact Windows PowerShell
+headed cold-control command was:
+
+```sh
+$env:TAP_HEADED='1'; $env:TAP_INERT_IDLE='1'; node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10
+```
+
+Boundary and result: exit **0**, **50 cold / 0 warm** samples, exactly 10 per
+unchanged five-game target, every worst cold total **≤400 ms**. P95 is
+report-only; no headless or warm-only data was substituted.
+
+| Measurement | Result |
+| --- | ---: |
+| Aggregate cold p95 response | 78.5 ms |
+| Aggregate cold p95 finished | 61.1 ms |
+| Aggregate cold p95 total | 256.4 ms |
+| Cold median total | 190.8 ms |
+| Worst cold total | 283.8 ms (Add It Up) |
+| `validate-boot` exit | 0 |
+| `validate-boot` samples / median | 766 / 377 / 397 ms, median 0.40 s |
+| In-script boot samples / median | 559 / 512 / 459 ms, median 0.51 s |
+| Unthrottled boot median | 418.6 ms |
+| 4×-throttled boot median | 1286.6 ms |
+
+| Game | Samples | p95 response | p95 finished | p95 total |
+| --- | ---: | ---: | ---: | ---: |
+| Shape Sorter | 10 | 67.6 ms | 59.8 ms | 225.9 ms |
+| Find the Letter | 10 | 63.7 ms | 56.8 ms | 218.6 ms |
+| Find the Word | 10 | 85.7 ms | 62.2 ms | 262.0 ms |
+| Add It Up | 10 | 78.5 ms | 63.6 ms | 283.8 ms |
+| Memory Match | 10 | 46.2 ms | 33.3 ms | 185.5 ms |
+
+Raw evidence:
+`conductor/tracks/20261127-release-v1-27-0/verification/first-tap-headed.json` and
+`conductor/tracks/20261127-release-v1-27-0/verification/first-tap-headed.stdout.log`.
+Evidence paths are given in code form; clickable archived evidence links are
+finalized after archival/ship. This is local headed Chromium evidence; physical
+iOS Safari, Android Chrome and Fire tablet coverage remains a ship-time gate, and
+the current adaptive-band spread is not longitudinal band-movement evidence.
 
 ## First-tap p95 baseline after the Word Match fix (2026-11-24)
 

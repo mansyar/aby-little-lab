@@ -1,6 +1,6 @@
 # Aby's Little Lab
 
-An ad-free, distraction-free developmental game suite for preschoolers aged 3-5. Twenty-two mini-games targeting cognitive, motor, literacy, numeracy, reasoning, social-emotional, and narrative-sequencing milestones, built with Phaser 4 + TypeScript + Vite as an installable PWA.
+An ad-free, distraction-free developmental game suite for preschoolers aged 3-5. Twenty-four mini-games targeting cognitive, motor, literacy, numeracy, reasoning, social-emotional, and narrative-sequencing milestones, built with Phaser 4 + TypeScript + Vite as an installable PWA.
 
 ## Tech Stack
 
@@ -115,7 +115,7 @@ src/
 
 ## Mini-Games
 
-Twenty-two mini-games in hub order; each links to its spec in [PRD §3](docs/PRD.md#3-game-specifications).
+Twenty-four mini-games in hub order; each links to its spec in [PRD §3](docs/PRD.md#3-game-specifications).
 
 - [Shape Sorter](docs/PRD.md#31-shape-sorter) — cognitive reasoning and categorisation
 - [Animal Trace](docs/PRD.md#32-animal-trace) — fine motor precision and pre-writing
@@ -180,7 +180,7 @@ The Hub is twenty-four storybook tiles, each a 64px icon above a small text labe
 
 Each new visit gives Professor Hoot a textless suggestion — a gentle ring pointing at one game — and spotlights one already-earned sticker on the shelf; the suggestion and the two idle-wiggling tiles avoid the games just played or suggested and reset when the child switches profile, while the spotlight advances one earned sticker per visit in registry order with wrap-around — re-derived per profile, with its cursor resuming for that profile — and falls back to one empty slot when none are earned.
 
-Six chips in the top band — All, Letters, Numbers, Thinking, Play and Stories — filter that board: a chip tap redraws it as that group's own games at 176×196 (three columns, every row centred), tapping All restores the 23-tile board byte-for-byte, and each tap also speaks the group's name. Choosing a group is a layout filter and nothing else: every game keeps its registry entry, sticker and place on the All board, the selection resets to All on the next visit and is never stored, so a child always lands on the familiar grid and reaches any game in at most two taps — the chip, then the game.
+Six chips in the top band — All, Letters, Numbers, Thinking, Play and Stories — filter that board: a chip tap redraws it as that group's own games at 176×196 (three columns, every row centred), tapping All restores the 24-tile board byte-for-byte, and each tap also speaks the group's name. Choosing a group is a layout filter and nothing else: every game keeps its registry entry, sticker and place on the All board, the selection resets to All on the next visit and is never stored, so a child always lands on the familiar grid and reaches any game in at most two taps — the chip, then the game.
 
 Product rules: [PRD §1.5](docs/PRD.md#15-session-flow), [PRD §4.4](docs/PRD.md#44-stickers), [PRD §4.6](docs/PRD.md#46-play-time-limits), [PRD §5.6](docs/PRD.md#56-motion-and-feedback). Implementation: [TDD §5.6](docs/TDD.md#56-profilechip-and-playtimeindicator), [TDD §7.1](docs/TDD.md#71-the-module-list).
 
@@ -204,7 +204,7 @@ Product rules: [PRD §1.4](docs/PRD.md#14-platforms-install-and-offline), [PRD �
 
 ## Bundle Code Splitting (2026-08-02)
 
-Only Boot, Preload and Hub load at startup; the other twenty-four scenes arrive through `ensureSceneLoaded()` on a tile tap, ahead of the crossfade, and each game's art rides its own chunk. Build output (shell and chunk figures re-measured 2026-11-27): a 196.3 kB shell entry (51.50 kB gzip, 200.98 kB as Vite prints it) against the 200 kB gate and 53 JavaScript chunks. Cold boot was 419.5 ms on 2026-10-20 against the 3 s gate; the 2026-10-22 re-measurement returned medians of 1392 / 1132 / 1115 ms, and this track's boot smoke check the same day returned a 1.25 s median — every run inside the gate, on a host roughly 3× slower than the 2026-10-20 one. Cold first tap: the 82 ms recorded on 2026-10-20 is the increment the lazy-art change added over a built pre-track baseline (`f377bf8`) — the quantity the 400 ms budget was set against, and met on that basis — not an absolute cost. The absolute cold-first-tap measurement on 2026-10-22 put the median across five games at 351–392 ms and the worst game at 462–640 ms on this host, so the 400 ms budget is not demonstrated by that measurement; [`docs/perf-baseline.md`](docs/perf-baseline.md) keeps the per-run numbers.
+Only Boot, Preload and Hub load at startup; the other twenty-four scenes arrive through `ensureSceneLoaded()` on a tile tap, ahead of the crossfade, and each game's art rides its own chunk. Build output (shell and chunk figures re-measured 2026-11-27): a 196.3 kB shell entry (51.54 kB gzip, 200.98 kB as Vite prints it) against the 200 kB gate and 53 JavaScript chunks. Cold boot was 419.5 ms on 2026-10-20 against the 3 s gate; the 2026-10-22 re-measurement returned medians of 1392 / 1132 / 1115 ms, and this track's boot smoke check the same day returned a 1.25 s median — every run inside the gate, on a host roughly 3× slower than the 2026-10-20 one. Cold first tap: the 82 ms recorded on 2026-10-20 is the increment the lazy-art change added over a built pre-track baseline (`f377bf8`) — the quantity the 400 ms budget was set against, and met on that basis — not an absolute cost. The absolute cold-first-tap measurement on 2026-10-22 put the median across five games at 351–392 ms and the worst game at 462–640 ms on this host, so the 400 ms budget is not demonstrated by that measurement; [`docs/perf-baseline.md`](docs/perf-baseline.md) keeps the per-run numbers.
 
 Product rules: [PRD §4.1](docs/PRD.md#41-shared-scene-bases-and-lazy-loading), [PRD §7](docs/PRD.md#7-performance-and-asset-budget). Implementation, measurements and art ownership: [TDD §3.5](docs/TDD.md#35-in-chunk-art), [TDD §3.6](docs/TDD.md#36-what-the-budget-costs).
 
@@ -235,6 +235,7 @@ One-time setup: a Coolify API token with the `deploy` permission, the app's Depl
 
 | Version | Date | Highlights | Tag |
 |---|---|---|---|
+| **v1.27.0** | 2026-11-27 | Four PRs since v1.26.1: #104 signature content variants reach Word Match, Story Order, Shape Sorter and Feelings Faces playthroughs with full-pool fallbacks, and #105 the Progress Overview shows the current adaptive-band spread (a snapshot, not longitudinal movement). Also two internal, unexecuted documentation PRs: #102 retention validation protocol and #103 blank retention pilot pack. Tag, deploy and device results pending. [Release notes](docs/release-notes-v1.27.0.md) | `v1.27.0` (pending) |
 | **v1.26.1** | 2026-11-26 | One PR since v1.26.0: #100 browser compatibility matrix - WebKit, Firefox and mobile Chromium/touch smoke on each code PR, a blocking `Browser Journeys` rollup so one red engine cannot hide behind green siblings, and a strict evidence helper that rejects retried, flaky, skipped, unexpected or wrong-project reports; plus three smoke-proven portability fixes (guarded `AudioContext` for WebKit, shared texture reservation/release for Firefox, and a state-based long-hold wait for high-refresh devices). Emulated CI engines, not physical-device coverage. [Release notes](docs/release-notes-v1.26.1.md) | `v1.26.1` |
 | **v1.26.0** | 2026-11-25 | Five PRs since v1.25.0: #94 replay novelty (textless Hub suggestions, idle wiggles and a per-visit earned-sticker spotlight), #95 adaptive-difficulty retuning with a parent band readout, #96 November dependency maintenance, #97 Find the Word cold first-tap fix, and #98 headed first-tap p95 evidence with a per-release refresh procedure. [Release notes](docs/release-notes-v1.26.0.md) | `v1.26.0` |
 | **v1.25.0** | 2026-11-23 | One feature track merged since v1.24.0: Content Depth doubles the core learning pools (60 words, 30 stories / 90 panels, 48 scenarios, 24 shapes + cut-outs, two variants each, no repeats per play) with a texture budget guard, plus the strict 400-line module-size guard and a single verbatim changelog. [Release notes](docs/release-notes-v1.25.0.md) | `v1.25.0` |
@@ -284,6 +285,7 @@ Release mechanics: bump `package.json` → tag `vX.Y.Z` → push to `master` (CI
 - [perf-baseline.md](docs/perf-baseline.md) - The measured boot, bundle and first-tap budgets
 - [changelog.md](docs/changelog.md) - Dated changelog entries moved verbatim from the Conductor docs
 - [SVG_STYLE.md](docs/SVG_STYLE.md) - The art style every SVG asset is drawn in
+- [release-notes-v1.27.0.md](docs/release-notes-v1.27.0.md) - v1.27.0 release notes (DRAFT: content variants in play and the current adaptive-band spread; retention protocol/pilot pack unexecuted; tag, deploy and device results pending)
 - [release-notes-v1.26.1.md](docs/release-notes-v1.26.1.md) - v1.26.1 release notes (browser compatibility matrix and three portability fixes; CI, deploy and live build verified; physical-device smoke recorded as an accepted gap)
 - [release-notes-v1.26.0.md](docs/release-notes-v1.26.0.md) - v1.26.0 release notes (five shipped PRs; release CI and deployment verified; physical-device smoke recorded as an accepted gap)
 - [release-notes-v1.25.0.md](docs/release-notes-v1.25.0.md) - v1.25.0 release notes (Content Depth plus the two P6 housekeeping items)
