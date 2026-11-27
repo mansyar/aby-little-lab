@@ -84,6 +84,6 @@ Review fixes are appended by `conductor-review` as:
 <!--
 Phase 3 acceptance (primary):
 **Result:** verified
-**Checkpoint:** <phase-3-commit>
+**Checkpoint:** a1fa6a59
 **Evidence:** conductor/tracks/20261128-repeat-machine/verification/phase-3.md (full gate green 164/3529, primary code tripwire fixes)
 -->
