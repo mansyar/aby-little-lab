@@ -5,7 +5,7 @@
 - **Date:** 2026-11-27
 - **Branch:** `chore/20261127-release-v1-27-0`
 - **Phase base:** `fdaaa8ec262d1ebda89d1b307d8f8245c493c035`
-- **Actual candidate head:** `65fe7286f0b0e37493268c0e299c469d47129211`
+- **Measured pre-squash candidate head:** `65fe7286f0b0e37493268c0e299c469d47129211` — runtime/package-identical to final Phase 3 checkpoint `74c1618e`; later changes were documentation/evidence only.
 - **Result:** **verified** — the exact configured gate, frozen install, boot, container/headers, headed first tap, full browser matrix and CRLF-aware whitespace check all passed on the final candidate head above.
 
 ## Remaining gates
@@ -28,7 +28,7 @@ Every configured command was run exactly as written, with no retries, substituti
 | Setup / dependency truth | `pnpm install --frozen-lockfile` | 0 | Lockfile up to date, resolution skipped, supply-chain policy verified; no drift. `.conductor/evidence/phase-3/frozen-install.log`. |
 | Smoke server | `node node_modules/vite/bin/vite.js preview --port 4173 --strictPort` | started | Served `http://localhost:4173/` on the fixed port; listener stopped and port confirmed free before the first-tap run. |
 | Smoke | `node scripts/validate-boot.js` | 0 | 766 / 377 / 397 ms samples; median **0.40 s** ≤ 3.0 s budget. `.conductor/evidence/phase-3/boot.log`. |
-| Container | `docker build --build-arg GIT_SHA=65fe7286f0b0e37493268c0e299c469d47129211 -t aby-little-lab:headers .` | 0 | Candidate image built at the actual candidate head. `.conductor/evidence/phase-3/docker-build.log`. |
+| Container | `docker build --build-arg GIT_SHA=65fe7286f0b0e37493268c0e299c469d47129211 -t aby-little-lab:headers .` | 0 | Candidate image built at the measured pre-squash head; runtime/package bytes are identical to final checkpoint `74c1618e`. `.conductor/evidence/phase-3/docker-build.log`. |
 | Strict headers | `node scripts/validate-headers.js` | 0 | **28 passed / 0 failed** across the observed route matrix. `.conductor/evidence/phase-3/headers.log`. The missing-hash immutable-404 behaviour is a pre-existing, already recorded quirk, not a new failure. |
 | First tap | `$env:TAP_HEADED='1'; $env:TAP_INERT_IDLE='1'; node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10` | 0 | Headed cold control: **50 cold / 0 warm**, exactly 10 per game. Aggregate cold p95 response / finished / total 78.5 / 61.1 / 256.4 ms; cold median total 190.8 ms; worst cold total **283.8 ms (Add It Up)** ≤ 400 ms. Raw stdout `.conductor/evidence/phase-3/first-tap.stdout.log`; committed raw JSON `verification/first-tap-headed.json` and stdout `verification/first-tap-headed.stdout.log`. |
 | Browser roster | `pnpm exec playwright test --list` | 0 | 50 tests in 20 files: Chromium 26, WebKit 8, Firefox 8, mobile Chromium 8. `.conductor/evidence/phase-3/browser-roster.txt`, `.conductor/evidence/phase-3/list.log`. |
@@ -55,7 +55,7 @@ Every configured command was run exactly as written, with no retries, substituti
 | Browser roster | 50 tests / 20 files: Chromium 26, WebKit 8, Firefox 8, mobile Chromium 8 |
 | Browser first-attempt counts | Chromium 26/26, WebKit 8/8, Firefox 8/8, mobile Chromium 8/8; 50/50 total, zero retries, run sequentially |
 
-No figure above is inherited from an earlier phase or release; every one comes from the final candidate head `65fe7286f0b0e37493268c0e299c469d47129211`. Historical release notes and dated perf sections retain their original figures verbatim.
+No figure above is inherited from an earlier phase or release; every one comes from the measured pre-squash candidate snapshot `65fe7286f0b0e37493268c0e299c469d47129211`. Final checkpoint `74c1618e` differs only in documentation/evidence and has identical runtime/package bytes. Historical release notes and dated perf sections retain their original figures verbatim.
 
 ## Acceptance criteria
 
@@ -109,7 +109,7 @@ Local results here are local evidence only. The four browser projects are emulat
 
 - **Verdict:** accepted for Phase 3 and integrated release-candidate verification.
 - **Final evidence head before squash:** `5cc6c1247b24740a173d42fb0c7fd041047e11ca`.
-- **Executor commits:** `65fe7286`, `33d060fb`, `5cc6c124`; all reported, no merge or unrelated commit in the phase range.
+- **Executor commits:** `65fe7286`, `33d060fb`, `5cc6c124` (pre-squash provenance SHAs, retained as evidence rather than final branch history); all reported, no merge or unrelated commit in the phase range.
 - **Scope:** the final phase diff contains exactly `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `docs/release-notes-v1.27.0.md`, `verification/integrated.md`, `verification/first-tap-headed.json`, and `verification/first-tap-headed.stdout.log`. No runtime source, test, asset, dependency, lockfile, schema, storage or network file changed.
 - **Archive safety:** all live `conductor/tracks/20261127-release-v1-27-0/verification/` Markdown links were removed from the release notes and perf baseline before archival. Clickable archive links are deferred to ship-time finalization.
 - **Post-finalization exact gate:** exit 0; Biome 378 files; app/E2E TypeScript clean; Vitest 159 files / 3,454 tests; coverage 97.12 % statements / 91.05 % branches / 96.4 % functions / 98.25 % lines; Vite 493 modules; shell `index-DF9s1m1B.js` 196.3 kB / 51.54 kB gzip; module-size zero warnings; textures pass; PWA 16/0; docs 5/0. Raw output: `.conductor/evidence/phase-3/full-gate-final.log`.
