@@ -8,7 +8,8 @@
  * budget after the content-depth pool expansion:
  *   1. typical tiered bytes (34 icon / 277 card / 2 hero on the shipped tree)
  *      stay within the re-baselined 80 MiB cap;
- *   2. full uniform 512² bytes stay within the re-baselined 320 MiB cap;
+ *   2. full uniform 512² bytes stay within the re-baselined 322 MiB cap (320 + 2 for
+ *      the 25th game's unique tile/sticker keys; each SVG is 1 MiB uniform);
  *   3. tiering still buys at least a 2x saving (typical/full <= 0.5).
  *
  * The structural ratio is the real anti-bloat guard: the absolute caps are
@@ -40,7 +41,7 @@ const TIER_RULES = [
   [/^mascot_/, "hero"],
 ];
 const TYPICAL_CAP_MIB = 80;
-const FULL_CAP_MIB = 320;
+const FULL_CAP_MIB = 322;
 const RATIO_CAP = 0.5;
 
 function tierForKey(key) {
