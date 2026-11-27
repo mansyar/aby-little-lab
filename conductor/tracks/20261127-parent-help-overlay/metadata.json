@@ -6,7 +6,7 @@
   "priority": "medium",
   "depends_on": [],
   "created_at": "2026-11-27T19:23:46+11:00",
-  "updated_at": "2026-11-28T01:16:31+11:00",
+  "updated_at": "2026-11-28T01:42:47+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "feat/20261127-parent-help-overlay",
@@ -14,11 +14,11 @@
   "base_sha": "f96979fca6fc0a08335cb83bd91fb8d3085875a3",
   "progress": {
     "phases_total": 4,
-    "phases_verified": 3,
+    "phases_verified": 4,
     "tasks_total": 23,
-    "tasks_done": 16
+    "tasks_done": 19
   },
-  "last_checkpoint": "d1db4cb18e7f04abe324aa46043f8d7bf86edd80",
+  "last_checkpoint": "d9f450d4cf7aefa5d085aa34e704556ecaf121cf",
   "review_verdict": "BLOCK",
   "review_rounds": 1,
   "doc_sync": "pending",
