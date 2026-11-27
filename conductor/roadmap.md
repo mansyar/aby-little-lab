@@ -24,7 +24,6 @@
 
 | id | title | type | priority | depends_on | track | origin |
 | --- | --- | --- | --- | --- | --- | --- |
-| RM-11 | Fix wide hub grid overflow with 25th game tile | bug | medium | 20261128-repeat-machine | — | review:20261128-repeat-machine |
 | RM-12 | Relocate chip band clear of the wide grid's fifth row | chore | medium | 20261128-wide-hub-grid-overflow | — | implement:20261128-wide-hub-grid-overflow |
 
 ## Later
