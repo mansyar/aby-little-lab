@@ -95,4 +95,4 @@ DRAFT already satisfies the phase's truth boundaries.
 - **Independent gate:** `node scripts/validate-docs.js` exited 0 with 5 passed / 0 failed. The executor's exact ten-command gate and CRLF-aware whitespace check were independently run by the primary and passed as recorded above.
 - **Acceptance criteria:** the new release row is newest-first, linked and truthful; current game and tile counts are 24; DRAFT/tag/deploy/device/retention/longitudinal claims remain correctly pending; historical rows and notes are unchanged.
 - **Deviations:** none.
-- **Checkpoint:** recorded after the squash.
+- **Checkpoint:** `a626fca1` (recorded after squash).

@@ -41,26 +41,23 @@
 - **Covers:** FR-2, FR-3, FR-4, NFR-3, NFR-4, AC-2, AC-3, AC-11
 - **Touches:** `README.md`, `docs/release-notes-v1.27.0.md`, `conductor/tracks/20261127-release-v1-27-0/verification/phase-2.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; targeted README count/link inspection; `git -c core.whitespace=cr-at-eol diff --check`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Add the README release-table row** — covers: FR-3, AC-3
-  - [ ] **P2.T1.1: Add a newest-first `v1.27.0` row dated 2026-11-27 with the notes link.**
-  - [ ] **P2.T1.2: Summarize all four PRs, leading with #104/#105 and labeling #102/#103 internal.**
-- [ ] **P2.T2: Correct current game-count wording** — covers: FR-3, AC-3
-  - [ ] **P2.T2.1: Change “Twenty-two mini-games” and the Mini-Games heading to twenty-four.**
-  - [ ] **P2.T2.2: Change the Hub “23-tile board” wording to 24 tiles.**
-- [ ] **P2.T3: Validate release truth and preserve history** — covers: FR-2, FR-3, FR-4, NFR-4, AC-2, AC-3, AC-11
-  - [ ] **P2.T3.1: Verify README links and anchors resolve.**
-  - [ ] **P2.T3.2: Preserve historical release rows, notes and evidence verbatim.**
-- [ ] **P2.T4: Record phase evidence** — covers: NFR-3, NFR-4
-  - [ ] **P2.T4.1: Save gate, validator, scope and whitespace evidence in `verification/phase-2.md`.**
+- [x] **P2.T1: Add the README release-table row** — covers: FR-3, AC-3
+  - [x] **P2.T1.1: Add a newest-first `v1.27.0` row dated 2026-11-27 with the notes link.**
+  - [x] **P2.T1.2: Summarize all four PRs, leading with #104/#105 and labeling #102/#103 internal.**
+- [x] **P2.T2: Correct current game-count wording** — covers: FR-3, AC-3
+  - [x] **P2.T2.1: Change “Twenty-two mini-games” and the Mini-Games heading to twenty-four.**
+  - [x] **P2.T2.2: Change the Hub “23-tile board” wording to 24 tiles.**
+- [x] **P2.T3: Validate release truth and preserve history** — covers: FR-2, FR-3, FR-4, NFR-4, AC-2, AC-3, AC-11
+  - [x] **P2.T3.1: Verify README links and anchors resolve.**
+  - [x] **P2.T3.2: Preserve historical release rows, notes and evidence verbatim.**
+- [x] **P2.T4: Record phase evidence** — covers: NFR-3, NFR-4
+  - [x] **P2.T4.1: Save gate, validator, scope and whitespace evidence in `verification/phase-2.md`.**
 
-<!--
-The primary appends after acceptance:
 **Result:** verified
-**Checkpoint:** <short-sha>
+**Checkpoint:** `a626fca1`
 **Evidence:** conductor/tracks/20261127-release-v1-27-0/verification/phase-2.md
--->
 
 ## Phase 3: Release-candidate verification
 
