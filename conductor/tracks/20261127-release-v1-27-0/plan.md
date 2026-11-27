@@ -73,38 +73,35 @@
   - `$env:TAP_HEADED='1'; $env:TAP_INERT_IDLE='1'; node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10` on Windows PowerShell; require exit 0, 50 cold / 0 warm samples, exactly 10 per target game and every worst cold total ≤400 ms.
   - `pnpm exec playwright test --list`, then `pnpm test:e2e`, `pnpm test:e2e:webkit`, `pnpm test:e2e:firefox` and `pnpm test:e2e:mobile-chromium` sequentially with zero local retries.
   - `git -c core.whitespace=cr-at-eol diff --check`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Run the integrated full gate and frozen install** — covers: FR-5, AC-4, NFR-2
-  - [ ] **P3.T1.1: Capture actual suite, coverage, bundle, module-size, texture, PWA and docs figures.**
-  - [ ] **P3.T1.2: Confirm frozen installation and no lockfile drift.**
-- [ ] **P3.T2: Run boot and strict-header validation** — covers: FR-6, AC-5
-  - [ ] **P3.T2.1: Require boot median under the 3.0 s budget.**
-  - [ ] **P3.T2.2: Rebuild the current candidate image and require every strict-header check to pass.**
-- [ ] **P3.T3: Run the headed first-tap baseline** — covers: FR-6, AC-5
-  - [ ] **P3.T3.1: Commit raw JSON/stdout evidence under `verification/`.**
-  - [ ] **P3.T3.2: Block on a failed worst-cold gate; never substitute headless or warm-only data.**
-- [ ] **P3.T4: Run the complete local browser matrix** — covers: FR-7, AC-6
-  - [ ] **P3.T4.1: Record the discovered roster before running projects.**
-  - [ ] **P3.T4.2: Run Chromium, WebKit, Firefox and mobile Chromium sequentially with zero local retries.**
-  - [ ] **P3.T4.3: Record first-attempt counts and distinguish emulation from physical hardware.**
-- [ ] **P3.T5: Refresh notes and living performance truth** — covers: FR-2, FR-6, FR-4, NFR-3, NFR-4, AC-2
-  - [ ] **P3.T5.1: Use measured release-state figures and leave tag/deploy pending.**
-  - [ ] **P3.T5.2: Update the live header/table in `docs/perf-baseline.md` if figures differ, preserving historical sections.**
-  - [ ] **P3.T5.3: Refresh only stale current counts in `README.md` and `docs/TDD.md`.**
-- [ ] **P3.T6: Inspect final scope and claims** — covers: FR-4, NFR-1, NFR-3, AC-11
-  - [ ] **P3.T6.1: Confirm no runtime, asset, dependency, schema, storage or network change.**
-  - [ ] **P3.T6.2: Confirm no physical-device, retention-pass or longitudinal-band claim.**
-- [ ] **P3.T7: Record integrated evidence** — covers: NFR-3, NFR-7
-  - [ ] **P3.T7.1: Save exact commands, exit codes, measured figures and raw-evidence paths in `verification/integrated.md`.**
-  - [ ] **P3.T7.2: Use the CRLF-aware whitespace check and record scope proof.**
+- [x] **P3.T1: Run the integrated full gate and frozen install** — covers: FR-5, AC-4, NFR-2
+  - [x] **P3.T1.1: Capture actual suite, coverage, bundle, module-size, texture, PWA and docs figures.**
+  - [x] **P3.T1.2: Confirm frozen installation and no lockfile drift.**
+- [x] **P3.T2: Run boot and strict-header validation** — covers: FR-6, AC-5
+  - [x] **P3.T2.1: Require boot median under the 3.0 s budget.**
+  - [x] **P3.T2.2: Rebuild the current candidate image and require every strict-header check to pass.**
+- [x] **P3.T3: Run the headed first-tap baseline** — covers: FR-6, AC-5
+  - [x] **P3.T3.1: Commit raw JSON/stdout evidence under `verification/`.**
+  - [x] **P3.T3.2: Block on a failed worst-cold gate; never substitute headless or warm-only data.**
+- [x] **P3.T4: Run the complete local browser matrix** — covers: FR-7, AC-6
+  - [x] **P3.T4.1: Record the discovered roster before running projects.**
+  - [x] **P3.T4.2: Run Chromium, WebKit, Firefox and mobile Chromium sequentially with zero local retries.**
+  - [x] **P3.T4.3: Record first-attempt counts and distinguish emulation from physical hardware.**
+- [x] **P3.T5: Refresh notes and living performance truth** — covers: FR-2, FR-6, FR-4, NFR-3, NFR-4, AC-2
+  - [x] **P3.T5.1: Use measured release-state figures and leave tag/deploy pending.**
+  - [x] **P3.T5.2: Update the live header/table in `docs/perf-baseline.md` if figures differ, preserving historical sections.**
+  - [x] **P3.T5.3: Refresh only stale current counts in `README.md` and `docs/TDD.md`.**
+- [x] **P3.T6: Inspect final scope and claims** — covers: FR-4, NFR-1, NFR-3, AC-11
+  - [x] **P3.T6.1: Confirm no runtime, asset, dependency, schema, storage or network change.**
+  - [x] **P3.T6.2: Confirm no physical-device, retention-pass or longitudinal-band claim.**
+- [x] **P3.T7: Record integrated evidence** — covers: NFR-3, NFR-7
+  - [x] **P3.T7.1: Save exact commands, exit codes, measured figures and raw-evidence paths in `verification/integrated.md`.**
+  - [x] **P3.T7.2: Use the CRLF-aware whitespace check and record scope proof.**
 
-<!--
-The primary appends after acceptance:
 **Result:** verified
-**Checkpoint:** <short-sha>
+**Checkpoint:** `74c1618e`
 **Evidence:** conductor/tracks/20261127-release-v1-27-0/verification/integrated.md
--->
 
 ## Phase 4: Strict review, PR and merge gate
 

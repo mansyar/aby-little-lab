@@ -117,4 +117,4 @@ Local results here are local evidence only. The four browser projects are emulat
 - **Whitespace and links:** `git -c core.whitespace=cr-at-eol diff --check` exited 0 with no output; `node scripts/validate-docs.js` independently passed 5/0 after the archive-safety edit.
 - **Unchanged heavy evidence:** frozen install, boot, Docker strict headers 28/0, headed first tap 50 cold / 0 warm with worst 283.8 ms, and the sequential 26/8/8/8 browser matrix remain valid because only documentation/evidence prose changed after those measurements.
 
-**Checkpoint:** recorded after squash.
+**Checkpoint:** `74c1618eeb7accc1a4ee4c8a212b6bcec00e6567`
