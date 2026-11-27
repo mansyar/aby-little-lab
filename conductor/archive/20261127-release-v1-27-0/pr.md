@@ -1,5 +1,10 @@
 # PR — chore(release): ship v1.27.0
 
+- **URL:** https://github.com/mansyar/aby-little-lab/pull/106
+- **State:** open
+- **Head:** `ab468fc65bc67674ceabfabc8eeb98f37faaac9f`
+- **Base:** `master`
+
 ## Summary
 
 Ship `v1.27.0` as a minor release for the two parent-visible features merged since `v1.26.1`: signature content variants now reach real playthroughs (PR #104), and the Progress Overview shows the current adaptive-band spread for the 22 adaptive games (PR #105). PRs #102 and #103 are included as internal retention-protocol/pilot-pack documentation and are explicitly labeled unexecuted.
