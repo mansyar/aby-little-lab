@@ -14,7 +14,7 @@
 - **Covers:** FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, NFR-1, NFR-2, NFR-3, NFR-6, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8, AC-9, AC-10, AC-11
 - **Touches:** `src/components/settings/helpContent.ts`, `src/components/settings/HelpOverlay.ts`, `src/__tests__/components/settings/helpContent.test.ts`, `src/__tests__/components/settings/HelpOverlay.test.ts`, `conductor/tracks/20261127-parent-help-overlay/verification/phase-1.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Define the eight-topic content contract** — covers: FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11
   - [ ] **P1.T1.1:** Create stable ordered IDs: `parental-lock`, `profiles-play-time`, `progress-adaptive`, `privacy-data`, `backup-restore`, `diagnostics`, `install-offline`, `updates`.
