@@ -23,7 +23,7 @@ import {
  * minimal structural interface so tests drive it with plain mock objects.
  */
 
-/** Top-left origin of the centered wide 6x4 grid in logical canvas space. */
+/** Top-left origin of the centered wide 6-column, 5-row board in logical canvas space. */
 export interface WideGridOrigin {
   startX: number;
   startY: number;
@@ -63,8 +63,9 @@ export interface EntranceOptions {
 }
 
 /**
- * Computes the top-left origin that centers the wide 6x4 grid (rows 6/6/6/6 + 1)
- * inside the given logical canvas size.
+ * Computes the top-left origin that centers the wide 6-column, 5-row board
+ * (rows 6/6/6/6 + 1) inside the given logical canvas size. The fifth row flows
+ * the 25th tile on-canvas; only the origin moves, tile size and spacing stay.
  */
 export function wideGridOrigin(canvasWidth: number, canvasHeight: number): WideGridOrigin {
   return {

@@ -19,7 +19,7 @@ export const CHIP_GAP = 10;
 /**
  * Vertical centre of the chip row (px). The row owns the band between the
  * avatar chip and Settings (y 20..116), so the top of a chip is 24 and its
- * bottom is 108 — clear of both controls and of the grid's first row at 119.
+ * bottom is 108 — clear of both controls.
  */
 export const CHIP_ROW_CENTER_Y = 66;
 /** Display size of a chip's glyph (px). */

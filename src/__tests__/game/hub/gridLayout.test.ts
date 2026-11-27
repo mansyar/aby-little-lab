@@ -20,26 +20,26 @@ const makeScene = () => ({ tweens: { add: vi.fn() } });
 const makeTarget = () => ({ setAlpha: vi.fn(), setScale: vi.fn() });
 
 describe("gridLayout — wide grid geometry", () => {
-  it("centers the 6x4 grid inside a 1024x768 canvas", () => {
-    expect(wideGridOrigin(1024, 768)).toEqual({ startX: 25, startY: 119 });
+  it("centers the 6-column, 5-row board inside a 1024x768 canvas", () => {
+    expect(wideGridOrigin(1024, 768)).toEqual({ startX: 25, startY: 50 });
   });
 
   it("places the first tile one half-tile in from the origin", () => {
     const { x, y } = wideTileCenter(0, wideGridOrigin(1024, 768));
     expect(x).toBe(97);
-    expect(y).toBe(177);
+    expect(y).toBe(108);
   });
 
   it("wraps row-major: tile 6 drops to the second row", () => {
     const { x, y } = wideTileCenter(6, wideGridOrigin(1024, 768));
     expect(x).toBe(97);
-    expect(y).toBe(315);
+    expect(y).toBe(246);
   });
 
-  it("places the last tile (21) in the short fourth row", () => {
+  it("places tile 21 in the fourth row of the five-row board", () => {
     const { x, y } = wideTileCenter(21, wideGridOrigin(1024, 768));
     expect(x).toBe(595);
-    expect(y).toBe(591);
+    expect(y).toBe(522);
   });
 });
 

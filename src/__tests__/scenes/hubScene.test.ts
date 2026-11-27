@@ -745,14 +745,14 @@ describe("HubScene session-start recording", () => {
     expect(getProgress()["shape-sorter"].plays).toBe(1);
   });
 
-  it("keeps the original 24 tiles inside the 1024×768 canvas, with the 25th below the fold", () => {
+  it("keeps all 25 tiles and their shelf plaques inside the 1024×768 canvas", () => {
     const scene = new HubScene();
     scene.create();
 
     const tiles = mockRegistry.filter((obj) => obj.kind === "rectangle" && obj.handlers.pointerup);
     expect(tiles).toHaveLength(25);
 
-    for (const tile of tiles.slice(0, 24)) {
+    for (const tile of tiles) {
       const [x, y, width, height] = tile.args as number[];
       expect(y - height / 2).toBeGreaterThanOrEqual(0);
       expect(y + height / 2).toBeLessThanOrEqual(768);
@@ -760,12 +760,22 @@ describe("HubScene session-start recording", () => {
       expect(x + width / 2).toBeLessThanOrEqual(1024);
     }
 
-    // The Thinking chip filters to nine tiles, so the new game is still
-    // reachable on the wide board without changing the 6×4 grid geometry.
-    const overflowTile = tiles[24];
-    if (!overflowTile) throw new Error("the 25th tile was not drawn");
-    const [, y, , height] = overflowTile.args as number[];
-    expect(y + height / 2).toBeGreaterThan(768);
+    // An empty store draws all 25 plaques as dashed empty-slot rings. They are
+    // anchored at the same centre the tiles use, so a board that pushes either
+    // a tile or its plaque off-canvas fails this assertion.
+    const plaques = mockRegistry.filter(
+      (obj) => obj.kind === "graphics" && obj.arc.mock.calls.some((call) => call[2] === 11),
+    );
+    expect(plaques).toHaveLength(25);
+    for (const plaque of plaques) {
+      const [x, y] = plaque.setPosition.mock.calls[0] as [number, number];
+      expect(y - 11).toBeGreaterThanOrEqual(0);
+      expect(y + 11).toBeLessThanOrEqual(768);
+      expect(x - 11).toBeGreaterThanOrEqual(0);
+      expect(x + 11).toBeLessThanOrEqual(1024);
+    }
+
+    // The Thinking chip still filters to nine on-canvas tiles (FR-4).
     mockRegistry.length = 0;
     (scene as unknown as { grid: { setGroup: (group: string) => void } }).grid.setGroup("thinking");
     const thinkingTiles = mockRegistry.filter(
@@ -920,7 +930,7 @@ describe("HubScene profile and hierarchy cohesion", () => {
     expect(tile.handlers.pointercancel).toBeDefined();
   });
 
-  it("preserves the 6×4 grid geometry at 1024×768 and the 25th tile's overflow row", () => {
+  it("preserves the 6-column/5-row geometry at 1024×768 with the 25th tile on-canvas", () => {
     setReducedMotion(false);
     const scene = new HubScene();
     scene.create();
@@ -1689,8 +1699,8 @@ describe("HubScene e2e hub tiles", () => {
     return scene;
   }
 
-  it("publishes the 24 wide-grid tiles in registry order at their drawn centres", () => {
-    // Pins the registry contract the launch journey loops: a 24th game changes
+  it("publishes all 25 wide-grid tiles in registry order at their drawn centres", () => {
+    // Pins the registry contract the launch journey loops: a new game changes
     // this count and fails here before the journey mis-maps a tile.
     const scene = new HubScene();
     scene.create();
