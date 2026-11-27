@@ -110,3 +110,20 @@
 - **Result:** verified
 - **Checkpoint:** `d1db4cb18e7f04abe324aa46043f8d7bf86edd80`
 - **Evidence:** `conductor/tracks/20261127-parent-help-overlay/verification/phase-3.md`
+
+## Phase R1: Resolve review findings (F1, F2) — covers: NFR-3, AC-9
+
+- **Status:** pending
+- **Touches:** `src/game/hub/gridBuilder.ts`, `src/__tests__/game/hubGrid.test.ts`, `src/components/settings/HelpOverlay.ts`, `src/__tests__/components/settings/HelpOverlay.test.ts`, `conductor/tracks/20261127-parent-help-overlay/verification/phase-R1.md`
+- [ ] **R1.T1: Deduplicate tile-gesture ownership (F1)** — extract the pointerdown/up/out/cancel ownership guard into one shared helper used by wide/paged/filtered builders; preserve all existing guards and behavior. — covers: NFR-3
+  - [ ] **R1.T1.1:** Add the shared helper and wire all three builders to it.
+  - [ ] **R1.T1.2:** Extend `hubGrid.test.ts` to prove shared ownership for all three grids.
+- [ ] **R1.T2: Make disabled controls non-interactive (F2)** — only set interactive/press feedback on enabled Previous/Next controls; keep the null-boundary E2E contract. — covers: AC-9
+  - [ ] **R1.T2.1:** Gate interactivity on the enabled flag in `HelpOverlay.ts`.
+  - [ ] **R1.T2.2:** Add a test asserting disabled prev/next labels carry no pointerdown listener.
+- [ ] **R1.T3: Run the gate and record evidence** — covers: NFR-5, AC-12
+  - [ ] **R1.T3.1:** Run the exact configured verification chain and record scope, AC coverage, and deviations.
+
+- **Result:** pending
+- **Checkpoint:** pending
+- **Evidence:** `conductor/tracks/20261127-parent-help-overlay/verification/phase-R1.md`
