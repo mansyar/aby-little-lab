@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **3,529 tests across 164 files**, all green (verified 2026-11-28).
+Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **3,530 tests across 164 files**, all green (verified 2026-11-28).
 
 Above the unit layer sits the browser journey suite. `pnpm test:e2e` builds `dist` and drives the full Chromium roster: 29 cases across 21 specs, including boot, all 25 launches, the mechanic families, sticker and persistence flows, the parental gate, backup/restore, offline relaunch and storage-failure recovery. It sees real hit areas on a letterboxed canvas, real storage and service-worker behaviour, and frame timing that happy-dom cannot model. Chromium deliberately ignores `e2e/smoke/**`, so smoke-only checks cannot silently enlarge the full suite.
 

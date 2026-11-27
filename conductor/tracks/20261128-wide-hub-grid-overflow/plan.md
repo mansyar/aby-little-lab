@@ -42,11 +42,14 @@ The primary appends after acceptance:
 - **Covers:** FR-2, AC-2
 - **Touches:** `src/game/hub/**`, `src/__tests__/scenes/hubScene.test.ts`, `src/__tests__/game/hub*.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
+**Result:** verified
+**Checkpoint:** 13d35778
+**Evidence:** conductor/tracks/20261128-wide-hub-grid-overflow/verification/phase-2.md
 
-- [ ] **P2.T1: Narrow bounds coverage** — covers: FR-2, AC-2
-  - [ ] **P2.T1.1: Extend narrow-viewport bounds assertions to all tiles; run to fail if violated**
-- [ ] **P2.T2: Conditional rebalance** — covers: FR-2
-  - [ ] **P2.T2.1: Rebalance only interacting narrow paths; no-op with evidence if unaffected**
-- [ ] **P2.T3: Green** — covers: FR-4
-  - [ ] **P2.T3.1: Full gate green**
+- [x] **P2.T1: Narrow bounds coverage** — covers: FR-2, AC-2
+  - [x] **P2.T1.1: Extend narrow-viewport bounds assertions to all tiles; run to fail if violated**
+- [x] **P2.T2: Conditional rebalance** — covers: FR-2
+  - [x] **P2.T2.1: Rebalance only interacting narrow paths; no-op with evidence if unaffected**
+- [x] **P2.T3: Green** — covers: FR-4
+  - [x] **P2.T3.1: Full gate green**
