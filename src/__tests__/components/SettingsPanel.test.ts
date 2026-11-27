@@ -2244,7 +2244,7 @@ describe("SettingsPanel progress report", () => {
     expect(findImagesByTexture(scene, PROFILE_AVATAR_TEXTURES.cat).length).toBe(1);
     // The overlay opens on the Overview page: its three statements, the page
     // counter over the extra page, and the 7-day strip.
-    expect(findTextByLabel(scene, "1 / 5")).toBeDefined();
+    expect(findTextByLabel(scene, "1 / 6")).toBeDefined();
     expect(findTextByLabel(scene, "Last 7 days · 0 plays")).toBeDefined();
     // Activity strip bars are 24px wide; the toggle knobs are 24×24 squares.
     const bars = scene.add.rectangle.mock.calls.filter((call) => call[2] === 24 && call[3] !== 24);
@@ -2312,7 +2312,7 @@ describe("SettingsPanel progress report", () => {
     expect(findTextByLabel(scene, "Animal Trace")).toBeDefined();
   });
 
-  it("pages through all 24 game rows with explicit chevrons (6+6+6+6)", () => {
+  it("pages through all 25 game rows with explicit chevrons (6+6+6+6+1)", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
@@ -2325,61 +2325,68 @@ describe("SettingsPanel progress report", () => {
     expect(findTextByLabel(scene, "Shape Sorter")).toBeUndefined();
     expect(findTextByLabel(scene, "Color Match")).toBeUndefined();
     expect(findTextByLabel(scene, "Story Order")).toBeUndefined();
-    expect(findTextByLabel(scene, "1 / 5")).toBeDefined();
+    expect(findTextByLabel(scene, "1 / 6")).toBeDefined();
 
     triggerPointerdown(nextChevron() as MockGameObject);
     const pageOneRow = findTextByLabel(scene, "Shape Sorter") as MockGameObject;
-    expect(findTextByLabel(scene, "2 / 5")).toBeDefined();
+    expect(findTextByLabel(scene, "2 / 6")).toBeDefined();
     expect(pageOneRow).toBeDefined();
     expect(findTextByLabel(scene, "Pattern Builder")).toBeUndefined();
     expect(findTextByLabel(scene, "Color Match")).toBeUndefined();
 
     triggerPointerdown(nextChevron() as MockGameObject);
     expect(pageOneRow.destroy).toHaveBeenCalled();
-    expect(findTextByLabel(scene, "3 / 5")).toBeDefined();
+    expect(findTextByLabel(scene, "3 / 6")).toBeDefined();
     expect(findTextByLabel(scene, "Pattern Builder")).toBeDefined();
     expect(findTextByLabel(scene, "First Sounds")).toBeDefined();
     expect(findTextByLabel(scene, "Color Match")).toBeUndefined();
     expect(findTextByLabel(scene, "Take Away")).toBeUndefined();
 
     triggerPointerdown(nextChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "4 / 5")).toBeDefined();
+    expect(findTextByLabel(scene, "4 / 6")).toBeDefined();
     expect(findTextByLabel(scene, "Color Match")).toBeDefined();
     expect(findTextByLabel(scene, "Add It Up")).toBeDefined();
     expect(findTextByLabel(scene, "Take Away")).toBeDefined();
     expect(findTextByLabel(scene, "Decode It")).toBeUndefined();
     expect(findTextByLabel(scene, "Story Order")).toBeUndefined();
 
-    const lastPageMark = scene.add.text.mock.calls.length;
     triggerPointerdown(nextChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "5 / 5")).toBeDefined();
+    expect(findTextByLabel(scene, "5 / 6")).toBeDefined();
     expect(findTextByLabel(scene, "Decode It")).toBeDefined();
     expect(findTextByLabel(scene, "Number Order")).toBeDefined();
     expect(findTextByLabel(scene, "Feelings Faces")).toBeDefined();
     expect(findTextByLabel(scene, "Story Order")).toBeDefined();
     expect(findTextByLabel(scene, "Robot Path")).toBeDefined();
     expect(findTextByLabel(scene, "Fix-It Machine")).toBeDefined();
-    // The last page holds a full six rows (24 = 6 + 6 + 6 + 6).
-    const lastPageRows = scene.add.text.mock.calls
-      .slice(lastPageMark)
+    expect(findTextByLabel(scene, "Repeat Machine")).toBeUndefined();
+
+    // The 25th game spills onto one final row of its own.
+    const finalPageMark = scene.add.text.mock.calls.length;
+    triggerPointerdown(nextChevron() as MockGameObject);
+    expect(findTextByLabel(scene, "6 / 6")).toBeDefined();
+    expect(findTextByLabel(scene, "Repeat Machine")).toBeDefined();
+    const finalPageRows = scene.add.text.mock.calls
+      .slice(finalPageMark)
       .filter((call) => call[0] === 354 && call[3]?.fontSize === "30px");
-    expect(lastPageRows).toHaveLength(6);
+    expect(finalPageRows).toHaveLength(1);
 
     // The last page clamps instead of wrapping around.
     triggerPointerdown(nextChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "5 / 5")).toBeDefined();
+    expect(findTextByLabel(scene, "6 / 6")).toBeDefined();
 
     // Previous pages walk back to the Overview, which also clamps.
     triggerPointerdown(prevChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "4 / 5")).toBeDefined();
+    expect(findTextByLabel(scene, "5 / 6")).toBeDefined();
     triggerPointerdown(prevChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "3 / 5")).toBeDefined();
+    expect(findTextByLabel(scene, "4 / 6")).toBeDefined();
     triggerPointerdown(prevChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "2 / 5")).toBeDefined();
+    expect(findTextByLabel(scene, "3 / 6")).toBeDefined();
     triggerPointerdown(prevChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "1 / 5")).toBeDefined();
+    expect(findTextByLabel(scene, "2 / 6")).toBeDefined();
     triggerPointerdown(prevChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "1 / 5")).toBeDefined();
+    expect(findTextByLabel(scene, "1 / 6")).toBeDefined();
+    triggerPointerdown(prevChevron() as MockGameObject);
+    expect(findTextByLabel(scene, "1 / 6")).toBeDefined();
   });
 
   it("shows Story Order as the 22nd row, reading its own progress record", () => {
@@ -2392,7 +2399,7 @@ describe("SettingsPanel progress report", () => {
       triggerPointerdown(findTextByLabel(scene, "›") as MockGameObject);
     }
 
-    expect(findTextByLabel(scene, "5 / 5")).toBeDefined();
+    expect(findTextByLabel(scene, "5 / 6")).toBeDefined();
     expect(findTextByLabel(scene, "Story Order")).toBeDefined();
     expect(findTextByLabel(scene, "Feelings Faces")).toBeDefined();
     // Exactly one row reports a play: story-order's own record.
@@ -2850,7 +2857,7 @@ describe("SettingsPanel affordance cohesion", () => {
     new SettingsPanel(scene as never);
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
 
-    const pageLabel = () => findLastTextByLabel(scene, "1 / 5");
+    const pageLabel = () => findLastTextByLabel(scene, "1 / 6");
     expect(pageLabel()).toBeDefined();
 
     // The ambiguous single More/Back button is gone.
@@ -2867,17 +2874,20 @@ describe("SettingsPanel affordance cohesion", () => {
     triggerPointerdown(next);
     triggerPointerdown(next);
     triggerPointerdown(next);
-    expect(findLastTextByLabel(scene, "5 / 5")).toBeDefined();
+    expect(findLastTextByLabel(scene, "5 / 6")).toBeDefined();
     triggerPointerdown(next);
-    expect(findLastTextByLabel(scene, "5 / 5")).toBeDefined(); // clamped
+    expect(findLastTextByLabel(scene, "6 / 6")).toBeDefined();
+    triggerPointerdown(next);
+    expect(findLastTextByLabel(scene, "6 / 6")).toBeDefined(); // clamped
 
     triggerPointerdown(prev);
     triggerPointerdown(prev);
     triggerPointerdown(prev);
     triggerPointerdown(prev);
-    expect(findLastTextByLabel(scene, "1 / 5")).toBeDefined();
     triggerPointerdown(prev);
-    expect(findLastTextByLabel(scene, "1 / 5")).toBeDefined(); // clamped
+    expect(findLastTextByLabel(scene, "1 / 6")).toBeDefined();
+    triggerPointerdown(prev);
+    expect(findLastTextByLabel(scene, "1 / 6")).toBeDefined(); // clamped
   });
 
   it("highlights the viewed profile in the progress report", () => {

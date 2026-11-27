@@ -139,6 +139,7 @@ describe("initE2EBridge", () => {
         "hubToast",
         "profileCount",
         "recover",
+        "repeatMachine",
         "robotPath",
         "roundGeometry",
         "roundIndex",

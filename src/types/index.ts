@@ -22,7 +22,8 @@ export type GameId =
   | "feelings-faces"
   | "story-order"
   | "robot-path"
-  | "fix-it-machine";
+  | "fix-it-machine"
+  | "repeat-machine";
 
 /**
  * The Hub's five learning-domain groups, in chip order after All.
@@ -173,6 +174,7 @@ export const GAME_IDS: GameId[] = [
   "story-order",
   "robot-path",
   "fix-it-machine",
+  "repeat-machine",
 ];
 
 /**

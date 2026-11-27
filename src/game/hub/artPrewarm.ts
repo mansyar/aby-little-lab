@@ -140,6 +140,8 @@ export const ART_KEYS_BY_GAME: Readonly<Record<string, readonly ArtKeyEntry[]>> 
   "story-order": artKeys("story-order", [STORY_PANEL_KEYS]),
   "robot-path": artKeys("robot-path", [ROBOT_PATH_KEYS]),
   "fix-it-machine": artKeys("fix-it-machine", [MACHINE_KEYS]),
+  // The Repeat Machine draws with the bubble glyph rather than shipping art.
+  "repeat-machine": artKeys("repeat-machine", [GLYPHS_KEYS]),
 });
 
 /**

@@ -237,7 +237,7 @@ describe("seeded session metric — FR-8 / AC-8", () => {
     distinctCounts.sort((left, right) => left - right);
     const median = distinctCounts[Math.floor(distinctCounts.length / 2)];
 
-    expect(GAMES).toHaveLength(24);
+    expect(GAMES).toHaveLength(25);
     expect(median).toBeGreaterThanOrEqual(4);
     expect(unexpectedRepeats).toBe(0);
     expect(forcedRepeats).toBe(0);

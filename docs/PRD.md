@@ -1,12 +1,12 @@
 # Aby's Little Lab Product Requirements Document
 
-Aby's Little Lab is a set of 23 preschool mini-games delivered as one installable web app. This document is the product record: what the app is, what each game asks a child to do, and the rules every game follows. The implementation record is [TDD.md](./TDD.md).
+Aby's Little Lab is a set of 25 preschool mini-games delivered as one installable web app. This document is the product record: what the app is, what each game asks a child to do, and the rules every game follows. The implementation record is [TDD.md](./TDD.md).
 
 | Field | Value |
 | --- | --- |
 | Product | Aby's Little Lab |
 | Audience | Preschoolers aged 36 to 60 months, playing with a parent or caregiver nearby |
-| Games | 23 mini-games, one per Hub tile |
+| Games | 25 mini-games, one per Hub tile |
 | Platforms | Tablets and phones in landscape, and desktop browsers |
 | Delivery | Private installable web app, self-hosted, installed from the browser |
 | Offline | Full play after the first install |
@@ -23,7 +23,7 @@ Aby's Little Lab is a set of 23 preschool mini-games delivered as one installabl
   - [1.5 Session flow](#15-session-flow)
 - [2. Curriculum map](#2-curriculum-map)
   - [2.1 How the games are grouped](#21-how-the-games-are-grouped)
-  - [2.2 The 24 games by domain](#22-the-24-games-by-domain)
+  - [2.2 The 25 games by domain](#22-the-25-games-by-domain)
 - [3. Game specifications](#3-game-specifications)
 - [4. Cross-game systems](#4-cross-game-systems)
   - [4.1 Shared scene bases and lazy loading](#41-shared-scene-bases-and-lazy-loading)
@@ -67,7 +67,7 @@ Aby's Little Lab is a set of 23 preschool mini-games delivered as one installabl
 
 ### 1.1 What the product is
 
-Aby's Little Lab is 23 small games with one shared Hub. Each game teaches one skill and asks for one gesture: tap the card that matches, drag the shape into its hole, trace the line, put the story in order. A playthrough lasts between three and six rounds, ends in a celebration, and returns to the Hub on its own.
+Aby's Little Lab is 25 small games with one shared Hub. Each game teaches one skill and asks for one gesture: tap the card that matches, drag the shape into its hole, trace the line, put the story in order. A playthrough lasts between three and six rounds, ends in a celebration, and returns to the Hub on its own.
 
 There is no score, no timer, no lives and no fail state. A wrong tap plays a soft tone, nudges the piece back, and leaves the round open so the child can try again. The reward is a sticker for finishing a game the first time, kept on a shelf under that game's tile.
 
@@ -105,23 +105,23 @@ The app is self-hosted on a private server behind HTTPS (Docker and Nginx on a p
 
 1. **Boot.** Locks the screen to landscape where the browser allows it, initialises audio and reads stored settings and profiles.
 2. **Preload.** Shows the brand lockup and a progress bar while the boot asset set rasterises.
-3. **Hub.** Shows the 24 game tiles, each a storybook icon above a short text label with its sticker shelf below, plus the avatar chip, the play-time indicator when a limit is set, the mascot and the hidden settings hold. On each visit Professor Hoot points at one game with a silent, textless ring, and one of the profile's earned stickers is highlighted on the shelf; the ring avoids the game just played or just suggested, and the idle wiggle follows the same no-repeat rule, while the sticker highlight advances one earned sticker per visit in game order with wrap-around, is re-derived per profile with its cursor resuming, and falls back to one empty slot when none are earned.
+3. **Hub.** Shows the 25 game tiles, each a storybook icon above a short text label with its sticker shelf below, plus the avatar chip, the play-time indicator when a limit is set, the mascot and the hidden settings hold. On each visit Professor Hoot points at one game with a silent, textless ring, and one of the profile's earned stickers is highlighted on the shelf; the ring avoids the game just played or just suggested, and the idle wiggle follows the same no-repeat rule, while the sticker highlight advances one earned sticker per visit in game order with wrap-around, is re-derived per profile with its cursor resuming, and falls back to one empty slot when none are earned.
 4. **Game.** The game's chunk is fetched and evaluated before the 300 ms crossfade, so a slow chunk never lands mid-round. If it cannot be fetched, the Hub tries again by itself. When that retry fails too, the rest of the Hub stays usable and a wordless retry ring appears on the tile the child tapped; tapping the ring tries the same game again. A game that never opens charges no play time and records no play.
 5. **Return.** Finishing a game plays the shared celebration, awards a sticker the first time, and fades back to the Hub after three seconds with the new sticker highlighted. The Back button in a game also returns to the Hub, but only through the parental hold.
 
-Above the grid sit six group chips — All, Letters, Numbers, Thinking, Play and Stories — in the top band between the avatar chip and Settings. A chip tap redraws the board as that group's own games at 176×196 in three columns, each row centred, so reaching a game takes at most two taps: the chip, then the game. Tapping a chip also speaks the group's spoken name ("Numbers and counting"), and All says "All games". All is the landing state of every visit: the selection is never stored, and the familiar 23-tile board is always what a child arrives on.
+Above the grid sit six group chips — All, Letters, Numbers, Thinking, Play and Stories — in the top band between the avatar chip and Settings. A chip tap redraws the board as that group's own games at 176×196 in three columns, each row centred, so reaching a game takes at most two taps: the chip, then the game. Tapping a chip also speaks the group's spoken name ("Numbers and counting"), and All says "All games". All is the landing state of every visit: the selection is never stored, and the familiar 25-tile board is always what a child arrives on.
 
-The Hub fits all 24 tiles in a 6 by 4 grid on wide screens. When the fitted scale would push a tile below the 64 px touch floor, which is the normal case on a phone, the Hub switches to pages of 5 by 2 larger tiles (ten, ten and four) with swipe between pages and textless page dots. Both layouts are fixed furniture: they do not reflow during a session.
+The Hub lays its tiles out in a 6 by 4 grid on wide screens. When the fitted scale would push a tile below the 64 px touch floor, which is the normal case on a phone, the Hub switches to pages of 5 by 2 larger tiles (ten, ten and five) with swipe between pages and textless page dots. Both layouts are fixed furniture: they do not reflow during a session.
 
 ## 2. Curriculum map
 
 ### 2.1 How the games are grouped
 
-The 24 games are grouped by the developmental skill they are built around. The grouping is a product view, not a claim about assessment: a game practises its domain first and leans on others in passing. Numeracy games use visual discrimination, literacy games use working memory, and every drag game is fine motor practice.
+The 25 games are grouped by the developmental skill they are built around. The grouping is a product view, not a claim about assessment: a game practises its domain first and leans on others in passing. Numeracy games use visual discrimination, literacy games use working memory, and every drag game is fine motor practice.
 
 The nine domains are cognitive reasoning, fine motor, inhibitory control, visual discrimination, working memory, early literacy, early numeracy, social-emotional learning and narrative sequencing.
 
-### 2.2 The 24 games by domain
+### 2.2 The 25 games by domain
 
 Games are numbered in Hub order, which is the order used throughout this document.
 
@@ -151,8 +151,9 @@ Games are numbered in Hub order, which is the order used throughout this documen
 | 22 | Story Order | Narrative sequencing | Putting three pictures in first, next, last order | [3.22](#322-story-order) |
 | 23 | Robot Path | Early programming | Programming absolute steps to walk a robot to its star | [3.23](#323-robot-path) |
 | 24 | Fix-It Machine | Early programming | Finding the step that went wrong and repairing it | [3.24](#324-fix-it-machine) |
+| 25 | Repeat Machine | Early programming | Repeating a chosen move exactly N times | [3.25](#325-repeat-machine) |
 
-Domain counts: cognitive reasoning 4, fine motor 1, inhibitory control 1, visual discrimination 2, working memory 2, early literacy 5, early numeracy 5, social-emotional 1, narrative sequencing 1, early programming 2.
+Domain counts: cognitive reasoning 4, fine motor 1, inhibitory control 1, visual discrimination 2, working memory 2, early literacy 5, early numeracy 5, social-emotional 1, narrative sequencing 1, early programming 3.
 
 ## 3. Game specifications
 
@@ -374,19 +375,28 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Narration.** Rule line: "Find the wrong card and fix it." No per-round narration.
 - **Art and assets.** Sixteen SVGs travel with the game's own chunk: four machine poses drawn on one shared anchor, six tool pictograms and six toy goals. The tape, tray and Go button are drawn at runtime. Tile and sticker icons.
 
+### 3.25 Repeat Machine
+
+- **Mechanic.** The child picks one move — wave, nod, cheer or curious — and a count from two to four, then presses Go. The mascot replays that move and sound exactly that many times; a row of target dots shows how many the machine wants.
+- **Rounds and rules.** Six rounds with targets 2, 2, 3, 3, 4, 4. The authored action is only a hint; any of the four moves may be repeated, and a replay wins only when its count equals the target.
+- **Feedback.** A wrong count replays visibly, rings the missed target, keeps the authoring and the round intact, and invites another try. A correct replay chimes, fills the progress dot and awards the sticker. First-try wins score two, retries one.
+- **Difficulty.** The count ladder is fixed at 2, 2, 3, 3, 4, 4 with an optional adaptive band shift applied once when the scene opens.
+- **Narration.** Rule line: "Pick a move and a count, then press Go." No per-round narration.
+- **Art and assets.** Reuses the shared mascot moves, sound effects and bubble glyph; tile and sticker icons are registered for the Hub.
+
 ## 4. Cross-game systems
 
 ### 4.1 Shared scene bases and lazy loading
 
 Every game scene extends one shared base. `GameSceneBase` owns the parts no game should reimplement: the parental lock on the Back button, the corner mascot, the speaker glyph and its narrator, progress dots, audio access, the instruction line, the win celebration, sticker award and return to the Hub, and shutdown cleanup.
 
-`ChoiceRoundScene` sits on top of it and owns the prompt-plus-cards loop: rendering a round, tearing it down, allowing exactly one advance per tap, the 250 ms success flash, filling a progress dot, the reduced-motion wiggle, and the wrong-answer path. Sixteen of the 24 games are built on it: fourteen extend `ChoiceRoundScene` directly (Find the Letter, Find the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Decode It, Number Order, Pattern Builder, Feelings Faces, Story Order, Robot Path, Fix-It Machine) and two extend it through `GroupMathScene` (Add It Up, Take Away).
+`ChoiceRoundScene` sits on top of it and owns the prompt-plus-cards loop: rendering a round, tearing it down, allowing exactly one advance per tap, the 250 ms success flash, filling a progress dot, the reduced-motion wiggle, and the wrong-answer path. Seventeen of the 25 games are built on it: fifteen extend `ChoiceRoundScene` directly (Find the Letter, Find the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Decode It, Number Order, Pattern Builder, Feelings Faces, Story Order, Robot Path, Fix-It Machine, Repeat Machine) and two extend it through `GroupMathScene` (Add It Up, Take Away).
 
 `GroupMathScene` adds the two-card equation row and the operation cue. Add It Up and Take Away are roughly 25 line subclasses that pin only the instruction, the game id, the cue and the round builders.
 
 Each game is a separately built chunk, registered in a lazy scene registry and fetched before the crossfade into the game. The Hub and the shell never contain a game's code, which keeps the entry chunk under its budget and lets a returning player skip chunks they have already cached.
 
-Game identity is declared once. A single registry lists each game's id, scene key, title, tile key and sticker key; the Hub tiles, the Learning Progress rows, the paging counts and the boot shell's 46 per-game assets - 23 tile icons and 23 sticker icons - all derive from it, so adding a game is one entry plus its scene, its art and its scene-loader row, with the id list checked by the type checker and the invariant suite rather than several lists kept in step by hand.
+Game identity is declared once. A single registry lists each game's id, scene key, title, tile key and sticker key; the Hub tiles, the Learning Progress rows, the paging counts and the boot shell's 50 per-game assets - 25 tile icons and 25 sticker icons - all derive from it, so adding a game is one entry plus its scene, its art and its scene-loader row, with the id list checked by the type checker and the invariant suite rather than several lists kept in step by hand.
 
 ### 4.2 One narrator, spoken rules and prompts
 
@@ -422,13 +432,13 @@ The limit is shown, never enforced mid-game. The Hub shows a textless remaining-
 
 Learning Progress is a parent-facing overlay behind the parental hold, showing one profile at a time with avatar chips to switch between them. For each game it shows the number of plays, an accuracy bar with a percentage, a mastery star once the game has been won three times, and when it was last played in relative terms. Games are listed six rows to a page, with chevrons and a page label, and a seven-day activity strip sits at the bottom.
 
-On the Overview (page 0 only), the note reports the viewed profile's current adaptive-band spread in place of the static "Difficulty adapts…" text: how many of the 22 adaptive games are assessed, and of those how many sit easier, classic and harder under the same `bandShiftFor` rule the games use. Only an adaptive game whose rolling ten-tap window holds at least six recent answer taps counts as assessed; Robot Path and Fix-It Machine have fixed ladders and are excluded even with a full window, as are games below the floor. The readout has four explicit states — adaptive off ("Adaptive difficulty is off · enable in Settings to see current bands"), no assessed game ("Not enough answers yet to show current bands · keep playing"), every assessed game at shift 0 ("all at classic"), and a mixed spread with per-band counts. It is a present snapshot derived from those existing windows, not a transition history: the app stores no band history, so it neither measures nor disproves the roadmap's two-week "60% move ≥ 1 band" target. Per-game pages keep the static adaptive note and their band rows; the three Overview statements, the activity strip and paging are unchanged.
+On the Overview (page 0 only), the note reports the viewed profile's current adaptive-band spread in place of the static "Difficulty adapts…" text: how many of the 23 adaptive games are assessed, and of those how many sit easier, classic and harder under the same `bandShiftFor` rule the games use. Only an adaptive game whose rolling ten-tap window holds at least six recent answer taps counts as assessed; Robot Path and Fix-It Machine have fixed ladders and are excluded even with a full window, as are games below the floor. The readout has four explicit states — adaptive off ("Adaptive difficulty is off · enable in Settings to see current bands"), no assessed game ("Not enough answers yet to show current bands · keep playing"), every assessed game at shift 0 ("all at classic"), and a mixed spread with per-band counts. It is a present snapshot derived from those existing windows, not a transition history: the app stores no band history, so it neither measures nor disproves the roadmap's two-week "60% move ≥ 1 band" target. Per-game pages keep the static adaptive note and their band rows; the three Overview statements, the activity strip and paging are unchanged.
 
 Progress is recorded on device as an additive part of the profile: a play when a game opens from its Hub tile, a tap for every answer, and a win when a game completes. Existing profiles backfill these fields on read, so upgrading never loses stickers or settings.
 
 ### 4.8 Adaptive difficulty
 
-Twenty-two of the 24 games adapt through the band ladder. When a game's difficulty moves, it moves for the whole playthrough, never mid-round. The shift applied to the band ladder is TDD's ([TDD §7.3](./TDD.md#73-adaptive-banding)); it is invisible to the child, who only feels a game getting easier or harder over days. A parent can turn the whole system off in Settings (on by default), which returns every game to its classic band.
+Twenty-three of the 25 games adapt through the band ladder. When a game's difficulty moves, it moves for the whole playthrough, never mid-round. The shift applied to the band ladder is TDD's ([TDD §7.3](./TDD.md#73-adaptive-banding)); it is invisible to the child, who only feels a game getting easier or harder over days. A parent can turn the whole system off in Settings (on by default), which returns every game to its classic band.
 
 An adaptive game keeps a rolling window of the profile's last ten taps for that game. Every tap feeds the window, whether the session is completed or abandoned - a child who backs out mid-game still made those taps, so they still inform the next shift. Only the window moves: the accuracy and the win count a parent sees describe completed sessions, while the play count still counts every game the child starts, abandoned or not. A shift is computed only once the window holds at least six taps: accuracy at or above 90 percent moves the band ladder up one step, accuracy below 50 percent moves it down one, and anything between leaves it alone - a window at exactly 50 percent holds steady. Most games clamp the shifted band to the 1 to 3 range the ladder defines, but some games deliberately step outside the classic ladder's shape, as described below.
 
@@ -556,7 +566,7 @@ All sound effects are synthesized with the Web Audio API at runtime. No audio fi
 | Sticker awarded | Two bright notes, C6 and E6 |
 | Idle Hub call | Two quiet notes, E5 and G5, at low gain |
 
-Every game carries its own audio identity, so the same event is a different set of notes from one game to the next. An identity sets a pitch offset of up to five semitones, a waveform, a tempo between 0.75 and 1.5, and its own three contours: correct, incorrect and win. The twenty-four identities are built from four three-note correct contours, four two-note incorrect contours and four four-note win contours, so a child hears a consistent voice within a game and a different one between games.
+Every game carries its own audio identity, so the same event is a different set of notes from one game to the next. An identity sets a pitch offset of up to five semitones, a waveform, a tempo between 0.75 and 1.5, and its own three contours: correct, incorrect and win. The twenty-five identities are built from four three-note correct contours, four two-note incorrect contours and four four-note win contours, so a child hears a consistent voice within a game and a different one between games.
 
 Two rules keep the trio gentle. The incorrect contour is forced gently descending for every identity, so no game can sound harsh. The win contour is always held inside a 300 to 800 millisecond celebration, and a game whose own tempo would run long has its tempo clamped to fit that budget. The pop, the wake tone, the sticker sparkle and the idle call are shared across the app and do not take a game identity. The TDD states the effect table ([§8.2](./TDD.md#82-sound-effects)) and the identity model ([§8.7](./TDD.md#87-the-per-game-audio-identity)).
 
@@ -584,7 +594,7 @@ Music and sound effects are two independent toggles in the Settings panel, each 
 
 ### 7.1 The boot asset set
 
-The boot set is 60 keys, rasterised during Preload so that the shell never stalls on a first draw. It is deliberately small and deliberately shared: the 23 tile icons and 23 sticker icons the Hub needs, the two mascot poses, the five group-chip glyphs, the shared speaker glyph, and the six profile avatars. Everything else a game draws is loaded with that game instead (see 7.3), so the shell does not pay for art a child may never open.
+The boot set is 64 keys, rasterised during Preload so that the shell never stalls on a first draw. It is deliberately small and deliberately shared: the 25 tile icons and 25 sticker icons the Hub needs, the two mascot poses, the five group-chip glyphs, the shared speaker glyph, and the six profile avatars. Everything else a game draws is loaded with that game instead (see 7.3), so the shell does not pay for art a child may never open.
 
 Rasterising every key at 512 by 512 would waste GPU memory, because most art displays far smaller than that. Each key is therefore rasterised at one of three tiers, chosen by an ordered rule list where the first match wins:
 
@@ -608,7 +618,7 @@ Measured from the current build (2026-11-27), the shell entry is `index-BXMw_AwN
 
 ### 7.3 Art that travels with a game
 
-Game art belongs in the game's chunk when only that game uses it. Two mechanisms move the art out of the shell, and together they move 257 of the app's 319 art files.
+Game art belongs in the game's chunk when only that game uses it. Two mechanisms move the art out of the shell, and together they move 257 of the app's 321 art files.
 
 **Twelve lazy art groups.** The art that is not shell art is grouped into `shapes`, `cutouts`, `letters`, `numerals`, `animals`, `food`, `items`, `shadows`, `toys`, `faces`, `music` and `glyphs` - 151 keys in all. A scene declares the groups it draws in its own `preload` and hands them to the loader, so the SVG markup lands in that game's lazy chunk instead of the shell. Six of the 151 keys are also shell keys, the profile avatars, so 145 of them are game-only. The loader is idempotent, tracks which scene owns which key so a child who leaves mid-load frees the key for the next attempt, and rasterises every key at its own tier.
 
@@ -616,7 +626,7 @@ Game art belongs in the game's chunk when only that game uses it. Two mechanisms
 
 A scene that asks for art which fails to load falls back to a neutral placeholder rather than Phaser's missing-texture checkerboard, and a shared textless cue is shown while the art loads, so the child sees a deliberate loading mark rather than a broken picture.
 
-The boundary is a test, not a convention: the test suite reads the boot preload's source, pins the 62 shell keys, and fails if the shell ever imports a game-only key.
+The boundary is a test, not a convention: the test suite reads the boot preload's source, pins the 64 shell keys, and fails if the shell ever imports a game-only key.
 
 ### 7.4 Runtime targets
 

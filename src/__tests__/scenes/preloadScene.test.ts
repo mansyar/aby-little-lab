@@ -85,13 +85,13 @@ const AVATAR_KEYS: readonly string[] = [
 ];
 
 /** How many SVGs the shell and the twelve groups carry together. */
-const CANONICAL_ASSET_COUNT = 207;
+const CANONICAL_ASSET_COUNT = 209;
 
 const shellKeys = SHELL_ASSETS.map((asset) => asset.key);
 
 describe("PreloadScene SHELL_ASSETS", () => {
-  it("carries exactly the 62 documented shell keys, all unique", () => {
-    expect(SHELL_ASSETS).toHaveLength(62);
+  it("carries exactly the 64 documented shell keys, all unique", () => {
+    expect(SHELL_ASSETS).toHaveLength(64);
     expect(new Set(shellKeys).size).toBe(shellKeys.length);
   });
 
@@ -106,7 +106,7 @@ describe("PreloadScene SHELL_ASSETS", () => {
     expect(overlaps.sort()).toEqual([...AVATAR_KEYS].sort());
   });
 
-  it("leaves the shell and the groups owning 207 keys in total", () => {
+  it("leaves the shell and the groups owning 209 keys in total", () => {
     const union = new Set([...shellKeys, ...allGroupKeys]);
     expect(union.size).toBe(CANONICAL_ASSET_COUNT);
   });
@@ -115,7 +115,7 @@ describe("PreloadScene SHELL_ASSETS", () => {
 /** `{ key: "…", svg: X }` — only the non-game rows stay literal after derivation. */
 const TABLE_ENTRY = /\{\s*key:\s*"([a-z0-9_]+)",\s*svg:\s*(\w+)\s*\}/g;
 
-/** The 44 game keys in derived order: every tile, then every sticker. */
+/** The 50 game keys in derived order: every tile, then every sticker. */
 const GAME_KEYS: readonly string[] = [
   ...GAME_REGISTRY.map((game) => game.tileKey),
   ...GAME_REGISTRY.map((game) => game.stickerKey),

@@ -111,9 +111,9 @@ describe("ProgressOverlay", () => {
     expect(panels()).toHaveLength(1);
     expect(liveTexts("Learning Progress")).toHaveLength(1);
     expect(liveTexts("X")).toHaveLength(1);
-    // 24 games over 6 rows per page -> 4 game pages behind the Overview.
-    expect(liveTexts("1 / 5")).toHaveLength(1);
-    expect(liveTexts("1 / 4")).toHaveLength(0);
+    // 25 games over 6 rows per page -> 5 game pages behind the Overview.
+    expect(liveTexts("1 / 6")).toHaveLength(1);
+    expect(liveTexts("1 / 5")).toHaveLength(0);
     expect(rowIcons()).toHaveLength(0);
     expect(liveTexts("‹")).toHaveLength(1);
     expect(liveTexts("›")).toHaveLength(1);
@@ -215,18 +215,22 @@ describe("ProgressOverlay", () => {
     overlay.open();
 
     nextPage();
-    expect(liveTexts("2 / 5")).toHaveLength(1);
+    expect(liveTexts("2 / 6")).toHaveLength(1);
     expect(rowIcons()).toHaveLength(6);
 
     nextPage();
     nextPage();
     nextPage();
-    expect(liveTexts("5 / 5")).toHaveLength(1);
-    // 24 games -> the last page shows a full 6 rows.
+    expect(liveTexts("5 / 6")).toHaveLength(1);
+    // 24 games still fill this page; the 25th spills onto the final page.
     expect(rowIcons()).toHaveLength(6);
 
     nextPage();
-    expect(liveTexts("5 / 5")).toHaveLength(1);
+    expect(liveTexts("6 / 6")).toHaveLength(1);
+    expect(rowIcons()).toHaveLength(1);
+
+    nextPage();
+    expect(liveTexts("6 / 6")).toHaveLength(1);
   });
 
   it("pages back from page 1 to the Overview", () => {
@@ -242,7 +246,7 @@ describe("ProgressOverlay", () => {
     expect(liveTexts(lines[0])).toHaveLength(0);
     previousPage();
 
-    expect(liveTexts("1 / 5")).toHaveLength(1);
+    expect(liveTexts("1 / 6")).toHaveLength(1);
     expect(rowIcons()).toHaveLength(0);
     for (const line of lines) expect(liveTexts(line)).toHaveLength(1);
   });
@@ -258,7 +262,7 @@ describe("ProgressOverlay", () => {
 
     previousPage();
 
-    expect(liveTexts("1 / 5")).toHaveLength(1);
+    expect(liveTexts("1 / 6")).toHaveLength(1);
     // No re-render happened: the live object count is unchanged.
     expect(live()).toHaveLength(before);
   });
@@ -422,7 +426,7 @@ describe("ProgressOverlay", () => {
 
     const opened = overlay.e2eState();
     expect(opened?.page).toBe(0);
-    expect(opened?.pageCount).toBe(5);
+    expect(opened?.pageCount).toBe(6);
     // The strings the page printed, captured as each text was created.
     expect(opened?.lines).toEqual([...statementLines()]);
     expect(opened?.prev).toEqual({ x: 402, y: 559 });
@@ -565,7 +569,7 @@ describe("ProgressOverlay — current band spread on the Overview", () => {
     expect(liveTexts(MIXED_NOTE)).toHaveLength(1);
     expect(liveTexts(STATIC_NOTE)).toHaveLength(0);
     for (const line of statementLines()) expect(liveTexts(line)).toHaveLength(1);
-    expect(liveTexts("1 / 5")).toHaveLength(1);
+    expect(liveTexts("1 / 6")).toHaveLength(1);
 
     // A game page keeps the static note and drops the spread readout.
     nextPage();
@@ -575,7 +579,7 @@ describe("ProgressOverlay — current band spread on the Overview", () => {
 
     previousPage();
     expect(liveTexts(MIXED_NOTE)).toHaveLength(1);
-    expect(liveTexts("1 / 5")).toHaveLength(1);
+    expect(liveTexts("1 / 6")).toHaveLength(1);
   });
 
   it("wraps the longest mixed note inside the card and leaves the per-game note alone", () => {

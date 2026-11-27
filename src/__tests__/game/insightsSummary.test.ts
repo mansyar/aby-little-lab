@@ -182,7 +182,7 @@ const CASES: ReadonlyArray<Case> = [
       },
     ),
     lines: [
-      "2 of 24 games · 2 days this week · nothing completed yet",
+      "2 of 25 games · 2 days this week · nothing completed yet",
       "77% of answers correct · not enough play yet to name a strongest game",
       "No streak yet · cap not reached yet",
     ],
@@ -202,7 +202,7 @@ const CASES: ReadonlyArray<Case> = [
       { activity: activityOf([[0, 1]]) },
     ),
     lines: [
-      "1 of 24 games · 1 day this week · 1 completion in all (100% of started games finished)",
+      "1 of 25 games · 1 day this week · 1 completion in all (100% of started games finished)",
       "71% of answers correct · not enough play yet to name a strongest game",
       "No streak yet · no daily limit set",
     ],
@@ -247,7 +247,7 @@ const CASES: ReadonlyArray<Case> = [
       },
     ),
     lines: [
-      "3 of 24 games · 4 days this week · 6 completions in all (43% of started games finished)",
+      "3 of 25 games · 4 days this week · 6 completions in all (43% of started games finished)",
       "73% of answers correct · strongest Shape Sorter (90%) · hardest Pop & Freeze (60%)",
       "4 days in a row · best 9 days · cap reached on 3 days",
     ],
@@ -279,7 +279,7 @@ const CASES: ReadonlyArray<Case> = [
       },
     ),
     lines: [
-      "1 of 24 games · 1 day this week · 2 completions in all (67% of started games finished)",
+      "1 of 25 games · 1 day this week · 2 completions in all (67% of started games finished)",
       "90% of answers correct · Story Order has the most answers so far (90%)",
       "2 days in a row · best 5 days · no daily limit set",
     ],
@@ -389,7 +389,7 @@ describe("summariseInsights — the day count", () => {
     expect(summary.activity.daysPlayed).toBe(3);
     expect(summary.activity.distinctGames).toBe(1);
     expect(summary.lines[0]).toBe(
-      "1 of 24 games · 3 days this week · 1 completion in all (33% of started games finished)",
+      "1 of 25 games · 3 days this week · 1 completion in all (33% of started games finished)",
     );
   });
 
@@ -472,7 +472,7 @@ describe("summariseInsights — the week window", () => {
     // Completions are lifetime, so both older games still count.
     expect(summary.activity.completions).toBe(6);
     expect(summary.lines[0]).toBe(
-      "1 of 24 games · 1 day this week · 6 completions in all (67% of started games finished)",
+      "1 of 25 games · 1 day this week · 6 completions in all (67% of started games finished)",
     );
   });
 });

@@ -200,12 +200,12 @@ describe("PreloadScene", () => {
     expect(getMockFn(tagline.destroy)).toHaveBeenCalled();
   });
 
-  it("loads exactly the 62 shell SVGs during preload", () => {
+  it("loads exactly the 64 shell SVGs during preload", () => {
     const scene = new PreloadScene();
     scene.preload();
 
     const svgCalls = getMockFn(scene.load.svg).mock.calls;
-    expect(svgCalls).toHaveLength(62);
+    expect(svgCalls).toHaveLength(64);
     expect(svgCalls.map((call) => call[0] as string)).toEqual(
       SHELL_ASSETS.map((asset) => asset.key),
     );
@@ -330,7 +330,7 @@ describe("HubScene", () => {
     scene.create();
 
     const icons = getTileIcons(scene);
-    expect(icons).toHaveLength(24);
+    expect(icons).toHaveLength(25);
     expect(new Set(icons.map((i) => i.key))).toEqual(
       new Set([
         "tile_shape_sorter",
@@ -357,6 +357,7 @@ describe("HubScene", () => {
         "tile_story_order",
         "tile_robot_path",
         "tile_fix_it_machine",
+        "tile_repeat_machine",
       ]),
     );
     // Icons render at their per-tile display size (>=64px default; the
@@ -379,7 +380,7 @@ describe("HubScene", () => {
     const scene = new HubScene();
     scene.create();
 
-    expect(hasSticker).toHaveBeenCalledTimes(24);
+    expect(hasSticker).toHaveBeenCalledTimes(25);
   });
 
   // Boots all 22 scenes in one test body: 20-23 s isolated, 30-31 s under
@@ -527,8 +528,8 @@ describe("Hub profile switcher", () => {
     expect((scene as unknown as { profileChip: { isOpen(): boolean } }).profileChip.isOpen()).toBe(
       false,
     );
-    // Shelf re-rendered: 24 more sticker lookups after the initial 24.
-    expect(hasSticker).toHaveBeenCalledTimes(48);
+    // Shelf re-rendered: 25 more sticker lookups after the initial 25.
+    expect(hasSticker).toHaveBeenCalledTimes(50);
     // Chip re-textured to the newly active profile.
     expect(getMockFn(chip.setTexture)).toHaveBeenCalledWith("animal_cat");
   });
@@ -560,7 +561,7 @@ describe("Hub profile switcher", () => {
     expect((scene as unknown as { profileChip: { isOpen(): boolean } }).profileChip.isOpen()).toBe(
       false,
     );
-    expect(hasSticker).toHaveBeenCalledTimes(24);
+    expect(hasSticker).toHaveBeenCalledTimes(25);
   });
 
   it("renders the sticker shelf for the active profile only", () => {
@@ -579,9 +580,9 @@ describe("Hub profile switcher", () => {
       scene as unknown as { grid: { rerenderStickerShelf: () => void } }
     ).grid.rerenderStickerShelf();
 
-    // The re-render starts at call 24 (one shelf lookup per tile on each pass).
-    expect((hasSticker as MockFn).mock.results[24]?.value).toBe(true);
-    expect((hasSticker as MockFn).mock.calls).toHaveLength(48);
+    // The re-render starts at call 25 (one shelf lookup per tile on each pass).
+    expect((hasSticker as MockFn).mock.results[25]?.value).toBe(true);
+    expect((hasSticker as MockFn).mock.calls).toHaveLength(50);
   });
 });
 

@@ -20,7 +20,7 @@ import {
  * unlaunched.
  *
  * The roster is driven as two halves that run in parallel workers. One test
- * doing all 24 launches was this suite's critical path — every launch ends with
+ * doing all 25 launches was this suite's critical path — every launch ends with
  * the three-second parental hold, so the file alone measured 3.3 min against
  * NFR-2's 5 min ceiling. Halving the sequence halves that path without touching
  * what is asserted: both halves still launch from a hub reached by the held
@@ -28,7 +28,7 @@ import {
  * unlaunched.
  */
 
-const EXPECTED_GAME_COUNT = 24;
+const EXPECTED_GAME_COUNT = 25;
 
 /** Where the second half starts; derived so the split cannot fall behind. */
 const SPLIT = Math.ceil(GAME_REGISTRY.length / 2);
@@ -66,7 +66,7 @@ test.describe("every game launches from the hub and returns to it", () => {
       expect(await profileCount(page)).toBe(1);
 
       // A narrow hub pages its tiles. The first page must still begin at
-      // registry index zero; the loops below prove every page and all 24
+      // registry index zero; the loops below prove every page and all 25
       // launches without pretending the whole roster fits on screen.
       const tiles = await hubTiles(page);
       const visibleIds = tiles.map((tile) => tile.id);

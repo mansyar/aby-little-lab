@@ -63,7 +63,7 @@ export interface EntranceOptions {
 }
 
 /**
- * Computes the top-left origin that centers the wide 6x4 grid (rows 6/6/6/4)
+ * Computes the top-left origin that centers the wide 6x4 grid (rows 6/6/6/6 + 1)
  * inside the given logical canvas size.
  */
 export function wideGridOrigin(canvasWidth: number, canvasHeight: number): WideGridOrigin {
