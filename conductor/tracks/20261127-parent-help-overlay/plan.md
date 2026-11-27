@@ -52,30 +52,34 @@
   - `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
   - `pnpm exec playwright test e2e/journeys/help.spec.ts --project=chromium --project=webkit --project=firefox --project=mobile-chromium`
   - Primary visual inspection at 1024×768 and 844×390; media stays uncommitted under `.conductor/media/20261127-parent-help-overlay/`.
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Add the Settings header entry point** — covers: FR-1, NFR-4, AC-1
-  - [ ] **P2.T1.1:** Implement a 96×96 Help button in a focused component.
-  - [ ] **P2.T1.2:** Open Help from either Settings page and return to the same page on close.
-  - [ ] **P2.T1.3:** Keep all existing row coordinates and Backup controls unchanged.
-  - [ ] **P2.T1.4:** Keep `SettingsPanel.ts` below the module-size warning threshold by inlining its existing trivial Progress/Profiles delegate methods.
-- [ ] **P2.T2: Extend the E2E settings contract** — covers: NFR-5
-  - [ ] **P2.T2.1:** Add Help button point and overlay state: screen, topic ID/index/count, title/lines, and active navigation controls.
-  - [ ] **P2.T2.2:** Update bridge exports, Hub publication, and fixture defaults without affecting unrelated state.
-- [ ] **P2.T3: Test integration and regressions** — covers: FR-1, FR-13, NFR-4, AC-1, AC-2, AC-11
-  - [ ] **P2.T3.1:** Cover parental gating, both underlying pages, close behavior, repeated cycles, and unchanged row positions.
-  - [ ] **P2.T3.2:** Verify Help is read-only and the E2E state defaults remain stable.
-  - [ ] **P2.T3.3:** Block underlying Hub tile releases while Settings or another modal owns the gesture; cover the cross-engine close-path regression.
-  - [ ] **P2.T3.4:** Treat a destroyed Settings panel as closed for Hub gesture ownership so normal play remains available after dismissal.
-  - [ ] **P2.T3.5:** Update remaining scene tap simulations to dispatch a matching pointerdown before ordinary tile pointerup while preserving unmatched-release regressions.
-- [ ] **P2.T4: Add and run the browser journey** — covers: FR-1, FR-3, FR-13, NFR-5, AC-1, AC-3, AC-9, AC-11, AC-12
-  - [ ] **P2.T4.1:** Open Settings through the real hold gesture, open Help, visit all eight topics, exercise boundaries, close, and verify the save is unchanged.
-  - [ ] **P2.T4.2:** Run Chromium, WebKit, Firefox, and mobile Chromium with zero local retries.
-  - [ ] **P2.T4.3:** Include the Help journey in the cross-engine smoke roster so each supported engine actually executes it.
-- [ ] **P2.T5: Run gates and record evidence** — covers: NFR-4, NFR-5, AC-10, AC-12
-  - [ ] **P2.T5.1:** Run the exact full gate and four-project Help journey.
-  - [ ] **P2.T5.2:** Record measured counts, scope, browser results, deviations, and checkpoint evidence.
-  - [ ] **P2.T5.3:** Refresh living suite, coverage, build, and browser-roster figures in README, TDD, and perf-baseline from primary-measured output, preserving dated historical evidence.
+- [x] **P2.T1: Add the Settings header entry point** — covers: FR-1, NFR-4, AC-1
+  - [x] **P2.T1.1:** Implement a 96×96 Help button in a focused component.
+  - [x] **P2.T1.2:** Open Help from either Settings page and return to the same page on close.
+  - [x] **P2.T1.3:** Keep all existing row coordinates and Backup controls unchanged.
+  - [x] **P2.T1.4:** Keep `SettingsPanel.ts` below the module-size warning threshold by inlining its existing trivial Progress/Profiles delegate methods.
+- [x] **P2.T2: Extend the E2E settings contract** — covers: NFR-5
+  - [x] **P2.T2.1:** Add Help button point and overlay state: screen, topic ID/index/count, title/lines, and active navigation controls.
+  - [x] **P2.T2.2:** Update bridge exports, Hub publication, and fixture defaults without affecting unrelated state.
+- [x] **P2.T3: Test integration and regressions** — covers: FR-1, FR-13, NFR-4, AC-1, AC-2, AC-11
+  - [x] **P2.T3.1:** Cover parental gating, both underlying pages, close behavior, repeated cycles, and unchanged row positions.
+  - [x] **P2.T3.2:** Verify Help is read-only and the E2E state defaults remain stable.
+  - [x] **P2.T3.3:** Block underlying Hub tile releases while Settings or another modal owns the gesture; cover the cross-engine close-path regression.
+  - [x] **P2.T3.4:** Treat a destroyed Settings panel as closed for Hub gesture ownership so normal play remains available after dismissal.
+  - [x] **P2.T3.5:** Update remaining scene tap simulations to dispatch a matching pointerdown before ordinary tile pointerup while preserving unmatched-release regressions.
+- [x] **P2.T4: Add and run the browser journey** — covers: FR-1, FR-3, FR-13, NFR-5, AC-1, AC-3, AC-9, AC-11, AC-12
+  - [x] **P2.T4.1:** Open Settings through the real hold gesture, open Help, visit all eight topics, exercise boundaries, close, and verify the save is unchanged.
+  - [x] **P2.T4.2:** Run Chromium, WebKit, Firefox, and mobile Chromium with zero local retries.
+  - [x] **P2.T4.3:** Include the Help journey in the cross-engine smoke roster so each supported engine actually executes it.
+- [x] **P2.T5: Run gates and record evidence** — covers: NFR-4, NFR-5, AC-10, AC-12
+  - [x] **P2.T5.1:** Run the exact full gate and four-project Help journey.
+  - [x] **P2.T5.2:** Record measured counts, scope, browser results, deviations, and checkpoint evidence.
+  - [x] **P2.T5.3:** Refresh living suite, coverage, build, and browser-roster figures in README, TDD, and perf-baseline from primary-measured output, preserving dated historical evidence.
+
+- **Result:** verified
+- **Checkpoint:** `99ff55727c1d2d9c6503742ab6006541fa4a869b`
+- **Evidence:** `conductor/tracks/20261127-parent-help-overlay/verification/phase-2.md`
 
 ## Phase 3: Synchronize product and engineering truth
 
