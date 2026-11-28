@@ -308,3 +308,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Add game 25: a Repeat Machine for loops** — [20261128-repeat-machine](./archive/20261128-repeat-machine/index.md) — feature — medium
 - [x] **Track: Fix wide hub grid overflow with 25th game tile** — [20261128-wide-hub-grid-overflow](./archive/20261128-wide-hub-grid-overflow/index.md) — bug — medium
 - [x] **Track: Add a parent control for narration pace** — [20261128-narration-pace](./archive/20261128-narration-pace/index.md) — feature — medium
+- [x] **Track: Release v1.28.0** — [20261128-release-v1-28-0](./archive/20261128-release-v1-28-0/index.md) — chore — medium

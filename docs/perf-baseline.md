@@ -1,8 +1,68 @@
 # Performance Baseline — Boot-Time Asset Profiling
 
-> **Live figures — refreshed 2026-11-27.** The suite and coverage figures here were refreshed for RM-7 Phase 2 (`20261127-parent-help-overlay`): 165 test files / 3,559 tests across 97.1 % statements, 91.09 % branches, 96.35 % functions and 98.19 % lines. The current Phase 2 build has Help wired into Settings: Vite built 496 modules; shell entry `index-BXMw_AwN.js` is 186.5 kB via `validate-bundle` (190.97 kB as Vite prints it, 48.43 kB gzip); the separate `parent-help-CO1457oM.js` chunk is 19.38 kB / 7.35 kB gzip; there are **54** JavaScript chunks and **66** PWA precache entries (1890.52 KiB), with PWA validation at 16 passes / 0 failures. The v1.27.0 release candidate at final Phase 3 checkpoint `74c1618e`, measured at pre-squash snapshot `65fe7286f0b0e37493268c0e299c469d47129211`, remains the provenance for the browser matrix and first-tap evidence: green locally with zero first-attempt retries, 50/50 passes across Chromium (26), WebKit (8), Firefox (8) and mobile Chromium (8); the earlier 2026-11-16 Chromium-only record remains history. The first-tap verdict was remeasured on 2026-11-27: 50 cold / 0 warm headed cold-control samples, aggregate cold p95 response / finished / total 78.5 / 61.1 / 256.4 ms, cold median total 190.8 ms, and worst cold total 283.8 ms (Add It Up), all inside the unchanged 400 ms gate; these heavy browser and first-tap measurements remain that release candidate's evidence, not new Help-overlay evidence — see [v1.27.0 release candidate (2026-11-27)](#v1270-release-candidate-2026-11-27) for this run and [First-tap p95 baseline after the Word Match fix (2026-11-24)](#first-tap-p95-baseline-after-the-word-match-fix-2026-11-24) for the earlier baseline. Historical sections retain their dated build, coverage, browser and first-tap figures. The four suite-count rows explicitly labeled as current living values and both current paired coverage rows were refreshed on 2026-11-27 for docs truth, not taken from those dated sessions. Where a historical figure disagrees with this header, the header is current truth and the record is history.
+> **Live figures — refreshed 2026-11-28.** The v1.28.0 release candidate (`20261128-release-v1-28-0`, measured at candidate head `60875e34`) has 165 test files / 3,559 tests across 96.91 % statements, 90.23 % branches, 96.22 % functions and 98.06 % lines. Vite built 501 modules; shell entry `index-B7LXOJIw.js` is 190.3 kB via `validate-bundle` (194.87 kB as Vite prints it, 48.95 kB gzip); the separate `parent-help-Ctv7USUC.js` chunk is 19.71 kB / 7.50 kB gzip; there are **55** JavaScript chunks and **67** PWA precache entries (1901.93 KiB), with PWA validation at 16 passes / 0 failures. The local browser matrix passed 60/60 on its caused rerun across Chromium (30), WebKit (10), Firefox (10) and mobile Chromium (10); the first attempt's single boot-toast timeout is retained in the release track. The corrected headed first-tap run recorded 50 cold / 0 warm samples, aggregate cold p95 response / finished / total 40.9 / 32.4 / 265.2 ms, cold median total 202.4 ms, and worst cold total 273.2 ms (Find the Word), all inside the unchanged 400 ms gate; boot median was 450.1 ms and 4×-throttled boot median was 1957.1 ms. See [v1.28.0 release candidate (2026-11-28)](#v1280-release-candidate-2026-11-28). Historical sections retain their dated build, coverage, browser and first-tap figures. The four suite-count rows explicitly labeled as current living values and both current paired coverage rows were refreshed on 2026-11-28 for docs truth, not taken from those dated sessions. Where a historical figure disagrees with this header, the header is current truth and the record is history.
 >
 > The standing debts live in the README's Known Issues, and the planned work behind these numbers lives in [`conductor/roadmap.md` §10](../conductor/roadmap.md#10-roadmap).
+
+## v1.28.0 release candidate (2026-11-28)
+
+Track `20261128-release-v1-28-0`, Phase 3. Measured at candidate head
+`60875e34` after the verification-only harness synchronization; the final docs
+candidate has identical runtime and package bytes. The exact Windows PowerShell
+headed cold-control command was:
+
+```sh
+$env:TAP_HEADED='1'; $env:TAP_INERT_IDLE='1'; node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10
+```
+
+Boundary and result: exit **0**, **50 cold / 0 warm** samples, exactly 10 per
+unchanged five-game target, every worst cold total **≤400 ms**. P95 is
+report-only; no headless or warm-only data was substituted.
+
+| Measurement | Result |
+| --- | ---: |
+| Aggregate cold p95 response | 40.9 ms |
+| Aggregate cold p95 finished | 32.4 ms |
+| Aggregate cold p95 total | 265.2 ms |
+| Cold median total | 202.4 ms |
+| Worst cold total | 273.2 ms (Find the Word) |
+| `validate-boot` exit | 0 |
+| In-script boot samples / median | 687.9 / 443.4 / 450.1 ms, median 450.1 ms |
+| 4×-throttled boot median | 1957.1 ms |
+
+| Game | Samples | p95 response | p95 finished | p95 total |
+| --- | ---: | ---: | ---: | ---: |
+| Shape Sorter | 10 | 38.1 ms | 32.4 ms | 237.0 ms |
+| Find the Letter | 10 | 48.3 ms | 38.1 ms | 205.8 ms |
+| Find the Word | 10 | 40.9 ms | 28.8 ms | 273.2 ms |
+| Add It Up | 10 | 47.7 ms | 34.6 ms | 270.8 ms |
+| Memory Match | 10 | 39.7 ms | 32.3 ms | 204.9 ms |
+
+The sequential local browser matrix also passed:
+
+| Project | Passed | Duration |
+| --- | ---: | ---: |
+| Chromium | 30 | 4.2 min |
+| WebKit | 10 | 1.8 min |
+| Firefox | 10 | 1.8 min |
+| Mobile Chromium | 10 | 2.3 min |
+| **Total** | **60** | — |
+
+The first matrix attempt preserved a single Chromium boot-toast timeout (29/30)
+while the other 29 journeys passed. After recording the transient readiness
+cause, clearing the preview port and confirming no orphan browser process, the
+identical zero-retry matrix was rerun once under NFR-3 and passed 60/60. No
+runtime source, test expectation or browser behavior was changed.
+
+Raw evidence:
+`conductor/archive/20261128-release-v1-28-0/verification/first-tap-headed.json`,
+`conductor/archive/20261128-release-v1-28-0/verification/first-tap-headed.stdout.log`,
+`.conductor/evidence/phase-3-browser-summary.json` and the four
+`.conductor/evidence/phase-3-browser-<project>.log` files. Evidence paths are
+given in code form; clickable archived evidence links are finalized after
+archival/ship. This is local headed Chromium first-tap evidence plus local
+emulated-browser evidence; physical iOS Safari, Android Chrome and Fire tablet
+coverage remains **SKIPPED — accepted gap**, not a measured pass.
 
 ## v1.27.0 release candidate (2026-11-27)
 
@@ -920,7 +980,7 @@ current living value refreshed on 2026-11-25 for docs truth.
 | Service-worker precache | **61 entries** (1794.60 KiB) | the build's PWA step |
 | Boot textures rasterized | 55 (23 tiles, 23 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
 | Test suite (current living value, verified 2026-11-28) | 165 files / 3,559 tests | `pnpm test -- --run` |
-| Coverage | statements 97.1 % / branches 91.09 % / functions 96.35 % / lines 98.19 % | `pnpm test:coverage` |
+| Coverage | statements 96.91 % / branches 90.23 % / functions 96.22 % / lines 98.06 % | `pnpm test:coverage` |
 | Browser journeys | 23 journeys in 18 spec files, 23 launches; 4.6 min wall clock on two workers, `launch-all` alone at 2.9 min | `pnpm test:e2e` |
 
 The two Robot Path shell SVGs moved the entry from 179.4 kB to 182.4 kB in Phase 4, and Phase 5's
@@ -953,7 +1013,7 @@ current living value refreshed on 2026-11-25 for docs truth.
 | Service-worker precache | **63 entries** (1826.19 KiB) | the build's PWA step |
 | Boot textures rasterized | 57 (24 tiles, 24 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
 | Test suite (current living value, verified 2026-11-28) | 165 files / 3,559 tests | `pnpm test -- --run` |
-| Coverage | statements 97.1 % / branches 91.09 % / functions 96.35 % / lines 98.19 % | `pnpm test:coverage` |
+| Coverage | statements 96.91 % / branches 90.23 % / functions 96.22 % / lines 98.06 % | `pnpm test:coverage` |
 | Browser journeys | **26 browser tests in 19 spec files, 24 launches in two parallel halves**; **3.8-4.3 min** on three workers across two runs on the development host, `launch-all` at 1.8 min; CI splits them across two shards of 13 browser cases each, 2.5 and 3.7 min | `pnpm test:e2e` |
 
 The two Fix-It Machine shell SVGs moved the entry from 182.5 kB to 186.4 kB (+3.9 kB, inside

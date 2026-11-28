@@ -119,12 +119,14 @@ const VIEWPORT = { width: 1024, height: 768 };
 /** The game's fixed logical canvas size (see src/main.ts). */
 const GAME_WIDTH = 1024;
 const GAME_HEIGHT = 768;
-/** Hub grid geometry, mirrored from src/game/hubGrid.ts. */
+/** Hub grid geometry, mirrored from src/game/hub/hubGridConstants.ts and gridLayout.ts. */
 const GRID_COLS = 6;
-const GRID_ROWS = 4;
+const GRID_ROWS = 5;
 const TILE_WIDTH = 144;
 const TILE_HEIGHT = 116;
 const TILE_SPACING = 22;
+const TILE_ROW_SPACING = 18;
+const WIDE_BOARD_TOP = 108;
 /** Let the Hub's entrance tweens settle before tapping. */
 const HUB_SETTLE_MS = Number(process.env.HUB_SETTLE_MS ?? 2000);
 /** Boot settles 5x1000 ms before sampling, as in docs/perf-baseline.md. */
@@ -218,14 +220,16 @@ const round = (value) => Math.round(value * 10) / 10;
 
 /** Logical tile centre -> client coordinates inside the letterboxed canvas. */
 async function tilePoint(page, tileIndex) {
+  if (tileIndex < 0 || tileIndex >= GRID_ROWS * GRID_COLS) {
+    throw new Error(`tile index ${tileIndex} is outside the ${GRID_COLS}x${GRID_ROWS} wide grid`);
+  }
   const gridWidth = GRID_COLS * TILE_WIDTH + (GRID_COLS - 1) * TILE_SPACING;
-  const gridHeight = GRID_ROWS * TILE_HEIGHT + (GRID_ROWS - 1) * TILE_SPACING;
   const startX = (GAME_WIDTH - gridWidth) / 2;
-  const startY = (GAME_HEIGHT - gridHeight) / 2;
+  const startY = WIDE_BOARD_TOP;
   const col = tileIndex % GRID_COLS;
   const row = Math.floor(tileIndex / GRID_COLS);
   const logicalX = startX + col * (TILE_WIDTH + TILE_SPACING) + TILE_WIDTH / 2;
-  const logicalY = startY + row * (TILE_HEIGHT + TILE_SPACING) + TILE_HEIGHT / 2;
+  const logicalY = startY + row * (TILE_HEIGHT + TILE_ROW_SPACING) + TILE_HEIGHT / 2;
 
   const box = await page.evaluate(() => {
     const canvas = document.querySelector("canvas");
