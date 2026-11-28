@@ -307,3 +307,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Add a parent Help overlay explaining controls, data, backup, and play-time** - [20261127-parent-help-overlay](./archive/20261127-parent-help-overlay/index.md) - feature - medium
 - [x] **Track: Add game 25: a Repeat Machine for loops** — [20261128-repeat-machine](./archive/20261128-repeat-machine/index.md) — feature — medium
 - [x] **Track: Fix wide hub grid overflow with 25th game tile** — [20261128-wide-hub-grid-overflow](./archive/20261128-wide-hub-grid-overflow/index.md) — bug — medium
+- [ ] **Track: Add a parent control for narration pace** — [20261128-narration-pace](./tracks/20261128-narration-pace/index.md) — feature — medium
