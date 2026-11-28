@@ -80,7 +80,7 @@
 - **Covers:** FR-5, FR-6, FR-7, NFR-3, AC-5, AC-6, AC-7
 - **Touches:** `docs/release-notes-v1.28.0.md`, `docs/perf-baseline.md`, `conductor/tracks/20261128-release-v1-28-0/verification/**`
 - **Verification:** full `verify_phase` gate plus `node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Validate the release record against merged evidence** — covers: FR-2, FR-5, FR-7
   - [ ] **P4.T1.1:** Cross-check PRs #109–#111, their merge order, and issue #108 against the notes and perf baseline.
