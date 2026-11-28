@@ -7,11 +7,12 @@ import {
   ENTRANCE_DURATION,
   ENTRANCE_STAGGER,
   GRID_COLS,
-  GRID_ROWS,
   TILE_HEIGHT,
   TILE_ICON_TEXTURE_SIZE,
+  TILE_ROW_SPACING,
   TILE_SPACING,
   TILE_WIDTH,
+  WIDE_BOARD_TOP,
 } from "./hubGridConstants";
 
 /**
@@ -63,14 +64,17 @@ export interface EntranceOptions {
 }
 
 /**
- * Computes the top-left origin that centers the wide 6-column, 5-row board
- * (rows 6/6/6/6 + 1) inside the given logical canvas size. The fifth row flows
- * the 25th tile on-canvas; only the origin moves, tile size and spacing stay.
+ * Computes the top-left origin of the wide 6-column, 5-row board (rows
+ * 6/6/6/6 + 1) inside the given logical canvas size. Horizontally the board
+ * stays centered; vertically its top edge anchors at WIDE_BOARD_TOP, flush
+ * below the interactive chip band, so the fifth row flows the 25th tile
+ * on-canvas and row 0 stays fully tappable. Tile size is unchanged.
  */
 export function wideGridOrigin(canvasWidth: number, canvasHeight: number): WideGridOrigin {
+  void canvasHeight;
   return {
     startX: (canvasWidth - GRID_COLS * TILE_WIDTH - (GRID_COLS - 1) * TILE_SPACING) / 2,
-    startY: (canvasHeight - GRID_ROWS * TILE_HEIGHT - (GRID_ROWS - 1) * TILE_SPACING) / 2,
+    startY: WIDE_BOARD_TOP,
   };
 }
 
@@ -80,7 +84,7 @@ export function wideTileCenter(index: number, origin: WideGridOrigin): { x: numb
   const row = Math.floor(index / GRID_COLS);
   return {
     x: origin.startX + col * (TILE_WIDTH + TILE_SPACING) + TILE_WIDTH / 2,
-    y: origin.startY + row * (TILE_HEIGHT + TILE_SPACING) + TILE_HEIGHT / 2,
+    y: origin.startY + row * (TILE_HEIGHT + TILE_ROW_SPACING) + TILE_HEIGHT / 2,
   };
 }
 

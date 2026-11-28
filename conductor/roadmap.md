@@ -24,7 +24,7 @@
 
 | id | title | type | priority | depends_on | track | origin |
 | --- | --- | --- | --- | --- | --- | --- |
-| RM-12 | Relocate chip band clear of the wide grid's fifth row | chore | medium | 20261128-wide-hub-grid-overflow | — | implement:20261128-wide-hub-grid-overflow |
+| — | No unstarted committed work: the hub grid overflow (RM-11) and chip-band overlap (RM-12) are both fixed on this track. | — | — | — | — | — |
 
 ## Later
 

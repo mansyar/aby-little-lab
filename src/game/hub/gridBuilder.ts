@@ -114,7 +114,7 @@ export function destroyPageGrid(grid: HubGrid): void {
 /**
  * Builds the wide board — rows 6/6/6/6 + 1 over all 25 tiles at 144px, for
  * desktop and tablet viewports. The fifth row flows the 25th tile on-canvas and
- * the board origin is recentered for 5 rows; no paging or tile resizing needed.
+ * the board top anchors below the chip band; no paging or tile resizing needed.
  */
 export function buildWideGrid(grid: HubGrid): void {
   const scene = grid.deps.scene;

@@ -640,7 +640,7 @@ describe("HubGrid — group chips and the filtered board", () => {
     ]);
   });
 
-  it("restores the 25-tile All board with the recentered tile positions", () => {
+  it("restores the 25-tile All board with the chip-clearing tile positions", () => {
     const { deps } = makeDeps();
     const grid = new HubGrid(deps);
     grid.classifyViewport();
@@ -650,9 +650,9 @@ describe("HubGrid — group chips and the filtered board", () => {
 
     const tiles = rects(144, 116);
     expect(tiles).toHaveLength(25);
-    // Recentered five-row origin from wideGridOrigin (see gridLayout.test.ts).
-    expect(tiles[0]?.args?.slice(0, 2)).toEqual([97, 108]);
-    expect(tiles[21]?.args?.slice(0, 2)).toEqual([595, 522]);
+    // Chip-clearing five-row origin from wideGridOrigin (see gridLayout.test.ts).
+    expect(tiles[0]?.args?.slice(0, 2)).toEqual([97, 166]);
+    expect(tiles[21]?.args?.slice(0, 2)).toEqual([595, 568]);
   });
 
   it("keeps the selected group across a viewport flip, in both directions", () => {

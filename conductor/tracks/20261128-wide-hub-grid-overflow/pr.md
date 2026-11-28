@@ -17,15 +17,22 @@ unchanged and no paging was added. The narrow/paged path is proven unaffected
 - P2 `13d35778`: new narrow-viewport bounds test over all 25 paged tiles +
   plaques (green first run); paged geometry never consumes wide constants, so
   no rebalance — no production change
+- CI-fallout fix: `WIDE_BOARD_TOP` anchor + `TILE_ROW_SPACING` 18 with a
+  chip-clearance guard — row 0 clears the interactive chip band (board
+  108–760); also resolves RM-12. Evidence:
+  `verification/ci-fix.md`.
 
 ## Tests
 
-164 files / 3530 tests green; coverage 96.94 / 90.36 / 96.35 / 98.09
+164 files / 3531 tests green; coverage stmts 96.94 / branches 90.36 / funcs
+96.35 / lines 98.09
 (gates 90/85/88/95). Full gate green: check, typecheck, build, bundle,
 module-size (2 pre-existing warnings), textures 76.42/321.00/0.238 vs
 80/322/0.5 (unchanged), PWA 16/0, docs 5/0. Integrated evidence:
 `conductor/archive/20261128-wide-hub-grid-overflow/verification/integrated.md`.
-E2E list: 59 tests / 22 files, no errors (full browser runs in CI).
+E2E list: 59 tests / 22 files, no errors; animal-trace, completion, and
+launch-all journeys verified green locally on the fixed build (full browser
+runs in CI).
 
 ## Verification
 
@@ -40,5 +47,6 @@ no assets, no storage changes. No secrets touched. Retires roadmap RM-11
 
 ## Follow-ups
 
-- Roadmap RM-12: chip band visually overlaps the recentered row 0 (controls
-  render on top and stay tappable) — relocate the chip band in a later track.
+- Roadmap RM-12 (chip-band overlap with row 0) resolved as a side effect of
+  the CI-fallout fix: the board now anchors below the chip band, so no
+  relocation track is needed.

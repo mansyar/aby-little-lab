@@ -14,15 +14,28 @@ import { textureSizeFor } from "../../utils/textureTiers";
 export const TILE_WIDTH = 144;
 /**
  * 25 tiles render as 6/6/6/6 + 1: the fifth row holds the 25th tile on-canvas
- * instead of pushing it below the fold. The 6x5 board is 668px tall (5x116 +
- * 4x22), so recentering it in the 768px canvas leaves 50px top/bottom margins
- * and keeps every tile and its sticker shelf within bounds. Tile size and
+ * instead of pushing it below the fold. The 6x5 board is 652px tall (5x116 +
+ * 4x18), so anchoring its top edge at WIDE_BOARD_TOP clears the interactive
+ * chip band (row 0 starts at 108, below the chip zones' bottom edge) and its
+ * bottom edge lands at 760 with an 8px margin. Tile size and horizontal
  * spacing are unchanged: the 25th game stays reachable from the All view, no
  * paging or shrinking required. The width is the widest that keeps 6 columns
  * inside 1024 with the 22px spacing.
  */
 export const TILE_HEIGHT = 116;
 export const TILE_SPACING = 22;
+/**
+ * Vertical gap between wide-board rows (px). Two px tighter per gap than
+ * TILE_SPACING so the 5-row board fits between the chip band and the canvas
+ * bottom; tile size is untouched.
+ */
+export const TILE_ROW_SPACING = 18;
+/**
+ * Top edge of the wide board (px): flush below the chip band
+ * (CHIP_ROW_CENTER_Y 66 + CHIP_HEIGHT 84 / 2 = 108), so row 0 tiles are fully
+ * tappable and no chip zone swallows tile taps.
+ */
+export const WIDE_BOARD_TOP = 108;
 export const GRID_COLS = 6;
 export const GRID_ROWS = 5;
 /** Display size of the game icon artwork on each tile (px). */
