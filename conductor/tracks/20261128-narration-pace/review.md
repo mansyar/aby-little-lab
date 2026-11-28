@@ -98,4 +98,4 @@ Both phases verified with Result/Checkpoint/Evidence; every `[x]` task implement
 
 | Round | Verdict | Critical | High | Medium | Low | Fixed |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | PASS WITH FINDINGS | 0 | 0 | 0 | 2 | 0 |
+| 1 | PASS WITH FINDINGS | 0 | 0 | 0 | 2 | 2 |

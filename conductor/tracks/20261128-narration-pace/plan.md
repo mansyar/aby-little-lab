@@ -53,7 +53,11 @@
 - **Covers:** F1, F2
 - **Touches:** `src/utils/backupMerge.ts`, `src/utils/storageProfiles.ts`, `src/__tests__/components/SettingsPanel.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: Resolve F1 (merge comment)** — covers: F1
-- [ ] **R1.T2: Resolve F2 (normalize on write + test)** — covers: F2
+**Result:** verified
+**Checkpoint:** fb894104
+**Evidence:** conductor/tracks/20261128-narration-pace/verification/phase-R1.md
+
+- [x] **R1.T1: Resolve F1 (merge comment)** — covers: F1
+- [x] **R1.T2: Resolve F2 (normalize on write + test)** — covers: F2
