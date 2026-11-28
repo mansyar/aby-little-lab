@@ -36,7 +36,7 @@
 - **Covers:** FR-3, NFR-2, AC-3 (Releases row; Documentation link completed in Phase 1)
 - **Touches:** `README.md`, `docs/release-notes-v1.28.0.md`
 - **Verification:** `node scripts/validate-docs.js && pnpm check`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Add the README Releases row** — covers: FR-3, AC-3
   - [ ] **P2.T1.1:** Add a 2026-11-28 Releases row summarizing #109–#111 and the accepted device gap.
