@@ -53,7 +53,7 @@
 - **Covers:** F1, F2
 - **Touches:** `src/utils/backupMerge.ts`, `src/utils/storageProfiles.ts`, `src/__tests__/components/SettingsPanel.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Resolve F1 (merge comment)** — covers: F1
 - [ ] **R1.T2: Resolve F2 (normalize on write + test)** — covers: F2
