@@ -120,7 +120,7 @@
 - **Covers:** FR-6, FR-7, FR-8, FR-9, NFR-3, NFR-5, AC-6, AC-7, AC-8, AC-9
 - **Touches:** `docs/release-notes-v1.28.0.md`, `conductor/tracks/20261128-release-v1-28-0/verification/**`
 - **Verification:** `node scripts/validate-docs.js && pnpm check` plus recorded confirmation that `v1.28.0` is absent locally and on origin
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P5.T1: Record the post-merge issue-closure procedure** — covers: FR-7, AC-7
   - [ ] **P5.T1.1:** Specify the exact #108 completion comment and require PR #110 plus the merged release PR as evidence.
