@@ -10,6 +10,7 @@ import {
   ROW_PITCH,
 } from "../../components/settings/primitives";
 import { createDefaultProfile, PROFILE_AVATAR_TEXTURES } from "../../game/profileLogic";
+import type { NarrationPace } from "../../types";
 import {
   backupFilename,
   downloadBackup,
@@ -2269,6 +2270,12 @@ describe("SettingsPanel TTS voice selection", () => {
       new SettingsPanel(scene as never);
 
       expect(findTextByLabel(scene, "Pace: Slower")).toBeDefined();
+    });
+
+    it("normalises an unknown pace to Gentle before storing it", () => {
+      setActiveProfileNarrationPace("turbo" as NarrationPace);
+
+      expect(getActiveProfile().narrationPace).toBe("gentle");
     });
 
     it("changes the rate of the next utterance without a reload", () => {

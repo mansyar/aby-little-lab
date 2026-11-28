@@ -147,8 +147,9 @@ export function mergeProfiles(local: Profile, incoming: Profile): Profile {
     progress,
     activity: mergeActivity(local.activity, incoming.activity),
     insights: mergeInsights(local.insights, incoming.insights),
-    // Like the face and the daily limit, pace is a device setting: merging
-    // another device's progress must not silently change how this one reads.
+    // On merge the pace stays with this device (local wins, normalised); a
+    // replace installs the incoming save, so restoring onto a fresh device
+    // reproduces the backed-up pace.
     narrationPace: normalizeNarrationPace(local.narrationPace),
   };
 }

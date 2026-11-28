@@ -117,13 +117,14 @@ export function switchProfile(profileId: string): boolean {
 
 /** Sets the ACTIVE profile's pace (FR-1) and applies it to the next utterance. */
 export function setActiveProfileNarrationPace(pace: NarrationPace): void {
+  const next = normalizeNarrationPace(pace);
   mutate((v2) => ({
     ...v2,
     profiles: v2.profiles.map((p) =>
-      p.id === v2.activeProfileId ? { ...p, narrationPace: pace } : p,
+      p.id === v2.activeProfileId ? { ...p, narrationPace: next } : p,
     ),
   }));
-  setNarrationPace(pace);
+  setNarrationPace(next);
 }
 
 export function getAvailableAvatars(): AvatarId[] {
