@@ -61,4 +61,4 @@ The behavior-neutral v1.28.0 release record is accurate and locally evidenced. V
 
 | Round | Verdict | Findings | Resolution |
 |---|---|---|---|
-| 1 | PASS WITH FINDINGS | F1 Low | Routed to Phase R1; pending |
+| 1 | PASS WITH FINDINGS | F1 Low | Fixed in Phase R1 (`f448e29b`); primary full gate passed; targeted re-review pending |

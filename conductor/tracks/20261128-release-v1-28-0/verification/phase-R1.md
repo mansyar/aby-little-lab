@@ -45,3 +45,27 @@ None. Both touched files are inside the phase `Touches` set; no Conductor state,
 - Documentation-only fix; no TDD test required, per the brief.
 - No shipped version is claimed and the release stays DRAFT. Physical-device smoke remains `SKIPPED — accepted gap`; emulated browser journeys and headed first-tap evidence are local candidate facts only.
 - No shell command was denied; no retries, rephrasing, splitting or workarounds were needed.
+
+## Primary verification
+
+The primary independently ran the full configured gate on the final R1 tree:
+
+```text
+pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js
+```
+
+Result: **PASS**, exit 0.
+
+- Biome: 393 files, no fixes.
+- TypeScript: app and e2e projects clean.
+- Tests: 165 files / 3,559 tests passed.
+- Coverage: statements 96.91% / branches 90.23% / functions 96.22% / lines 98.06%; all gates passed.
+- Build: 501 modules; shell `index-B7LXOJIw.js` 194.87 kB / 48.95 kB gzip.
+- Bundle: PASS, shell 190.3 kB ≤ 200 kB.
+- Module-size: PASS with 3 pre-existing warn-only notes.
+- Textures: PASS, 76.42 / 321.00 MiB, ratio 0.238.
+- PWA: PASS, 16/0; 55/55 JavaScript chunks precached; 67 entries.
+- Docs: PASS, 5/0.
+- Raw log: `.conductor/evidence/phase-R1-final-gate.log`.
+
+F1 is resolved; a targeted read-only re-review follows this acceptance.

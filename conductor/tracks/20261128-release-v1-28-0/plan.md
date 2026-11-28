@@ -102,12 +102,16 @@
 - **Covers:** NFR-2
 - **Touches:** `README.md`, `conductor/tracks/20261128-release-v1-28-0/verification/phase-R1.md`
 - **Verification:** `node scripts/validate-docs.js && pnpm check`; primary also runs the full `verify_phase` gate.
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: Correct the README candidate-status wording** — covers: NFR-2
-  - [ ] **R1.T1.1:** Update README lines 241 and 292 to say local candidate verification passed while CI, tag, deploy, and live verification remain pending; retain DRAFT and `SKIPPED — accepted gap`.
-- [ ] **R1.T2: Verify and record the fix** — covers: NFR-2
-  - [ ] **R1.T2.1:** Run docs/static checks, record evidence, and obtain primary full-gate verification.
+- [x] **R1.T1: Correct the README candidate-status wording** — covers: NFR-2
+  - [x] **R1.T1.1:** Update README lines 241 and 292 to say local candidate verification passed while CI, tag, deploy, and live verification remain pending; retain DRAFT and `SKIPPED — accepted gap`.
+- [x] **R1.T2: Verify and record the fix** — covers: NFR-2
+  - [x] **R1.T2.1:** Run docs/static checks, record evidence, and obtain primary full-gate verification.
+
+**Result:** verified — F1 resolved; both README entries now distinguish completed local candidate verification from pending CI/tag/deploy/live work. Docs/static checks and the primary full gate passed (165 files / 3,559 tests; coverage 96.91/90.23/96.22/98.06; all validators green).
+**Checkpoint:** `f448e29b`
+**Evidence:** `conductor/tracks/20261128-release-v1-28-0/verification/phase-R1.md`
 
 ## Phase 5: Post-merge ship runbook
 
