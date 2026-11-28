@@ -6,6 +6,7 @@
 - Branch: `chore/20261128-release-v1-28-0`
 - Phase base: `219733a9208219128f9f6156bab5eaf5077ab3af`
 - Candidate measurement head: `60875e34`
+- Phase checkpoint: `e62d349a`
 - Result: **verified** — full gate, corrected headed first tap, four-project browser matrix, measured documentation, and final post-doc gate all passed.
 
 ## Commands
