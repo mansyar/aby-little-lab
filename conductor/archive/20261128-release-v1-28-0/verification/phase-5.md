@@ -94,7 +94,7 @@ A `## Post-merge Ship Runbook` section was added to
 ## Evidence paths
 
 - `docs/release-notes-v1.28.0.md` — DRAFT notes with the new `Post-merge Ship Runbook` section.
-- `conductor/tracks/20261128-release-v1-28-0/verification/phase-4.md` — issue #108 comment template and PR/merge boundary carried forward verbatim.
+- `conductor/archive/20261128-release-v1-28-0/verification/phase-4.md` — issue #108 comment template and PR/merge boundary carried forward verbatim.
 - `.git/refs/tags` and `.git/packed-refs` — read-only local tag-absence confirmation.
 
 ## Deviations

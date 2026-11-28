@@ -40,7 +40,7 @@
 - `README.md` — Documentation index gains the v1.28.0 DRAFT notes link only; no Releases table row added in Phase 1.
 - `vite.config.ts` — inspected, unchanged (version define at lines 4 and 10).
 - `pnpm-lock.yaml` — inspected, unchanged; no version field to bump.
-- `conductor/tracks/20261128-release-v1-28-0/verification/phase-1.md` — this report.
+- `conductor/archive/20261128-release-v1-28-0/verification/phase-1.md` — this report.
 - No binary or large log artifacts were produced; nothing was written under `.conductor/evidence/`.
 
 ## Deviations

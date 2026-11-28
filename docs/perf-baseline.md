@@ -55,8 +55,8 @@ identical zero-retry matrix was rerun once under NFR-3 and passed 60/60. No
 runtime source, test expectation or browser behavior was changed.
 
 Raw evidence:
-`conductor/tracks/20261128-release-v1-28-0/verification/first-tap-headed.json`,
-`conductor/tracks/20261128-release-v1-28-0/verification/first-tap-headed.stdout.log`,
+`conductor/archive/20261128-release-v1-28-0/verification/first-tap-headed.json`,
+`conductor/archive/20261128-release-v1-28-0/verification/first-tap-headed.stdout.log`,
 `.conductor/evidence/phase-3-browser-summary.json` and the four
 `.conductor/evidence/phase-3-browser-<project>.log` files. Evidence paths are
 given in code form; clickable archived evidence links are finalized after

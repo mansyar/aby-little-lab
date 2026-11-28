@@ -34,8 +34,8 @@
 
 - `README.md` — v1.28.0 Releases row, commit `772d8c9d`.
 - `docs/release-notes-v1.28.0.md` — three archived-record links plus issue #108, commit `4c321cb7`.
-- `conductor/tracks/20261128-release-v1-28-0/verification/phase-2.md` — this report.
-- `conductor/tracks/20261128-release-v1-28-0/verification/phase-1.md` — format reference; unchanged.
+- `conductor/archive/20261128-release-v1-28-0/verification/phase-2.md` — this report.
+- `conductor/archive/20261128-release-v1-28-0/verification/phase-1.md` — format reference; unchanged.
 - No binary or large log artifacts were produced; nothing was written under `.conductor/evidence/`.
 
 ## Deviations

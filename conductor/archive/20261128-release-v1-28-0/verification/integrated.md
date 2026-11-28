@@ -48,7 +48,7 @@ $env:TAP_HEADED="1"; $env:TAP_INERT_IDLE="1"; node scripts/measure-first-tap.mjs
 - Cold median total: **202.4 ms**.
 - Worst cold total: **Find the Word, 273.2 ms ≤ 400 ms**.
 - Boot median 450.1 ms; 4×-throttled boot median 1957.1 ms.
-- Raw evidence: `conductor/tracks/20261128-release-v1-28-0/verification/first-tap-headed.json` and `first-tap-headed.stdout.log` (rewritten to the archive path at completion).
+- Raw evidence: `conductor/archive/20261128-release-v1-28-0/verification/first-tap-headed.json` and `first-tap-headed.stdout.log`.
 
 ## Local browser matrix
 

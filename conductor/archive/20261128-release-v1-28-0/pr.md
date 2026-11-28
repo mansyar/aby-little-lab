@@ -35,14 +35,14 @@ This release PR is behavior-neutral: it bumps the version, updates release docum
 - Local browser matrix: **PASS after one caused rerun** — Chromium 30/30, WebKit 10/10, Firefox 10/10, mobile Chromium 10/10. The first attempt's single boot-toast timeout and successful identical rerun are retained.
 - Physical iOS Safari, Android Chrome and Fire tablet testing: **SKIPPED — accepted gap**. No real-device pass is claimed.
 
-Raw evidence is retained under `conductor/tracks/20261128-release-v1-28-0/verification/` and will move with the track archive at completion.
+Raw evidence is retained under `conductor/archive/20261128-release-v1-28-0/verification/`.
 
 ## Required CI
 
 - Quality Gates
 - Browser Journeys (all shards/projects)
 
-CI remains authoritative. Do not merge until every required check is green.
+CI remains authoritative. All required checks for PR #112 passed before track completion.
 
 ## Post-merge boundary
 

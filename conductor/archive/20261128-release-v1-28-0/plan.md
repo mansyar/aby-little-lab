@@ -27,7 +27,7 @@
 
 **Result:** verified — `package.json` and the built shell report 1.28.0; DRAFT notes cover #109–#111 in merge order with no unmeasured claims; README indexes the notes. Primary full gate: 165 files / 3,559 tests, coverage 96.91/90.23/96.22/98.06, build and all validators PASS.
 **Checkpoint:** `c9f96919`
-**Evidence:** `conductor/tracks/20261128-release-v1-28-0/verification/phase-1.md`
+**Evidence:** `conductor/archive/20261128-release-v1-28-0/verification/phase-1.md`
 
 ## Phase 2: README and release documentation truth
 
@@ -46,14 +46,14 @@
 
 **Result:** verified — README indexes v1.28.0 in Documentation and Releases; notes link all three archived tracks and issue #108; `validate-docs` 5/0 and `pnpm check` pass. Primary full gate: 165 files / 3,559 tests, coverage 96.91/90.23/96.22/98.06, build and all validators PASS.
 **Checkpoint:** `b99e27e5`
-**Evidence:** `conductor/tracks/20261128-release-v1-28-0/verification/phase-2.md`
+**Evidence:** `conductor/archive/20261128-release-v1-28-0/verification/phase-2.md`
 
 ## Phase 3: Release-candidate verification and performance baseline
 
 - **Goal:** the final candidate has a full green gate, measured first-tap evidence, browser evidence, and a truthful perf-baseline update.
 - **Depends on:** Phase 2
 - **Covers:** FR-4, FR-5, NFR-2, NFR-3, NFR-4, AC-4, AC-5
-- **Touches:** `scripts/measure-first-tap.mjs`, `docs/perf-baseline.md`, `docs/release-notes-v1.28.0.md`, `conductor/tracks/20261128-release-v1-28-0/verification/**`
+- **Touches:** `scripts/measure-first-tap.mjs`, `docs/perf-baseline.md`, `docs/release-notes-v1.28.0.md`, `conductor/archive/20261128-release-v1-28-0/verification/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js` plus `TAP_HEADED=1 TAP_INERT_IDLE=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10`
 - **Status:** verified
 
@@ -71,14 +71,14 @@
 
 **Result:** verified — exact full gate passed before and after measured docs (165 files / 3,559 tests; coverage 96.91/90.20/96.22/98.06); corrected headed first tap passed 50 cold / 0 warm with worst 273.2 ms; browser matrix passed 60/60 on its single caused rerun; v1.28.0 perf section and DRAFT notes contain measured local facts only.
 **Checkpoint:** `e62d349a`
-**Evidence:** `conductor/tracks/20261128-release-v1-28-0/verification/phase-3.md`
+**Evidence:** `conductor/archive/20261128-release-v1-28-0/verification/phase-3.md`
 
 ## Phase 4: Review, PR, and issue-closure readiness
 
 - **Goal:** the final candidate has review-ready evidence, a complete PR body, explicit CI expectations, and an issue #108 closure record; no merge occurs in this phase.
 - **Depends on:** Phase 3
 - **Covers:** FR-5, FR-6, FR-7, NFR-3, AC-5, AC-6, AC-7
-- **Touches:** `docs/release-notes-v1.28.0.md`, `docs/perf-baseline.md`, `conductor/tracks/20261128-release-v1-28-0/verification/**`
+- **Touches:** `docs/release-notes-v1.28.0.md`, `docs/perf-baseline.md`, `conductor/archive/20261128-release-v1-28-0/verification/**`
 - **Verification:** full `verify_phase` gate plus `node scripts/validate-docs.js`
 - **Status:** verified
 
@@ -93,14 +93,14 @@
 
 **Result:** verified — merged order #109 → #110 → #111 and open issue #108 cross-checked; strict-review pack, PR body and post-merge runbook prepared. Exact full gate passed on the final Phase 4 tree (165 files / 3,559 tests; coverage 96.91/90.23/96.22/98.06; all validators green).
 **Checkpoint:** `cf3f8a37`
-**Evidence:** `conductor/tracks/20261128-release-v1-28-0/verification/phase-4.md`
+**Evidence:** `conductor/archive/20261128-release-v1-28-0/verification/phase-4.md`
 
 ## Phase R1: Resolve strict-review documentation finding
 
 - **Goal:** README truthfully distinguishes completed local candidate verification from pending CI/tag/deploy/live work.
 - **Depends on:** Phase 4 and review round 1
 - **Covers:** NFR-2
-- **Touches:** `README.md`, `conductor/tracks/20261128-release-v1-28-0/verification/phase-R1.md`
+- **Touches:** `README.md`, `conductor/archive/20261128-release-v1-28-0/verification/phase-R1.md`
 - **Verification:** `node scripts/validate-docs.js && pnpm check`; primary also runs the full `verify_phase` gate.
 - **Status:** verified
 
@@ -111,14 +111,14 @@
 
 **Result:** verified — F1 resolved; both README entries now distinguish completed local candidate verification from pending CI/tag/deploy/live work. Docs/static checks and the primary full gate passed (165 files / 3,559 tests; coverage 96.91/90.23/96.22/98.06; all validators green).
 **Checkpoint:** `f448e29b`
-**Evidence:** `conductor/tracks/20261128-release-v1-28-0/verification/phase-R1.md`
+**Evidence:** `conductor/archive/20261128-release-v1-28-0/verification/phase-R1.md`
 
 ## Phase 5: Post-merge ship runbook
 
 - **Goal:** a preflighted runbook exists for issue closure, separate tag/deploy authorization, immutable tagging, CI/deploy/live verification, and FINAL notes; no external mutation occurs in this phase.
 - **Depends on:** Phase 4
 - **Covers:** FR-6, FR-7, FR-8, FR-9, NFR-3, NFR-5, AC-6, AC-7, AC-8, AC-9
-- **Touches:** `docs/release-notes-v1.28.0.md`, `conductor/tracks/20261128-release-v1-28-0/verification/**`
+- **Touches:** `docs/release-notes-v1.28.0.md`, `conductor/archive/20261128-release-v1-28-0/verification/**`
 - **Verification:** `node scripts/validate-docs.js && pnpm check` plus recorded confirmation that `v1.28.0` is absent locally and on origin
 - **Status:** verified
 
@@ -133,7 +133,7 @@
 
 **Checkpoint:** `532a7aae`
 
-**Evidence:** `conductor/tracks/20261128-release-v1-28-0/verification/phase-5.md`
+**Evidence:** `conductor/archive/20261128-release-v1-28-0/verification/phase-5.md`
 
 ## Post-merge execution runbook
 
