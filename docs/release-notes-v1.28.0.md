@@ -52,7 +52,7 @@ Nothing to install by hand: this release is the PWA shell plus its content-addre
 - Physical-device coverage: **SKIPPED — accepted gap.** No physical iOS Safari, Android Chrome or Fire tablet pass is claimed. See [device-testing-checklist.md](device-testing-checklist.md).
 - Tag, deploy and live verification: pending. No tag commit, CI run, deploy, HTTP status, served version or shell hash is claimed here.
 
-Measured evidence is recorded in [the v1.28.0 performance-baseline section](perf-baseline.md#v1280-release-candidate-2026-11-28) and the release track's Phase 3 verification report.
+Measured evidence is recorded in [the v1.28.0 performance-baseline section](perf-baseline.md#v1280-release-candidate-2026-11-28) and the release track's [integrated verification report](../conductor/tracks/20261128-release-v1-28-0/verification/integrated.md).
 
 ## Known Issues
 
