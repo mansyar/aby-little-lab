@@ -80,16 +80,20 @@
 - **Covers:** FR-5, FR-6, FR-7, NFR-3, AC-5, AC-6, AC-7
 - **Touches:** `docs/release-notes-v1.28.0.md`, `docs/perf-baseline.md`, `conductor/tracks/20261128-release-v1-28-0/verification/**`
 - **Verification:** full `verify_phase` gate plus `node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: Validate the release record against merged evidence** — covers: FR-2, FR-5, FR-7
-  - [ ] **P4.T1.1:** Cross-check PRs #109–#111, their merge order, and issue #108 against the notes and perf baseline.
-- [ ] **P4.T2: Prepare the strict-review evidence pack** — covers: FR-6, AC-6
-  - [ ] **P4.T2.1:** Record the final diff, requirement matrix, gate output, and known accepted device gap for `conductor-review`.
-- [ ] **P4.T3: Prepare the release PR body and CI checklist** — covers: FR-6, AC-6
-  - [ ] **P4.T3.1:** Draft the `chore(release): ship v1.28.0` body with Quality Gates and Browser Journeys as required checks.
-- [ ] **P4.T4: Prepare the merge and issue-closure runbook** — covers: FR-6, FR-7, NFR-3, AC-6, AC-7
-  - [ ] **P4.T4.1:** Record the explicit Merge now / Leave open / Stop boundary, configured merge method, branch cleanup, and the #108 completion comment linking #110 and the release PR.
+- [x] **P4.T1: Validate the release record against merged evidence** — covers: FR-2, FR-5, FR-7
+  - [x] **P4.T1.1:** Cross-check PRs #109–#111, their merge order, and issue #108 against the notes and perf baseline.
+- [x] **P4.T2: Prepare the strict-review evidence pack** — covers: FR-6, AC-6
+  - [x] **P4.T2.1:** Record the final diff, requirement matrix, gate output, and known accepted device gap for `conductor-review`.
+- [x] **P4.T3: Prepare the release PR body and CI checklist** — covers: FR-6, AC-6
+  - [x] **P4.T3.1:** Draft the `chore(release): ship v1.28.0` body with Quality Gates and Browser Journeys as required checks.
+- [x] **P4.T4: Prepare the merge and issue-closure runbook** — covers: FR-6, FR-7, NFR-3, AC-6, AC-7
+  - [x] **P4.T4.1:** Record the explicit Merge now / Leave open / Stop boundary, configured merge method, branch cleanup, and the #108 completion comment linking #110 and the release PR.
+
+**Result:** verified — merged order #109 → #110 → #111 and open issue #108 cross-checked; strict-review pack, PR body and post-merge runbook prepared. Exact full gate passed on the final Phase 4 tree (165 files / 3,559 tests; coverage 96.91/90.23/96.22/98.06; all validators green).
+**Checkpoint:** `cf3f8a37`
+**Evidence:** `conductor/tracks/20261128-release-v1-28-0/verification/phase-4.md`
 
 ## Phase 5: Post-merge ship runbook
 
