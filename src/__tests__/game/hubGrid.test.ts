@@ -59,7 +59,7 @@ function makeDeps(overrides: Partial<HubGridDeps> = {}): {
   return { deps, scene, activate };
 }
 
-describe("HubGrid — classic wide 6x4 grid", () => {
+describe("HubGrid — classic wide 6-column/5-row board", () => {
   beforeEach(() => {
     stubMatchMedia(false);
     localStorage.clear();
@@ -640,7 +640,7 @@ describe("HubGrid — group chips and the filtered board", () => {
     ]);
   });
 
-  it("restores the 25-tile All board with the original tile positions", () => {
+  it("restores the 25-tile All board with the chip-clearing tile positions", () => {
     const { deps } = makeDeps();
     const grid = new HubGrid(deps);
     grid.classifyViewport();
@@ -650,9 +650,9 @@ describe("HubGrid — group chips and the filtered board", () => {
 
     const tiles = rects(144, 116);
     expect(tiles).toHaveLength(25);
-    // The same origin the pre-track grid computed (see gridLayout.test.ts).
-    expect(tiles[0]?.args?.slice(0, 2)).toEqual([97, 177]);
-    expect(tiles[21]?.args?.slice(0, 2)).toEqual([595, 591]);
+    // Chip-clearing five-row origin from wideGridOrigin (see gridLayout.test.ts).
+    expect(tiles[0]?.args?.slice(0, 2)).toEqual([97, 166]);
+    expect(tiles[21]?.args?.slice(0, 2)).toEqual([595, 568]);
   });
 
   it("keeps the selected group across a viewport flip, in both directions", () => {

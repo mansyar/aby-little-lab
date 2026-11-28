@@ -36,7 +36,7 @@ import { createShelfSticker, PAGED_STICKER_DISPLAY_SIZE } from "./stickerShelf";
 
 /**
  * Grid construction and teardown for the Hub's two layouts, extracted from the
- * `hubGrid.ts` orchestrator: the wide 6x4 build, the paged 5x2 build (with its
+ * `hubGrid.ts` orchestrator: the wide 6-column/5-row build, the paged 5x2 build (with its
  * slide-in), page-dot creation, the per-build shelf (delegated to
  * `stickerShelf.ts`), and the object-list teardowns.
  *
@@ -112,9 +112,9 @@ export function destroyPageGrid(grid: HubGrid): void {
 }
 
 /**
- * Builds the 6x4 wide grid — rows 6/6/6/6 over the first 24 tiles at 144px, for
- * desktop and tablet viewports. The 25th tile falls on a fifth row below the
- * fold and is reached through the Thinking chip filter.
+ * Builds the wide board — rows 6/6/6/6 + 1 over all 25 tiles at 144px, for
+ * desktop and tablet viewports. The fifth row flows the 25th tile on-canvas and
+ * the board top anchors below the chip band; no paging or tile resizing needed.
  */
 export function buildWideGrid(grid: HubGrid): void {
   const scene = grid.deps.scene;

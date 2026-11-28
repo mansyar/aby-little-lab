@@ -60,12 +60,12 @@ describe("groupLayout — chip row", () => {
     expect(Math.min(CHIP_WIDTH, CHIP_HEIGHT)).toBeGreaterThanOrEqual(64);
   });
 
-  it("sits entirely inside the top band, above the grid's first row", () => {
+  it("sits entirely inside the top band", () => {
     const top = CHIP_ROW_CENTER_Y - CHIP_HEIGHT / 2;
     const bottom = CHIP_ROW_CENTER_Y + CHIP_HEIGHT / 2;
     expect(top).toBeGreaterThanOrEqual(20);
     expect(bottom).toBeLessThanOrEqual(116); // avatar chip / Settings band
-    expect(bottom).toBeLessThan(119); // the wide grid's first row top
+    expect(bottom).toBeLessThan(119); // legacy first-row-top bound, kept as a guard
     expect(CHIP_LABEL_Y + 8).toBeLessThanOrEqual(bottom);
   });
 });

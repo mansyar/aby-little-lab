@@ -1,6 +1,6 @@
 # Conductor Roadmap
 
-<!-- next-rm-id: 12 -->
+<!-- next-rm-id: 13 -->
 
 > Planned and future work. The roadmap stores **intent** — ordering, priority,
 > and dependencies — not live state. `conductor-status` joins every entry whose
@@ -24,7 +24,7 @@
 
 | id | title | type | priority | depends_on | track | origin |
 | --- | --- | --- | --- | --- | --- | --- |
-| RM-11 | Fix wide hub grid overflow with 25th game tile | bug | medium | 20261128-repeat-machine | — | review:20261128-repeat-machine |
+| — | No unstarted committed work: the hub grid overflow (RM-11) and chip-band overlap (RM-12) are both fixed on this track. | — | — | — | — | — |
 
 ## Later
 
