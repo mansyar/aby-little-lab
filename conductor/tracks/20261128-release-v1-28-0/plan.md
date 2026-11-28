@@ -36,12 +36,17 @@
 - **Covers:** FR-3, NFR-2, AC-3 (Releases row; Documentation link completed in Phase 1)
 - **Touches:** `README.md`, `docs/release-notes-v1.28.0.md`
 - **Verification:** `node scripts/validate-docs.js && pnpm check`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Add the README Releases row** — covers: FR-3, AC-3
-  - [ ] **P2.T1.1:** Add a 2026-11-28 Releases row summarizing #109–#111 and the accepted device gap.
-- [ ] **P2.T2: Link release evidence** — covers: FR-2, FR-3
-  - [ ] **P2.T2.1:** Link the three archived track records and issue #108 from the notes without claiming unmeasured verification.
+- [x] **P2.T1: Add the README Releases row** — covers: FR-3, AC-3
+  - [x] **P2.T1.1:** Add a 2026-11-28 Releases row summarizing #109–#111 and the accepted device gap.
+- [x] **P2.T2: Link release evidence** — covers: FR-2, FR-3
+  - [x] **P2.T2.1:** Link the three archived track records and issue #108 from the notes without claiming unmeasured verification.
+  - [x] **P2.T2.2:** Preserve all existing parent-facing copy and placeholders; do not fill candidate/perf/CI/ship figures in this phase.
+
+**Result:** verified — README indexes v1.28.0 in Documentation and Releases; notes link all three archived tracks and issue #108; `validate-docs` 5/0 and `pnpm check` pass. Primary full gate: 165 files / 3,559 tests, coverage 96.91/90.23/96.22/98.06, build and all validators PASS.
+**Checkpoint:** `b99e27e5`
+**Evidence:** `conductor/tracks/20261128-release-v1-28-0/verification/phase-2.md`
 
 ## Phase 3: Release-candidate verification and performance baseline
 

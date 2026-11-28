@@ -49,3 +49,11 @@ None. All changes stayed inside the Phase 2 `Touches` paths (`README.md`, `docs/
 - `Status: DRAFT`, `Tag: pending`, Release Verification placeholders and all parent-facing copy were left untouched, as required by P2.T2.2.
 - No `plan.md`, `spec.md`, `metadata.json`, `tracks.md`, `conductor/index.md`, product doc, `review.md` or `pr.md` was edited. The branch was not switched.
 - Verification was run on the final reviewed working tree before the task commits; the two task commits contain exactly the reviewed file changes.
+
+## Primary verification
+
+- Independent phase verification: `node scripts/validate-docs.js && pnpm check` — PASS (5/0 document checks; Biome 393 files clean).
+- Independent full `verify_phase` gate — PASS: `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`.
+- Test evidence: 165 files / 3,559 tests passed; coverage 96.91 statements / 90.23 branches / 96.22 functions / 98.06 lines (gates 90/85/88/95).
+- Build/guard evidence: 501 modules; shell entry 190.3 kB; module-size PASS with three warning-only notes; textures 76.42/321.00 MiB, ratio 0.238; PWA 16/0; docs 5/0.
+- Phase checkpoint after primary squash: `b99e27e5`; diff from `742dc9fd` is three files / 55 insertions; working tree clean.
