@@ -55,7 +55,7 @@
 - **Covers:** FR-4, FR-5, NFR-2, NFR-3, NFR-4, AC-4, AC-5
 - **Touches:** `docs/perf-baseline.md`, `docs/release-notes-v1.28.0.md`, `conductor/tracks/20261128-release-v1-28-0/verification/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js` plus `TAP_HEADED=1 TAP_INERT_IDLE=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Run and retain the full configured gate** — covers: FR-5, NFR-4, AC-5
   - [ ] **P3.T1.1:** Run the exact `verify_phase` command on the final candidate and retain the raw log.
