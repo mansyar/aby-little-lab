@@ -14,14 +14,18 @@
 - **Covers:** FR-2, FR-3, FR-5, NFR-1, NFR-3, AC-2, AC-3, AC-5
 - **Touches:** `src/types/index.ts`, `src/game/narrationPace.ts`, `src/utils/speech.ts`, `src/game/storage.ts`, `src/__tests__/utils/speech.test.ts`, `src/__tests__/game/narrationPace.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Pace model and rate mapping** — covers: FR-2
-  - [ ] **P1.T1.1: `NarrationPace` type (`slower`/`gentle`/`standard`) with the approved rate table**
-  - [ ] **P1.T1.2: Wire the active pace into all four speak paths**
-- [ ] **P1.T2: Per-profile persistence and normalisation** — covers: FR-3, FR-5
-  - [ ] **P1.T2.1: Additive `Profile` field with Gentle backfill and unknown-value normaliser**
-  - [ ] **P1.T2.2: SFX-off and speech-unsupported paths unchanged (guard tests)**
+**Result:** verified
+**Checkpoint:** 5a05c92c
+**Evidence:** conductor/tracks/20261128-narration-pace/verification/phase-1.md
+
+- [x] **P1.T1: Pace model and rate mapping** — covers: FR-2
+  - [x] **P1.T1.1: `NarrationPace` type (`slower`/`gentle`/`standard`) with the approved rate table**
+  - [x] **P1.T1.2: Wire the active pace into all four speak paths**
+- [x] **P1.T2: Per-profile persistence and normalisation** — covers: FR-3, FR-5
+  - [x] **P1.T2.1: Additive `Profile` field with Gentle backfill and unknown-value normaliser**
+  - [x] **P1.T2.2: SFX-off and speech-unsupported paths unchanged (guard tests)**
 
 ## Phase 2: Settings control, profile switching, backup/restore
 
