@@ -9,11 +9,11 @@
 
 ## Phase 1: Version metadata and DRAFT release notes
 
-- **Goal:** `package.json` reports 1.28.0 and complete DRAFT notes exist for PRs #109–#111.
+- **Goal:** `package.json` reports 1.28.0, complete DRAFT notes exist for PRs #109–#111, and README indexes the notes so docs validation passes.
 - **Depends on:** none
-- **Covers:** FR-1, FR-2, NFR-1, AC-1, AC-2
-- **Touches:** `package.json`, `docs/release-notes-v1.28.0.md`
-- **Verification:** `pnpm check && pnpm typecheck`
+- **Covers:** FR-1, FR-2, FR-3, NFR-1, AC-1, AC-2, AC-3 (Documentation link only)
+- **Touches:** `package.json`, `docs/release-notes-v1.28.0.md`, `README.md`
+- **Verification:** `node scripts/validate-docs.js && pnpm check && pnpm typecheck`
 - **Status:** in_progress
 
 - [ ] **P1.T1: Bump the release version** — covers: FR-1, AC-1
@@ -23,19 +23,19 @@
   - [ ] **P1.T2.1:** Use Status DRAFT, Tag pending, Base v1.27.0 (`019a26cd`, 2026-11-27), and date 2026-11-28.
   - [ ] **P1.T2.2:** Add parent-facing sections for PR #109 Repeat Machine, PR #110 Hub grid/tap fix, and PR #111 narration pace in merge order.
   - [ ] **P1.T2.3:** Include Installation, Release Verification placeholders, Known Issues, no-migration language, and `SKIPPED — accepted gap` device policy.
+  - [ ] **P1.T2.4:** Add the v1.28.0 notes link to README Documentation so `validate-docs` passes during Phase 1 — covers: FR-3, AC-3.
 
 ## Phase 2: README and release documentation truth
 
 - **Goal:** README indexes v1.28.0 and all release-document links resolve.
 - **Depends on:** Phase 1
-- **Covers:** FR-3, NFR-2, AC-3
+- **Covers:** FR-3, NFR-2, AC-3 (Releases row; Documentation link completed in Phase 1)
 - **Touches:** `README.md`, `docs/release-notes-v1.28.0.md`
 - **Verification:** `node scripts/validate-docs.js && pnpm check`
 - **Status:** pending
 
-- [ ] **P2.T1: Add the README release entries** — covers: FR-3, AC-3
-  - [ ] **P2.T1.1:** Add the v1.28.0 notes link to Documentation.
-  - [ ] **P2.T1.2:** Add a 2026-11-28 Releases row summarizing #109–#111 and the accepted device gap.
+- [ ] **P2.T1: Add the README Releases row** — covers: FR-3, AC-3
+  - [ ] **P2.T1.1:** Add a 2026-11-28 Releases row summarizing #109–#111 and the accepted device gap.
 - [ ] **P2.T2: Link release evidence** — covers: FR-2, FR-3
   - [ ] **P2.T2.1:** Link the three archived track records and issue #108 from the notes without claiming unmeasured verification.
 
