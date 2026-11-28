@@ -7,7 +7,7 @@
 
 Three PRs have merged since v1.27.0. All three are parent-visible: a 25th game called Repeat Machine, a hub-grid fix that keeps every tile visible and tappable on wide screens, and a per-profile narration pace control in Settings. The games, rules and controls are otherwise unchanged, and nothing new is asked of a child. Profiles, stickers, settings and saves carry over without migration.
 
-This is a draft. No release-candidate, CI, tag, deploy or live result is claimed here; those sections are placeholders until verification is measured and recorded.
+This remains a DRAFT. Candidate verification is measured and recorded below; CI, tag, deploy and live results are still pending, so no shipped version or production hash is claimed.
 
 ## What Shipped Since v1.27.0
 
@@ -41,19 +41,22 @@ Nothing to install by hand: this release is the PWA shell plus its content-addre
 
 ## Release Verification
 
-> **Pending.** This is a DRAFT. No release-candidate build, CI run, tag, deploy or live result has been measured or recorded for v1.28.0 in this document. The bullets below are placeholders to be filled with measured evidence before the Status changes to FINAL.
+> **Candidate verified locally; ship gate pending.** Status remains DRAFT. The
+> integrated gate, headed first-tap measurement and four-project local browser
+> matrix passed. PR CI, the immutable tag, Coolify deploy and live verification
+> have not run yet.
 
-- Integrated gate: pending. No Biome, TypeScript, Vitest, coverage, build, bundle, module-size, texture, PWA or docs result is claimed here.
-- Boot and first tap: pending. No boot, strict-header or headed first-tap figure is claimed here.
-- Browser matrix: pending. No local or CI browser result is claimed here.
+- Integrated gate: **PASS** — Biome checked 393 files; application and E2E TypeScript projects passed; Vitest passed 165 files / 3,559 tests; coverage reached 96.91 % statements, 90.20 % branches, 96.22 % functions and 98.06 % lines. Vite built 501 modules. Bundle, module-size, texture, PWA and docs validators all passed; the shell entry is 190.3 kB via `validate-bundle`, PWA validation is 16/0 with 55 chunks precached, and texture figures remain 76.42 / 321.00 MiB with ratio 0.238.
+- Boot and first tap: **PASS** — the corrected headed cold-control run recorded 50 cold / 0 warm samples, exactly 10 per game. Aggregate cold p95 response / finished / total was 40.9 / 32.4 / 265.2 ms, cold median total was 202.4 ms, and the worst cold total was 273.2 ms (Find the Word), inside the 400 ms gate. Boot median was 450.1 ms; 4×-throttled boot median was 1957.1 ms.
+- Browser matrix: **PASS after one caused rerun** — Chromium 30/30, WebKit 10/10, Firefox 10/10 and mobile Chromium 10/10, 60/60 total with zero local retries. The first attempt's single boot-toast timeout and the identical successful rerun are retained in the release track. This is local emulated-browser evidence; PR CI remains authoritative.
 - Physical-device coverage: **SKIPPED — accepted gap.** No physical iOS Safari, Android Chrome or Fire tablet pass is claimed. See [device-testing-checklist.md](device-testing-checklist.md).
 - Tag, deploy and live verification: pending. No tag commit, CI run, deploy, HTTP status, served version or shell hash is claimed here.
 
-Measured figures and archived release evidence will be linked here once recorded.
+Measured evidence is recorded in [the v1.28.0 performance-baseline section](perf-baseline.md#v1280-release-candidate-2026-11-28) and the release track's Phase 3 verification report.
 
 ## Known Issues
 
 The full list of known issues lives in the README's [Known Issues](../README.md#known-issues) section, and planned work lives in [conductor/roadmap.md §10](../conductor/roadmap.md#10-roadmap); nothing below duplicates either.
 
 - Physical iOS Safari, Android Chrome and Fire tablet behaviour remains an accepted gap; see [device-testing-checklist.md](device-testing-checklist.md). No physical-device pass is claimed.
-- This is a DRAFT with verification still pending. No production-retention result was measured by these three PRs.
+- Candidate verification is green locally; CI, tag, deploy and live verification remain pending while this document is DRAFT.
