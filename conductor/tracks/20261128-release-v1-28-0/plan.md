@@ -59,45 +59,61 @@
   - [ ] **P3.T4.1:** Add the dated v1.28.0 candidate section and current living figures to `docs/perf-baseline.md` without rewriting historical rows.
   - [ ] **P3.T4.2:** Fill the notes' Release Verification section with measured candidate facts; keep Status DRAFT and Tag pending.
 
-## Phase 4: Strict review, PR, merge, and issue closure
+## Phase 4: Review, PR, and issue-closure readiness
 
-- **Goal:** review passes, PR CI is green, the user-approved merge lands, and issue #108 is closed.
+- **Goal:** the final candidate has review-ready evidence, a complete PR body, explicit CI expectations, and an issue #108 closure record; no merge occurs in this phase.
 - **Depends on:** Phase 3
-- **Covers:** FR-6, FR-7, NFR-3, AC-6, AC-7
-- **Touches:** `conductor/tracks/20261128-release-v1-28-0/**`, `docs/release-notes-v1.28.0.md`, `docs/perf-baseline.md`, GitHub issue #108
-- **Verification:** full `verify_phase` gate plus `conductor-review` PASS and all required PR checks green
+- **Covers:** FR-5, FR-6, FR-7, NFR-3, AC-5, AC-6, AC-7
+- **Touches:** `docs/release-notes-v1.28.0.md`, `docs/perf-baseline.md`, `conductor/tracks/20261128-release-v1-28-0/verification/**`
+- **Verification:** full `verify_phase` gate plus `node scripts/validate-docs.js`
 - **Status:** pending
 
-- [ ] **P4.T1: Run integrated verification and post-review doc sync** — covers: FR-5, FR-6
-- [ ] **P4.T2: Pass strict Conductor review** — covers: FR-6, AC-6
-  - [ ] **P4.T2.1:** Resolve findings within the allowed two review-fix rounds or record approved overrides.
-- [ ] **P4.T3: Open the release PR and watch CI** — covers: FR-6, AC-6
-  - [ ] **P4.T3.1:** Use title `chore(release): ship v1.28.0`; require Quality Gates and Browser Journeys green before merge.
-- [ ] **P4.T4: Merge only after explicit approval** — covers: FR-6, NFR-3, AC-6
-  - [ ] **P4.T4.1:** Ask Merge now / Leave open / Stop; on Merge now use the configured `merge` method and clean up the branch.
-- [ ] **P4.T5: Close issue #108 with evidence** — covers: FR-7, AC-7
-  - [ ] **P4.T5.1:** Comment that PR #110 fixed the overflow/tap issue and link the merged release evidence; close as completed.
+- [ ] **P4.T1: Validate the release record against merged evidence** — covers: FR-2, FR-5, FR-7
+  - [ ] **P4.T1.1:** Cross-check PRs #109–#111, their merge order, and issue #108 against the notes and perf baseline.
+- [ ] **P4.T2: Prepare the strict-review evidence pack** — covers: FR-6, AC-6
+  - [ ] **P4.T2.1:** Record the final diff, requirement matrix, gate output, and known accepted device gap for `conductor-review`.
+- [ ] **P4.T3: Prepare the release PR body and CI checklist** — covers: FR-6, AC-6
+  - [ ] **P4.T3.1:** Draft the `chore(release): ship v1.28.0` body with Quality Gates and Browser Journeys as required checks.
+- [ ] **P4.T4: Prepare the merge and issue-closure runbook** — covers: FR-6, FR-7, NFR-3, AC-6, AC-7
+  - [ ] **P4.T4.1:** Record the explicit Merge now / Leave open / Stop boundary, configured merge method, branch cleanup, and the #108 completion comment linking #110 and the release PR.
 
-## Phase 5: Authorized tag, deploy, and final notes
+## Phase 5: Post-merge ship runbook
 
-- **Goal:** after merge and separate explicit authorization, tag/deploy v1.28.0 and finalize the release record.
-- **Depends on:** Phase 4 merge
-- **Covers:** FR-8, FR-9, NFR-3, NFR-5, AC-8, AC-9
-- **Touches:** `docs/release-notes-v1.28.0.md`, `conductor/archive/20261128-release-v1-28-0/**`, git tag `v1.28.0`
-- **Verification:** no tag collision; tag on merged `master` HEAD; tag CI and Coolify green; live HTTP/title/version/hash/service-worker/manifest checks pass; `node scripts/validate-docs.js`
+- **Goal:** a preflighted runbook exists for issue closure, separate tag/deploy authorization, immutable tagging, CI/deploy/live verification, and FINAL notes; no external mutation occurs in this phase.
+- **Depends on:** Phase 4
+- **Covers:** FR-6, FR-7, FR-8, FR-9, NFR-3, NFR-5, AC-6, AC-7, AC-8, AC-9
+- **Touches:** `docs/release-notes-v1.28.0.md`, `conductor/tracks/20261128-release-v1-28-0/verification/**`
+- **Verification:** `node scripts/validate-docs.js && pnpm check` plus recorded confirmation that `v1.28.0` is absent locally and on origin
 - **Status:** pending
 
-- [ ] **P5.T1: Preflight and obtain tag/deploy authorization** — covers: FR-8, NFR-3, AC-8
-  - [ ] **P5.T1.1:** Fetch `master`, confirm the release merge is HEAD and the tree is clean, and confirm `v1.28.0` exists neither locally nor on origin.
-  - [ ] **P5.T1.2:** Ask for explicit go-ahead to push the immutable tag and trigger deployment; stop if not granted.
-- [ ] **P5.T2: Create and push the annotated tag** — covers: FR-8, AC-8
-  - [ ] **P5.T2.1:** Annotate `v1.28.0` on merged `master` HEAD and push it once; never move or recreate it.
-- [ ] **P5.T3: Verify tag CI, deployment, and live build** — covers: FR-9, AC-9
-  - [ ] **P5.T3.1:** Require Quality Gates, Browser Journeys, and Deploy to Coolify to pass.
-  - [ ] **P5.T3.2:** Verify live HTTP 200, title, local/remote shell hash, embedded 1.28.0, `sw.js`, and `manifest.webmanifest`.
-- [ ] **P5.T4: Finalize the release record** — covers: FR-2, FR-9, AC-2, AC-9
-  - [ ] **P5.T4.1:** Flip notes DRAFT → FINAL with tag commit, CI run, deploy/live evidence, and the accepted device gap.
-  - [ ] **P5.T4.2:** Update archived ship evidence/state through the documented docs/Conductor-only finalization exception; run `validate-docs` and diff checks.
+- [ ] **P5.T1: Record the post-merge issue-closure procedure** — covers: FR-7, AC-7
+  - [ ] **P5.T1.1:** Specify the exact #108 completion comment and require PR #110 plus the merged release PR as evidence.
+- [ ] **P5.T2: Record the authorized tag, deploy, and live-verification procedure** — covers: FR-8, FR-9, NFR-3, NFR-5, AC-8, AC-9
+  - [ ] **P5.T2.1:** Require a separate explicit go-ahead, clean merged `master` HEAD, no tag collision, one annotated tag push, green tag CI/Coolify, and live HTTP/title/version/hash/service-worker/manifest checks.
+- [ ] **P5.T3: Record the FINAL-notes and rollback procedure** — covers: FR-2, FR-9, NFR-5, AC-2, AC-9
+  - [ ] **P5.T3.1:** Specify DRAFT → FINAL only after ship evidence passes, the docs/Conductor-only finalization exception, and the never-move-a-published-tag rollback rule.
+
+## Post-merge execution runbook
+
+These operations are deliberately outside the autonomous phase loop because the
+active goal stops at `awaiting-merge` and tagging requires separate authorization.
+
+1. After the user answers **Merge now**, merge PR #<release-pr> with the configured
+   `merge` method, verify `MERGED`, and delete the local and remote release branch.
+2. Close issue #108 with the prepared completion comment linking PR #110 and the
+   merged release PR.
+3. Ask for explicit authorization to push immutable tag `v1.28.0` and trigger
+   Coolify. Do not infer authorization from the merge answer.
+4. Fetch `master`, confirm the release merge is HEAD and the tree is clean, and
+   confirm `v1.28.0` exists neither locally nor on origin.
+5. Create and push the annotated tag once. Never move, delete, or recreate it.
+6. Require tag Quality Gates, Browser Journeys, and Deploy to Coolify to pass;
+   verify live HTTP 200, title, local/remote shell hash, embedded `1.28.0`,
+   `sw.js`, and `manifest.webmanifest`.
+7. Flip notes DRAFT → FINAL with tag commit, CI run, deploy/live evidence, and
+   `SKIPPED — accepted gap`; update archived ship evidence through the documented
+   docs/Conductor-only finalization exception, then run `validate-docs` and diff
+   checks.
 
 ## Rollback Strategy
 
