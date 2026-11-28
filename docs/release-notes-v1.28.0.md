@@ -19,18 +19,21 @@ Three PRs merged after v1.27.0, listed in merge order.
 - When the count is wrong, the machine visibly replays the loop so the child can see the mismatch and try again. Sessions run for six rounds with the same scoring and completion behaviour as the other games.
 - Repeat Machine sits in the Thinking group on the hub, with its own progress row, tile and sticker. The texture cap moved from 320 to 322 for two copied-shell SVGs under unique keys; no new artwork was designed.
 - No migration, new dependency or storage change. [PR #109](https://github.com/mansyar/aby-little-lab/pull/109).
+- Archived evidence: [Repeat Machine track record](../conductor/archive/20261128-repeat-machine/pr.md).
 
 ### PR #110 - Wide hub grid shows and taps the 25th tile
 
 - On wide desktop screens the All view used four rows, leaving the 25th tile and its plaque below the 1024×768 fold. The 25th tile now flows onto a fifth row and the wide board is recentered, so every game is visible and tappable without scrolling.
 - Row 0 now anchors below the interactive chip band. Tile size and horizontal spacing are unchanged; vertical row spacing is now 18px so the five-row board clears the chip band and fits 1024×768. No paging was added; the narrow, paged hub path is unchanged.
 - No migration, new dependency, new asset or storage change. [PR #110](https://github.com/mansyar/aby-little-lab/pull/110).
+- Archived evidence: [wide hub grid fix track record](../conductor/archive/20261128-wide-hub-grid-overflow/pr.md) and [issue #108](https://github.com/mansyar/aby-little-lab/issues/108) (RM-11), the wide-grid overflow report this fix addresses.
 
 ### PR #111 - Parent control for narration pace
 
 - Settings now has a narration pace selector beside the voice row, with Slower, Gentle and Standard presets. It applies per child profile on boot and when switching profiles.
 - Gentle is byte-identical to the previous read-aloud behaviour and is the default for existing profiles, so nothing changes for a child unless a parent opts in. Backup export carries the pace; merge keeps the local setting and replace restores the incoming one.
 - This is an additive profile field only: no schema bump, new dependency or new art asset. [PR #111](https://github.com/mansyar/aby-little-lab/pull/111).
+- Archived evidence: [narration pace track record](../conductor/archive/20261128-narration-pace/pr.md).
 
 ## Installation
 
