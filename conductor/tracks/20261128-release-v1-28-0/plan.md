@@ -102,7 +102,7 @@
 - **Covers:** NFR-2
 - **Touches:** `README.md`, `conductor/tracks/20261128-release-v1-28-0/verification/phase-R1.md`
 - **Verification:** `node scripts/validate-docs.js && pnpm check`; primary also runs the full `verify_phase` gate.
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Correct the README candidate-status wording** — covers: NFR-2
   - [ ] **R1.T1.1:** Update README lines 241 and 292 to say local candidate verification passed while CI, tag, deploy, and live verification remain pending; retain DRAFT and `SKIPPED — accepted gap`.
