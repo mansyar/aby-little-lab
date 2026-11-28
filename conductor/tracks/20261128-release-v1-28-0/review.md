@@ -11,7 +11,7 @@
 
 ## Summary
 
-The behavior-neutral v1.28.0 release record is accurate and locally evidenced. Version propagation, DRAFT notes, README indexing, measured performance evidence, first-tap tooling synchronization, and post-merge boundaries match the approved plan. One Low documentation-consistency finding remains.
+The behavior-neutral v1.28.0 release record is accurate and locally evidenced. Version propagation, DRAFT notes, README indexing, measured performance evidence, first-tap tooling synchronization, and post-merge boundaries match the approved plan. One Low documentation-consistency finding was resolved in R1 and the targeted re-review returned PASS with no open findings.
 
 ## Requirements
 
@@ -27,7 +27,7 @@ The behavior-neutral v1.28.0 release record is accurate and locally evidenced. V
 | FR-8 | Partial by design | Tag/deploy runbook prepared; separate authorization required |
 | FR-9 | Partial by design | Live/FINAL/rollback runbook prepared; execution is post-ship |
 | NFR-1 | Covered | Version/docs/verification tooling only; no runtime/assets/deps/schema changes |
-| NFR-2 | Covered except F1 | Docs validator passes; one README wording inconsistency found |
+| NFR-2 | Covered | Docs validator passes; README wording inconsistency fixed in R1 and re-reviewed |
 | NFR-3 | Covered | Conventional commits; no reset/force-push/tag mutation; caused reruns recorded |
 | NFR-4 | Covered | Coverage, bundle, module-size, texture and PWA gates pass |
 | NFR-5 | Covered | Rollback runbook preserves published tag; no migration |

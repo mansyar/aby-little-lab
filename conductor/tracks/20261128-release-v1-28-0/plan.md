@@ -120,14 +120,20 @@
 - **Covers:** FR-6, FR-7, FR-8, FR-9, NFR-3, NFR-5, AC-6, AC-7, AC-8, AC-9
 - **Touches:** `docs/release-notes-v1.28.0.md`, `conductor/tracks/20261128-release-v1-28-0/verification/**`
 - **Verification:** `node scripts/validate-docs.js && pnpm check` plus recorded confirmation that `v1.28.0` is absent locally and on origin
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P5.T1: Record the post-merge issue-closure procedure** — covers: FR-7, AC-7
-  - [ ] **P5.T1.1:** Specify the exact #108 completion comment and require PR #110 plus the merged release PR as evidence.
-- [ ] **P5.T2: Record the authorized tag, deploy, and live-verification procedure** — covers: FR-8, FR-9, NFR-3, NFR-5, AC-8, AC-9
-  - [ ] **P5.T2.1:** Require a separate explicit go-ahead, clean merged `master` HEAD, no tag collision, one annotated tag push, green tag CI/Coolify, and live HTTP/title/version/hash/service-worker/manifest checks.
-- [ ] **P5.T3: Record the FINAL-notes and rollback procedure** — covers: FR-2, FR-9, NFR-5, AC-2, AC-9
-  - [ ] **P5.T3.1:** Specify DRAFT → FINAL only after ship evidence passes, the docs/Conductor-only finalization exception, and the never-move-a-published-tag rollback rule.
+- [x] **P5.T1: Record the post-merge issue-closure procedure** — covers: FR-7, AC-7
+  - [x] **P5.T1.1:** Specify the exact #108 completion comment and require PR #110 plus the merged release PR as evidence.
+- [x] **P5.T2: Record the authorized tag, deploy, and live-verification procedure** — covers: FR-8, FR-9, NFR-3, NFR-5, AC-8, AC-9
+  - [x] **P5.T2.1:** Require a separate explicit go-ahead, clean merged `master` HEAD, no tag collision, one annotated tag push, green tag CI/Coolify, and live HTTP/title/version/hash/service-worker/manifest checks.
+- [x] **P5.T3: Record the FINAL-notes and rollback procedure** — covers: FR-2, FR-9, NFR-5, AC-2, AC-9
+  - [x] **P5.T3.1:** Specify DRAFT → FINAL only after ship evidence passes, the docs/Conductor-only finalization exception, and the never-move-a-published-tag rollback rule.
+
+**Result:** verified — exact merge/issue-closure, separately authorized immutable-tag, tag CI/Coolify/live, FINAL-notes and rollback runbook recorded without external mutation; local and remote `v1.28.0` tag absence confirmed by primary. Primary full gate: 165 files / 3,559 tests, coverage 96.91/90.23/96.22/98.06, build and all validators PASS.
+
+**Checkpoint:** `532a7aae`
+
+**Evidence:** `conductor/tracks/20261128-release-v1-28-0/verification/phase-5.md`
 
 ## Post-merge execution runbook
 

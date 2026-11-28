@@ -113,3 +113,16 @@ None. Only the two allowed files were changed.
 - The primary runs the full ten-command gate independently; only
   `node scripts/validate-docs.js && pnpm check` was in this phase's brief.
 - No external mutation occurred: no issue, PR, tag, deploy or live system was touched, and no tag was created. The `v1.28.0` tag, CI runs, deploy and live verification remain explicitly pending a separate authorization.
+
+## Primary verification
+
+The primary independently reproduced the denied local tag check and ran the complete final gate on `532a7aae`:
+
+| Command | Result |
+| --- | --- |
+| `git tag -l v1.28.0` | exit 0, **no output** — no local `v1.28.0` tag. PASS. |
+| `git ls-remote --tags origin refs/tags/v1.28.0` | exit 0, **no output** — no remote `v1.28.0` tag. PASS. |
+| `git -c core.whitespace=cr-at-eol diff --check` | exit 0, no whitespace errors. PASS. |
+| Exact ten-command `verify_phase` chain | exit 0 — Biome 393 files; app + e2e typecheck; 165 files / 3,559 tests; coverage 96.91 statements / 90.23 branches / 96.22 functions / 98.06 lines; build 501 modules; bundle, module-size, textures, PWA and docs validators all PASS. |
+
+The subagent's local-tag shell denial is therefore resolved by primary evidence. Phase 5 is accepted at checkpoint `532a7aae`; no external mutation occurred.
