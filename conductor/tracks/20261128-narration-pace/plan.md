@@ -34,10 +34,14 @@
 - **Covers:** FR-1, FR-4, NFR-2, AC-1, AC-4
 - **Touches:** `src/components/SettingsPanel.*`, `src/scenes/BootScene.ts`, `src/game/backup.ts`, `src/__tests__/components/SettingsPanel.test.ts`, `e2e/journeys/settings*.spec.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Settings pace control** — covers: FR-1
-  - [ ] **P2.T1.1: Three-preset selector beside voice, bound to the active profile**
-  - [ ] **P2.T1.2: Apply on boot and on profile switch (voice-preference seam precedent)**
-- [ ] **P2.T2: Backup/restore carriage** — covers: FR-4
-  - [ ] **P2.T2.1: Export includes pace; merge/replace yield a valid pace per profile**
+**Result:** verified
+**Checkpoint:** 9f37f684
+**Evidence:** conductor/tracks/20261128-narration-pace/verification/phase-2.md
+
+- [x] **P2.T1: Settings pace control** — covers: FR-1
+  - [x] **P2.T1.1: Three-preset selector beside voice, bound to the active profile**
+  - [x] **P2.T1.2: Apply on boot and on profile switch (voice-preference seam precedent)**
+- [x] **P2.T2: Backup/restore carriage** — covers: FR-4
+  - [x] **P2.T2.1: Export includes pace; merge/replace yield a valid pace per profile**
