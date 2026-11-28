@@ -1470,12 +1470,18 @@ describe("schema versioning", () => {
     if (stored === null) return;
     const parsed = JSON.parse(stored);
     expect(parsed.schemaVersion).toBe(1);
-    // The stamp and the backfilled insights record are the only changes to the
-    // profiles; in settings the crash log is the one additive field this track
-    // backfills. Every other field is untouched.
+    // The stamp, the backfilled insights record and the Gentle pace are the
+    // only changes to the profiles; in settings the crash log is the one
+    // additive field this track backfills. Every other field is untouched.
     expect(parsed).toEqual({
       ...body,
-      profiles: [{ ...body.profiles[0], insights: createDefaultInsights() }],
+      profiles: [
+        {
+          ...body.profiles[0],
+          insights: createDefaultInsights(),
+          narrationPace: "gentle",
+        },
+      ],
       settings: { ...body.settings, diagnostics: [] },
       schemaVersion: 1,
     });

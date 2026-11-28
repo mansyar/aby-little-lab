@@ -12,7 +12,13 @@
  * tap); without it, iOS silently drops every programmatic speak.
  */
 
+import {
+  DEFAULT_NARRATION_PACE,
+  normalizeNarrationPace,
+  ratesForPace,
+} from "../game/narrationPace";
 import { resolveVoice } from "../game/voiceLogic";
+import type { NarrationPace } from "../types";
 
 /** Returns whether the browser exposes the Web Speech synthesis API. */
 export function isSpeechSupported(): boolean {
@@ -59,6 +65,21 @@ let preferredVoiceURI: string | null = null;
  */
 export function setPreferredVoiceURI(uri: string | null): void {
   preferredVoiceURI = uri;
+}
+
+/**
+ * Active narration pace preset. Defaults to Gentle so an app that has not
+ * applied a profile preference yet hears exactly the historical rates.
+ */
+let narrationPace: NarrationPace = DEFAULT_NARRATION_PACE;
+
+/**
+ * Applies the active profile's narration pace to every subsequent utterance.
+ * Unknown values fall back to Gentle, so a corrupt stored preset can never
+ * change how a child hears a prompt.
+ */
+export function setNarrationPace(pace: NarrationPace): void {
+  narrationPace = normalizeNarrationPace(pace);
 }
 
 /**
@@ -169,18 +190,18 @@ function speakText(text: string, enabled: boolean, rate: number): boolean {
  * @returns True when an utterance was actually dispatched.
  */
 export function speakLetter(letter: string, enabled: boolean): boolean {
-  return speakText(letter, enabled, 0.9);
+  return speakText(letter, enabled, ratesForPace(narrationPace).general);
 }
 
 /**
  * Speaks a word (en-US) if enabled and supported, slightly slower than a
- * single letter so toddlers can follow the printed word.
+ * single letter at every preset so toddlers can follow the printed word.
  * @param word - The word to pronounce (e.g. "CAT").
  * @param enabled - Whether speech is allowed (SFX toggle).
  * @returns True when an utterance was actually dispatched.
  */
 export function speakWord(word: string, enabled: boolean): boolean {
-  return speakText(word, enabled, 0.8);
+  return speakText(word, enabled, ratesForPace(narrationPace).word);
 }
 
 /** Number words for 0-10, the How Many? counting range. */
@@ -199,25 +220,29 @@ const NUMBER_WORDS = [
 ] as const;
 
 /**
- * Speaks a number word (en-US) if enabled and supported, at the same gentle
+ * Speaks a number word (en-US) if enabled and supported, at the same preset
  * rate as a single letter.
  * @param number - The number to pronounce (e.g. 3 → "three").
  * @param enabled - Whether speech is allowed (SFX toggle).
  * @returns True when an utterance was actually dispatched.
  */
 export function speakNumber(number: number, enabled: boolean): boolean {
-  return speakText(NUMBER_WORDS[number] ?? String(number), enabled, 0.9);
+  return speakText(
+    NUMBER_WORDS[number] ?? String(number),
+    enabled,
+    ratesForPace(narrationPace).general,
+  );
 }
 
 /**
  * Speaks a full instruction sentence (en-US) if enabled and supported.
  *
- * Sentences are narrated at the same gentle rate as a letter or number: slow
+ * Sentences are narrated at the same preset rate as a letter or number: slow
  * enough for a toddler to follow, fast enough to survive a whole sentence.
  * @param sentence - The instruction to read out (e.g. "Drag each shape into its hole.").
  * @param enabled - Whether speech is allowed (SFX toggle).
  * @returns True when an utterance was actually dispatched.
  */
 export function speakSentence(sentence: string, enabled: boolean): boolean {
-  return speakText(sentence, enabled, 0.9);
+  return speakText(sentence, enabled, ratesForPace(narrationPace).general);
 }
