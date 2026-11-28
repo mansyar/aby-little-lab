@@ -14,16 +14,20 @@
 - **Covers:** FR-1, FR-2, FR-3, NFR-1, AC-1, AC-2, AC-3 (Documentation link only)
 - **Touches:** `package.json`, `docs/release-notes-v1.28.0.md`, `README.md`
 - **Verification:** `node scripts/validate-docs.js && pnpm check && pnpm typecheck`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Bump the release version** — covers: FR-1, AC-1
-  - [ ] **P1.T1.1:** Change `package.json` from 1.27.0 to 1.28.0 without editing the lockfile by hand.
-  - [ ] **P1.T1.2:** Confirm the existing Vite version define picks up 1.28.0.
-- [ ] **P1.T2: Write DRAFT release notes** — covers: FR-2, AC-2
-  - [ ] **P1.T2.1:** Use Status DRAFT, Tag pending, Base v1.27.0 (`019a26cd`, 2026-11-27), and date 2026-11-28.
-  - [ ] **P1.T2.2:** Add parent-facing sections for PR #109 Repeat Machine, PR #110 Hub grid/tap fix, and PR #111 narration pace in merge order.
-  - [ ] **P1.T2.3:** Include Installation, Release Verification placeholders, Known Issues, no-migration language, and `SKIPPED — accepted gap` device policy.
-  - [ ] **P1.T2.4:** Add the v1.28.0 notes link to README Documentation so `validate-docs` passes during Phase 1 — covers: FR-3, AC-3.
+- [x] **P1.T1: Bump the release version** — covers: FR-1, AC-1
+  - [x] **P1.T1.1:** Change `package.json` from 1.27.0 to 1.28.0 without editing the lockfile by hand.
+  - [x] **P1.T1.2:** Confirm the existing Vite version define picks up 1.28.0.
+- [x] **P1.T2: Write DRAFT release notes** — covers: FR-2, AC-2
+  - [x] **P1.T2.1:** Use Status DRAFT, Tag pending, Base v1.27.0 (`019a26cd`, 2026-11-27), and date 2026-11-28.
+  - [x] **P1.T2.2:** Add parent-facing sections for PR #109 Repeat Machine, PR #110 Hub grid/tap fix, and PR #111 narration pace in merge order.
+  - [x] **P1.T2.3:** Include Installation, Release Verification placeholders, Known Issues, no-migration language, and `SKIPPED — accepted gap` device policy.
+  - [x] **P1.T2.4:** Add the v1.28.0 notes link to README Documentation so `validate-docs` passes during Phase 1 — covers: FR-3, AC-3.
+
+**Result:** verified — `package.json` and the built shell report 1.28.0; DRAFT notes cover #109–#111 in merge order with no unmeasured claims; README indexes the notes. Primary full gate: 165 files / 3,559 tests, coverage 96.91/90.23/96.22/98.06, build and all validators PASS.
+**Checkpoint:** `c9f96919`
+**Evidence:** `conductor/tracks/20261128-release-v1-28-0/verification/phase-1.md`
 
 ## Phase 2: README and release documentation truth
 
