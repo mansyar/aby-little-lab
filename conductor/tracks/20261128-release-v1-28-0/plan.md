@@ -14,7 +14,7 @@
 - **Covers:** FR-1, FR-2, NFR-1, AC-1, AC-2
 - **Touches:** `package.json`, `docs/release-notes-v1.28.0.md`
 - **Verification:** `pnpm check && pnpm typecheck`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Bump the release version** — covers: FR-1, AC-1
   - [ ] **P1.T1.1:** Change `package.json` from 1.27.0 to 1.28.0 without editing the lockfile by hand.
