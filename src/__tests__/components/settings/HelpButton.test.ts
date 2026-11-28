@@ -12,7 +12,7 @@ const CENTER_X = 512;
 const CENTER_Y = 384;
 /** Mirrors the close ✕'s inset and header offset. */
 const INSET = 36;
-const HEADER_OFFSET = -105;
+const HEADER_OFFSET = -161;
 
 interface Setup {
   button: HelpButton;

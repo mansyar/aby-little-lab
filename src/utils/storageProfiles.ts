@@ -1,3 +1,4 @@
+import { normalizeNarrationPace } from "../game/narrationPace";
 import {
   addProfile as addProfileToV2,
   availableAvatarIds,
@@ -5,8 +6,9 @@ import {
   deleteProfile as deleteProfileFromV2,
   switchActiveProfile,
 } from "../game/profileLogic";
-import type { AvatarId, CrashEntry, GameId, Profile, Settings } from "../types";
+import type { AvatarId, CrashEntry, GameId, NarrationPace, Profile, Settings } from "../types";
 import { appendCrash } from "./diagnostics";
+import { setNarrationPace } from "./speech";
 import { ensureV2, mutate } from "./storageEngine";
 
 /** Marks a sticker as earned on the ACTIVE profile and persists. */
@@ -104,7 +106,25 @@ export function deleteProfile(profileId: string): void {
 /** Switches the active profile; returns false for an unknown profile id. */
 export function switchProfile(profileId: string): boolean {
   const next = mutate((v2) => switchActiveProfile(v2, profileId));
-  return next !== null && next.activeProfileId === profileId;
+  const switched = next !== null && next.activeProfileId === profileId;
+  if (switched) {
+    // Pace belongs to the profile, not the device: the next utterance must
+    // follow the profile the child just switched to.
+    setNarrationPace(normalizeNarrationPace(getActiveProfile().narrationPace));
+  }
+  return switched;
+}
+
+/** Sets the ACTIVE profile's pace (FR-1) and applies it to the next utterance. */
+export function setActiveProfileNarrationPace(pace: NarrationPace): void {
+  const next = normalizeNarrationPace(pace);
+  mutate((v2) => ({
+    ...v2,
+    profiles: v2.profiles.map((p) =>
+      p.id === v2.activeProfileId ? { ...p, narrationPace: next } : p,
+    ),
+  }));
+  setNarrationPace(next);
 }
 
 export function getAvailableAvatars(): AvatarId[] {

@@ -64,7 +64,7 @@ vi.mock("../../scenes/sceneRegistry", async () => {
 
 import { BootScene } from "../../scenes/BootScene";
 import { ensureGlyphFontLoaded } from "../../utils/fonts";
-import { updateSettings } from "../../utils/storage";
+import { setActiveProfileNarrationPace, updateSettings } from "../../utils/storage";
 
 beforeEach(() => {
   vi.stubGlobal("screen", {
@@ -169,5 +169,15 @@ describe("BootScene", () => {
     scene.create();
 
     expect(mockSpeech.setPreferredVoiceURI).toHaveBeenCalledWith("urn:test-voice");
+  });
+
+  it("applies the active profile's narration pace on create", () => {
+    setActiveProfileNarrationPace("slower");
+    vi.mocked(mockSpeech.setNarrationPace).mockClear();
+
+    const scene = new BootScene();
+    scene.create();
+
+    expect(mockSpeech.setNarrationPace).toHaveBeenCalledWith("slower");
   });
 });

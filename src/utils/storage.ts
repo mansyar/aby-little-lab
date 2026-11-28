@@ -33,6 +33,7 @@ export {
   hasSticker,
   recordCrash,
   resetProgress,
+  setActiveProfileNarrationPace,
   switchProfile,
   updateSettings,
 } from "./storageProfiles";

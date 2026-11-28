@@ -5,6 +5,7 @@ import type {
   E2EProgressState,
   E2ESettingsToggle,
 } from "../game/e2eBridge";
+import type { NarrationPace } from "../types";
 import { getInstallPromptTracker, type InstallTracker } from "../utils/pwaInstall";
 import { getSettings, isPersistenceDegraded } from "../utils/storage";
 import { textStyle } from "../utils/typography";
@@ -34,16 +35,25 @@ import { ResetModal } from "./settings/ResetModal";
 import { SettingsRows } from "./settings/SettingsRows";
 import { VoiceRow } from "./settings/VoiceRow";
 
-/** Y offset of the first row; the eight rows then step by `ROW_PITCH`. */
-const FIRST_ROW_OFFSET = -47;
+/**
+ * Y offset of the first row; the nine rows then step by `ROW_PITCH`. The whole
+ * stack (and the chrome above it) sits 56px higher than it did with eight rows
+ * so the last card still ends at the panel's bottom edge.
+ */
+const FIRST_ROW_OFFSET = -103;
+/**
+ * Page two still has only three rows; it keeps its original position rather
+ * than inheriting page one's upward shift for the ninth control.
+ */
+const BACKUP_FIRST_ROW_OFFSET = -47;
 /** Y offset of the degraded notice, in the empty band above the title. */
-const NOTICE_OFFSET = -150;
+const NOTICE_OFFSET = -206;
 
 /** What the notice says: the fact itself, in the panel's own quiet voice. */
 const NOTICE_LABEL = "Progress can't be saved on this device";
 
 /** Y offset of the page-switch card, above the degraded notice. */
-const SWITCH_OFFSET = -250;
+const SWITCH_OFFSET = -306;
 
 /** The switch card on each page: where it leads, with a chevron saying so. */
 const SWITCH_TO_BACKUP = "Backup & restore ›";
@@ -161,7 +171,7 @@ export class SettingsPanel {
     const title = scene.add
       .text(
         centerX,
-        centerY - 105,
+        centerY - 161,
         SETTINGS_TITLE,
         textStyle({
           color: "#2d3748",
@@ -191,7 +201,7 @@ export class SettingsPanel {
     const closeButton = this.scene.add
       .text(
         centerX + PANEL_WIDTH / 2 - 36,
-        centerY - 105,
+        centerY - 161,
         "✕",
         textStyle({
           color: "#2d3748",
@@ -244,7 +254,7 @@ export class SettingsPanel {
       scene.add
         .text(
           centerX,
-          centerY - 75,
+          centerY - 131,
           `v${__APP_VERSION__}`,
           textStyle({
             color: DISABLED_COLOR,
@@ -328,7 +338,9 @@ export class SettingsPanel {
     if (this.page === 0) {
       this.settingsRows.build(settings, centerX, rowY);
     } else {
-      this.backupPanel.build(centerX, rowY);
+      const backupRowY = (index: number): number =>
+        centerY + BACKUP_FIRST_ROW_OFFSET + index * ROW_PITCH;
+      this.backupPanel.build(centerX, backupRowY);
     }
     // Both persistent header controls are raised above the rows, never above
     // overlays that must cover them.
@@ -350,6 +362,16 @@ export class SettingsPanel {
   /** The "Progress" row's live canvas centre, or null before it is built. */
   e2eProgressRow(): { x: number; y: number } | null {
     return this.settingsRows.e2eProgressRow();
+  }
+
+  /** The pace chip's live canvas centre, or null on page two. */
+  e2ePace(): { x: number; y: number } | null {
+    return this.settingsRows.e2ePace();
+  }
+
+  /** The active profile's narration pace as the chip draws it. */
+  e2eNarrationPace(): NarrationPace {
+    return this.settingsRows.e2eNarrationPace();
   }
 
   /** The Learning Progress overlay as it is drawing it, or null when closed. */

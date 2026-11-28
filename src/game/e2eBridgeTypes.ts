@@ -1,3 +1,4 @@
+import type { NarrationPace } from "../types";
 import type { ActionIcon } from "./fixItMachineLogic";
 import type { MoveAction, Program, TargetCount } from "./repeatMachineLogic";
 import type { Direction } from "./robotPathLogic";
@@ -153,6 +154,13 @@ export interface E2ESettingsState extends E2EBackupState {
   progressRow: { x: number; y: number } | null;
   /** The Progress overlay while it is open; null when it is closed. */
   progress: E2EProgressState | null;
+  /**
+   * Canvas centre of the "Pace" chip while the panel is up, so a journey taps
+   * the parent's control rather than a copied coordinate. Null when closed.
+   */
+  pace: GamePoint | null;
+  /** The active profile's narration pace as the chip draws it. */
+  narrationPace: NarrationPace;
   /** The persistent header Help control's centre while the panel is open. */
   helpButton: GamePoint | null;
   /** The Parent Help overlay while it is open; null when Help or Settings is closed. */

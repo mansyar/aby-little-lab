@@ -4,7 +4,8 @@ import { textStyle } from "../../utils/typography";
 import { centredHitArea, type ObjectBucket, PANEL_WIDTH } from "./primitives";
 
 /** Header controls sit this far above the panel's centre. */
-const HEADER_OFFSET = -105;
+/** Tracks the panel header, which moved up when the pace row was added. */
+const HEADER_OFFSET = -161;
 /** Mirrors the close ✕'s inset from the panel edge. */
 const HEADER_INSET = 36;
 /** Same generous touch band the close ✕ uses. */

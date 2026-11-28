@@ -10,6 +10,7 @@ import type {
 import { AVATAR_IDS, DEFAULT_AVATAR_ID, GAME_IDS, MAX_PROFILES } from "../types";
 import { normalizeDiagnostics } from "../utils/diagnostics";
 import { createDefaultInsights, normalizeInsights } from "./insightsLogic";
+import { DEFAULT_NARRATION_PACE, normalizeNarrationPace } from "./narrationPace";
 import { createDefaultPlayTime, normalizePlayTime } from "./playTimeLogic";
 import { createDefaultProgressMap, normalizeProgressMap, pruneActivity } from "./progressLogic";
 
@@ -40,6 +41,7 @@ export function createDefaultProfile(
     id,
     avatarId,
     createdAt,
+    narrationPace: DEFAULT_NARRATION_PACE,
     stickers: createDefaultStickers(),
     playTime: createDefaultPlayTime(new Date(createdAt)),
     progress: createDefaultProgressMap(),
@@ -75,7 +77,7 @@ export function migrateV1(
 
 /**
  * Normalizes raw v2 data into a valid schema: backfills each profile's
- * sticker keys, guarantees at least one profile, repairs an invalid active
+ * sticker keys and narration pace, guarantees at least one profile, repairs an invalid active
  * profile id, and merges settings with defaults.
  *
  * The crash log is the one settings field that is re-read rather than merely
@@ -102,6 +104,7 @@ export function normalizeV2(
         ? (p?.avatarId as AvatarId)
         : DEFAULT_AVATAR_ID,
       createdAt: typeof p?.createdAt === "string" ? p.createdAt : now,
+      narrationPace: normalizeNarrationPace(p?.narrationPace),
       stickers: mergeStickers(p?.stickers),
       playTime: normalizePlayTime(p?.playTime, new Date(now)),
       progress: normalizeProgressMap(p?.progress),

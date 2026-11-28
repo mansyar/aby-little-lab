@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { NarrationPace } from "../../types";
 import {
   isSpeechSupported,
   onSpeechLifecycle,
+  setNarrationPace,
   setPreferredVoiceURI,
   speakLetter,
   speakNumber,
@@ -30,6 +32,8 @@ describe("speech", () => {
     vi.stubGlobal("SpeechSynthesisUtterance", Utterance);
     // Every test starts with no voice preference (browser default).
     setPreferredVoiceURI(null);
+    // Every test starts at the historical Gentle pace.
+    setNarrationPace("gentle");
   });
 
   afterEach(() => {
@@ -270,6 +274,73 @@ describe("speech", () => {
     });
   });
 
+  describe("setNarrationPace", () => {
+    it("uses the historical Gentle rates until a preset is set", () => {
+      speakLetter("A", true);
+      speakWord("CAT", true);
+
+      expect(Utterance.mock.instances[0].rate).toBe(0.9);
+      expect(Utterance.mock.instances[1].rate).toBe(0.8);
+    });
+
+    it("applies the preset rate to all four speak paths", () => {
+      const cases = [
+        { pace: "slower", general: 0.7, word: 0.6 },
+        { pace: "gentle", general: 0.9, word: 0.8 },
+        { pace: "standard", general: 1, word: 1 },
+      ] as const;
+
+      for (const { pace, general, word } of cases) {
+        setNarrationPace(pace);
+        Utterance.mockClear();
+        speakLetter("A", true);
+        speakWord("CAT", true);
+        speakNumber(3, true);
+        speakSentence("Put the shape in the hole.", true);
+
+        expect(Utterance.mock.instances.map((utterance) => utterance.rate)).toEqual([
+          general,
+          word,
+          general,
+          general,
+        ]);
+      }
+    });
+
+    it("silences every preset when SFX is off", () => {
+      for (const pace of ["slower", "gentle", "standard"] as const) {
+        setNarrationPace(pace);
+        expect(speakLetter("A", false)).toBe(false);
+        expect(speakWord("CAT", false)).toBe(false);
+        expect(speakNumber(3, false)).toBe(false);
+        expect(speakSentence("Put the shape in the hole.", false)).toBe(false);
+      }
+      expect(speak).not.toHaveBeenCalled();
+      expect(Utterance.mock.instances).toHaveLength(0);
+      expect(cancel).not.toHaveBeenCalled();
+    });
+
+    it("stays visual-only at every preset when speech is unsupported", () => {
+      vi.unstubAllGlobals();
+      for (const pace of ["slower", "gentle", "standard"] as const) {
+        setNarrationPace(pace);
+        expect(speakLetter("A", true)).toBe(false);
+        expect(speakWord("CAT", true)).toBe(false);
+        expect(speakNumber(3, true)).toBe(false);
+        expect(speakSentence("Put the shape in the hole.", true)).toBe(false);
+      }
+      expect(speak).not.toHaveBeenCalled();
+    });
+
+    it("falls back to Gentle when an unknown preset is set", () => {
+      setNarrationPace("turbo" as NarrationPace);
+
+      speakSentence("Put the shape in the hole.", true);
+
+      expect(Utterance.mock.instances[0].rate).toBe(0.9);
+    });
+  });
+
   describe("unlockSpeechForUserGesture", () => {
     it("dispatches one silent warm-up utterance to unlock the WebKit session", () => {
       unlockSpeechForUserGesture();
@@ -318,6 +389,8 @@ describe("speech lifecycle events", () => {
     vi.stubGlobal("speechSynthesis", synth);
     vi.stubGlobal("SpeechSynthesisUtterance", Utterance);
     setPreferredVoiceURI(null);
+    // Every test starts at the historical Gentle pace.
+    setNarrationPace("gentle");
   });
 
   afterEach(() => {

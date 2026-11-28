@@ -1,3 +1,4 @@
+import { normalizeNarrationPace } from "../game/narrationPace";
 import type {
   DayActivity,
   GameId,
@@ -146,5 +147,9 @@ export function mergeProfiles(local: Profile, incoming: Profile): Profile {
     progress,
     activity: mergeActivity(local.activity, incoming.activity),
     insights: mergeInsights(local.insights, incoming.insights),
+    // On merge the pace stays with this device (local wins, normalised); a
+    // replace installs the incoming save, so restoring onto a fresh device
+    // reproduces the backed-up pace.
+    narrationPace: normalizeNarrationPace(local.narrationPace),
   };
 }

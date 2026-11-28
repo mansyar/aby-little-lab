@@ -30,7 +30,6 @@
 
 | id | title | type | priority | depends_on | track | origin |
 | --- | --- | --- | --- | --- | --- | --- |
-| RM-8 | Add a parent control for narration pace | feature | medium | — | — | user |
 | RM-10 | Add a parent-facing sticker collection album in Progress | feature | low | — | — | user |
 
 ## Dropped

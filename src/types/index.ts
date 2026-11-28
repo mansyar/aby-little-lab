@@ -196,10 +196,18 @@ export interface ProfileInsights {
   lastLimitHitDay: string | null;
 }
 
+/**
+ * Parent-selected narration pace for a child profile. "gentle" preserves the
+ * historical utterance rates and is the backfill for saves without a pace.
+ */
+export type NarrationPace = "slower" | "gentle" | "standard";
+
 export interface Profile {
   id: string;
   avatarId: AvatarId;
   createdAt: string;
+  /** Per-child narration pace preference (additive, Gentle on backfill). */
+  narrationPace?: NarrationPace;
   stickers: Record<GameId, StickerData>;
   /** Daily play-time budget (unlimited by default). */
   playTime: PlayTime;

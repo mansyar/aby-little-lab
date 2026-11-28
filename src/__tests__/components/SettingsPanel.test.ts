@@ -9,7 +9,8 @@ import {
   ROW_HIT_WIDTH,
   ROW_PITCH,
 } from "../../components/settings/primitives";
-import { PROFILE_AVATAR_TEXTURES } from "../../game/profileLogic";
+import { createDefaultProfile, PROFILE_AVATAR_TEXTURES } from "../../game/profileLogic";
+import type { NarrationPace } from "../../types";
 import {
   backupFilename,
   downloadBackup,
@@ -19,6 +20,7 @@ import {
   saveDiagnostics,
 } from "../../utils/backupFile";
 import { type BackupEnvelope, createBackup, refusalFor } from "../../utils/backupFormat";
+import { mergeProfiles } from "../../utils/backupMerge";
 import { NO_CRASHES } from "../../utils/diagnostics";
 import {
   createInstallTracker,
@@ -26,6 +28,7 @@ import {
   type InstallTrackerDeps,
   type InstallUiState,
 } from "../../utils/pwaInstall";
+import { setNarrationPace } from "../../utils/speech";
 import {
   addProfile,
   applyImport,
@@ -40,6 +43,7 @@ import {
   recordGamePlay,
   recordGameResult,
   SCHEMA_VERSION,
+  setActiveProfileNarrationPace,
   setPlayTimeLimit,
   switchProfile,
   updateSettings,
@@ -481,11 +485,15 @@ function measuredHitRect(object: MeasurableText): HitRect {
   };
 }
 
-/** The args of the four corner coordinates of a row card, by its 400x68 size. */
-function lastRowCard(scene: MockScene): [number, number, number, number] {
-  const card = getRectangles(scene)
-    .filter(({ args }) => args?.[2] === 400 && args?.[3] === 68)
-    .at(-1);
+/**
+ * The args of a row card, by its 400x68 size. Defaults to the last row drawn;
+ * a caller whose row is no longer last (Voice, since Pace was added) passes its
+ * centre so the card under that control is the one measured.
+ */
+function lastRowCard(scene: MockScene, centreY?: number): [number, number, number, number] {
+  const cards = getRectangles(scene).filter(({ args }) => args?.[2] === 400 && args?.[3] === 68);
+  const card =
+    centreY === undefined ? cards.at(-1) : cards.find(({ args }) => args?.[1] === centreY);
   if (!card?.args) throw new Error("no row card");
   return card.args as [number, number, number, number];
 }
@@ -612,7 +620,7 @@ describe("SettingsPanel row geometry", () => {
     vi.clearAllMocks();
   });
 
-  /** The eight main-panel rows, top to bottom, with the install row visible. */
+  /** The nine main-panel rows, top to bottom, with the install row visible. */
   const ROW_LABELS = [
     "BGM: ON",
     "SFX: ON",
@@ -622,6 +630,7 @@ describe("SettingsPanel row geometry", () => {
     "Reset Progress",
     "Install App",
     "Voice: Default (device)",
+    "Pace: Gentle",
   ];
 
   it("gives every row one band, so neighbours abut and never overlap", () => {
@@ -1030,7 +1039,7 @@ describe("SettingsPanel Parent Help integration", () => {
     const point = panel.e2eHelpButton();
     const help = findTextByLabel(scene, "Help") as MockGameObject;
     expect(scene.children.bringToTop).toHaveBeenCalledWith(help);
-    expect(point).toEqual({ x: 512 - PANEL_WIDTH / 2 + 36, y: 384 - 105 });
+    expect(point).toEqual({ x: 512 - PANEL_WIDTH / 2 + 36, y: 384 - 161 });
     const band = hitRectFor(scene, "Help");
     expect(band.right - band.left).toBe(96);
     expect(band.bottom - band.top).toBe(96);
@@ -1330,9 +1339,9 @@ describe("SettingsPanel version footer", () => {
     expect(call).toBeDefined();
     const [x, y] = call as unknown as [number, number];
     expect(x).toBe(512);
-    // Between the title (-105) and the BGM toggle (-45), inside the panel.
-    expect(y).toBeGreaterThan(384 - 105);
-    expect(y).toBeLessThan(384 - 45);
+    // Between the title (-161) and the BGM toggle (-103), inside the panel.
+    expect(y).toBeGreaterThan(384 - 161);
+    expect(y).toBeLessThan(384 - 103);
   });
 
   it("keeps the version footer non-interactive", () => {
@@ -2021,9 +2030,12 @@ describe("SettingsPanel TTS voice selection", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
 
-    const [cardX, cardY, cardWidth, cardHeight] = lastRowCard(scene);
     const chipRect = hitRectFor(scene, "Voice: Default (device)");
     const previewRect = hitRectFor(scene, "Preview");
+    const [cardX, cardY, cardWidth, cardHeight] = lastRowCard(
+      scene,
+      (chipRect.top + chipRect.bottom) / 2,
+    );
 
     // The row carries two controls, so one band is split between them: the
     // halves meet exactly, each keeps the pitch height, and neither is a sliver
@@ -2217,6 +2229,86 @@ describe("SettingsPanel TTS voice selection", () => {
     panel.destroy();
 
     expect(synth.removeEventListener).toHaveBeenCalledWith("voiceschanged", expect.any(Function));
+  });
+
+  // FR-1 / AC-1: the parent's pace chip sits beside the voice chip and cycles
+  // the three presets in the order the model publishes them.
+  describe("narration pace chip", () => {
+    afterEach(() => {
+      setNarrationPace("gentle");
+    });
+
+    it("shows Gentle for a profile with no stored pace", () => {
+      const scene = createScene();
+      new SettingsPanel(scene as never);
+
+      expect(findTextByLabel(scene, "Pace: Gentle")).toBeDefined();
+    });
+
+    it("cycles through Standard and Slower and persists each choice to the active profile", () => {
+      const scene = createScene();
+      new SettingsPanel(scene as never);
+      const chip = findTextByLabel(scene, "Pace: Gentle") as MockGameObject;
+
+      triggerPointerdown(chip);
+      expect(chip.setText).toHaveBeenCalledWith("Pace: Standard");
+      expect(getActiveProfile().narrationPace).toBe("standard");
+
+      triggerPointerdown(chip);
+      expect(chip.setText).toHaveBeenCalledWith("Pace: Slower");
+      expect(getActiveProfile().narrationPace).toBe("slower");
+
+      triggerPointerdown(chip);
+      expect(chip.setText).toHaveBeenCalledWith("Pace: Gentle");
+      expect(getActiveProfile().narrationPace).toBe("gentle");
+    });
+
+    it("shows the active profile's stored pace when the panel is built", () => {
+      setActiveProfileNarrationPace("slower");
+      const scene = createScene();
+
+      new SettingsPanel(scene as never);
+
+      expect(findTextByLabel(scene, "Pace: Slower")).toBeDefined();
+    });
+
+    it("normalises an unknown pace to Gentle before storing it", () => {
+      setActiveProfileNarrationPace("turbo" as NarrationPace);
+
+      expect(getActiveProfile().narrationPace).toBe("gentle");
+    });
+
+    it("changes the rate of the next utterance without a reload", () => {
+      const { speak } = stubSynth([makeVoice("urn:zoe", "Zoe", "en-US")]);
+      vi.stubGlobal("SpeechSynthesisUtterance", MockUtterance);
+      const scene = createScene();
+      new SettingsPanel(scene as never);
+
+      const chip = findTextByLabel(scene, "Pace: Gentle") as MockGameObject;
+      triggerPointerdown(chip); // Gentle -> Standard
+      triggerPointerdown(chip); // Standard -> Slower
+      triggerPointerdown(findTextByLabel(scene, "Preview") as MockGameObject);
+
+      const utterance = speak.mock.calls[0]?.[0] as MockUtterance | undefined;
+      expect(speak).toHaveBeenCalledTimes(1);
+      expect(utterance?.rate).toBe(0.6);
+    });
+
+    it("follows the active profile when it is switched and the panel rebuilt", () => {
+      const firstId = getActiveProfile().id;
+      setActiveProfileNarrationPace("slower");
+      const second = addProfile("dog");
+      if (!second) throw new Error("the second profile should have been created");
+      const secondScene = createScene();
+      new SettingsPanel(secondScene as never);
+      expect(findTextByLabel(secondScene, "Pace: Gentle")).toBeDefined();
+
+      expect(switchProfile(firstId)).toBe(true);
+      const scene = createScene();
+      new SettingsPanel(scene as never);
+
+      expect(findTextByLabel(scene, "Pace: Slower")).toBeDefined();
+    });
   });
 });
 
@@ -2973,13 +3065,13 @@ describe("SettingsPanel affordance cohesion", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
 
-    // Eight cards: the page switch above the title, then BGM, SFX, Adaptive,
-    // Profiles, Progress, Reset, Voice.
+    // Nine cards: the page switch above the title, then BGM, SFX, Adaptive,
+    // Profiles, Progress, Reset, Voice and Pace.
     const cards = getRectangles(scene).filter((r) => {
       const [, , w, h] = r.args ?? [];
       return w === 400 && h === 68;
     });
-    expect(cards).toHaveLength(8);
+    expect(cards).toHaveLength(9);
   });
 
   it("keeps every settings row card inside the panel and the canvas", () => {
@@ -3099,7 +3191,7 @@ describe("SettingsPanel degraded persistence notice", () => {
     expect(findTextByLabel(scene, NOTICE)).toBeDefined();
   });
 
-  it("leaves the title, the version footer and the eight rows exactly where they were", () => {
+  it("leaves the title, the version footer and the nine rows exactly where they were", () => {
     const healthyScene = createScene();
     buildPanel(healthyScene);
 
@@ -3119,6 +3211,7 @@ describe("SettingsPanel degraded persistence notice", () => {
       "Reset Progress",
       "Install App",
       "Voice: Default (device)",
+      "Pace: Gentle",
     ];
     for (const label of unchanged) {
       expect(textY(degradedScene, label), `${label} should not move`).toBe(
@@ -3165,7 +3258,7 @@ describe("SettingsPanel degraded persistence notice", () => {
 describe("SettingsPanel backup page", () => {
   /** One fixed instant, so the download's filename and the payload agree. */
   const FIXED_NOW = new Date("2026-11-08T10:00:00");
-  /** Page one's eight rows, in the order they are drawn. */
+  /** Page one's nine rows, in the order they are drawn. */
   const PAGE_ONE_LABELS = [
     "BGM: ON",
     "SFX: ON",
@@ -3175,11 +3268,12 @@ describe("SettingsPanel backup page", () => {
     "Reset Progress",
     "Install App",
     "Voice: Default (device)",
+    "Pace: Gentle",
   ];
-  /** Their centres, which AC-9 pins: centerY -47, stepping by ROW_PITCH. */
-  const PAGE_ONE_Y = [337, 393, 449, 505, 561, 617, 673, 729];
+  /** Their centres: centerY -103, stepping by ROW_PITCH. */
+  const PAGE_ONE_Y = [281, 337, 393, 449, 505, 561, 617, 673, 729];
   /** The switch card's centre, in the empty band above the title. */
-  const SWITCH_Y = 134;
+  const SWITCH_Y = 78;
   /** The result line's row on page two: one pitch below the row it reports on. */
   const RESULT_Y = 561;
 
@@ -3256,6 +3350,41 @@ describe("SettingsPanel backup page", () => {
       schemaVersion: SCHEMA_VERSION,
     });
   }
+
+  // FR-4 / AC-4: pace travels inside the profile record, in both directions.
+  it("includes the active profile's pace in an exported backup", () => {
+    setActiveProfileNarrationPace("slower");
+    const activeId = getActiveProfile().id;
+
+    const backup = backupOfThisDevice();
+
+    expect(backup.envelope.payload.profiles.find((p) => p.id === activeId)?.narrationPace).toBe(
+      "slower",
+    );
+  });
+
+  it("keeps the device's pace when merging another device's profile", () => {
+    const local = {
+      ...createDefaultProfile("p1", "cat", FIXED_NOW.toISOString()),
+      narrationPace: "slower" as const,
+    };
+    const incoming = {
+      ...createDefaultProfile("p1", "cat", FIXED_NOW.toISOString()),
+      narrationPace: "standard" as const,
+    };
+
+    expect(mergeProfiles(local, incoming).narrationPace).toBe("slower");
+  });
+
+  it("defaults a merged profile with no stored pace to Gentle", () => {
+    const local = createDefaultProfile("p1", "cat", FIXED_NOW.toISOString());
+    const incoming = {
+      ...createDefaultProfile("p1", "cat", FIXED_NOW.toISOString()),
+      narrationPace: "standard" as const,
+    };
+
+    expect(mergeProfiles(local, incoming).narrationPace).toBe("gentle");
+  });
 
   it("reaches a second page in one tap, with its own title and three rows", () => {
     const scene = createScene();

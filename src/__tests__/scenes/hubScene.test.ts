@@ -152,6 +152,7 @@ const { mockSpeech } = vi.hoisted(() => ({
   mockSpeech: {
     unlockSpeechForUserGesture: vi.fn(),
     speakSentence: vi.fn(() => true),
+    setNarrationPace: vi.fn(),
   },
 }));
 
@@ -221,6 +222,7 @@ import {
 import { SUGGESTION_RING_RADIUS } from "../../game/hub/replayCue";
 import { pagedTilePosition } from "../../game/hubPaging";
 import { GAME_TILES } from "../../game/hubTiles";
+import { normalizeNarrationPace } from "../../game/narrationPace";
 import { HubScene } from "../../scenes/HubScene";
 import hubSceneSource from "../../scenes/HubScene.ts?raw";
 import { loadSceneWithRetry } from "../../scenes/sceneRegistry";
@@ -1106,6 +1108,10 @@ describe("HubScene profile and hierarchy cohesion", () => {
     switchProfiles();
 
     expect(getActiveProfile().id).not.toBe(before);
+    // Pace follows the newly active profile, not the one the child just left.
+    expect(mockSpeech.setNarrationPace).toHaveBeenCalledWith(
+      normalizeNarrationPace(getActiveProfile().narrationPace),
+    );
     // Picker closed: every picker avatar was destroyed.
     for (const obj of mockRegistry.filter((o) => o.kind === "image" && o.args?.[1] === 384)) {
       expect(obj.destroy.mock.calls.length).toBeGreaterThan(0);
@@ -1921,6 +1927,8 @@ describe("HubScene e2e hub tiles", () => {
       toggles: [],
       progressRow: null,
       progress: null,
+      pace: null,
+      narrationPace: "gentle",
       helpButton: null,
       help: null,
       degraded: false,
