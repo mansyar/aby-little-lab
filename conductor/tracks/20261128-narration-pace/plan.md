@@ -45,3 +45,15 @@
   - [x] **P2.T1.2: Apply on boot and on profile switch (voice-preference seam precedent)**
 - [x] **P2.T2: Backup/restore carriage** — covers: FR-4
   - [x] **P2.T2.1: Export includes pace; merge/replace yield a valid pace per profile**
+
+## Phase R1: Review Fixes
+
+- **Goal:** Resolve review findings F1 and F2.
+- **Depends on:** Phase 2
+- **Covers:** F1, F2
+- **Touches:** `src/utils/backupMerge.ts`, `src/utils/storageProfiles.ts`, `src/__tests__/components/SettingsPanel.test.ts`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
+- **Status:** pending
+
+- [ ] **R1.T1: Resolve F1 (merge comment)** — covers: F1
+- [ ] **R1.T2: Resolve F2 (normalize on write + test)** — covers: F2
