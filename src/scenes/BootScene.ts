@@ -1,13 +1,15 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
+import { normalizeNarrationPace } from "../game/narrationPace";
 import { ensureGlyphFontLoaded } from "../utils/fonts";
-import { setPreferredVoiceURI } from "../utils/speech";
-import { getSettings } from "../utils/storage";
+import { setNarrationPace, setPreferredVoiceURI } from "../utils/speech";
+import { getActiveProfile, getSettings } from "../utils/storage";
 
 /**
  * Boot scene — the first scene loaded by the game.
  *
- * Initializes the audio system, applies the stored TTS voice preference,
+ * Initializes the audio system, applies the stored TTS voice preference and
+ * the active profile's narration pace,
  * attempts to lock the screen orientation to landscape, ensures the bundled
  * Baloo 2 font is ready for the glyph SVGs, then transitions to the Preload
  * scene.
@@ -21,6 +23,9 @@ export class BootScene extends Phaser.Scene {
     AudioManager.getInstance().init();
     // Apply the device-level TTS voice preference before any scene speaks.
     setPreferredVoiceURI(getSettings().preferredVoiceURI);
+    // Pace follows the active child, not the device: this is the boot half of
+    // the seam whose other half runs on profile switch.
+    setNarrationPace(normalizeNarrationPace(getActiveProfile().narrationPace));
 
     // iPad Safari/Chrome (all iOS browsers use WebKit) only implement a partial
     // Screen Orientation API: `screen.orientation` exists but `lock()` does

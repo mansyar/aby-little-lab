@@ -1,9 +1,14 @@
 import type Phaser from "phaser";
 import { AudioManager } from "../../audio/AudioManager";
 import type { E2ESettingsToggle } from "../../game/e2eBridge";
-import type { Settings } from "../../types";
+import { NARRATION_PACES, normalizeNarrationPace } from "../../game/narrationPace";
+import type { NarrationPace, Settings } from "../../types";
 import { attachPressFeedback } from "../../utils/pressFeedback";
-import { updateSettings } from "../../utils/storage";
+import {
+  getActiveProfile,
+  setActiveProfileNarrationPace,
+  updateSettings,
+} from "../../utils/storage";
 import { textStyle } from "../../utils/typography";
 import type { InstallRow } from "./InstallRow";
 import {
@@ -27,6 +32,13 @@ import {
 import type { ResetModal } from "./ResetModal";
 import type { VoiceRow } from "./VoiceRow";
 
+/** Parent-facing names for the three narration speeds. */
+const PACE_LABELS: Record<NarrationPace, string> = {
+  slower: "Slower",
+  gentle: "Gentle",
+  standard: "Standard",
+};
+
 export interface SettingsRowsDeps {
   scene: Phaser.Scene;
   /** Bucket the current page's objects go into, shared with the parent panel. */
@@ -39,7 +51,7 @@ export interface SettingsRowsDeps {
 }
 
 /**
- * Page one's eight parental rows. The parent panel owns page switching and the
+ * Page one's nine parental rows. The parent panel owns page switching and the
  * chrome; this helper owns the toggle state and the two overlay-opening rows,
  * so a page switch can drop every interactive object by clearing one bucket.
  */
@@ -67,6 +79,8 @@ export class SettingsRows {
    * the browser suite taps the row's layout rather than a copied coordinate.
    */
   private progressRowPoint: { x: number; y: number } | null = null;
+  /** The pace chip's canvas centre, published for the browser suite. */
+  private pacePoint: { x: number; y: number } | null = null;
 
   constructor(deps: SettingsRowsDeps) {
     this.scene = deps.scene;
@@ -78,7 +92,7 @@ export class SettingsRows {
     this.onOpenProgress = deps.onOpenProgress;
   }
 
-  /** Page one: the eight settings rows, at the numbers AC-9 pins. */
+  /** Page one: the nine settings rows, the last of which is the pace chip. */
   build(settings: Settings, centerX: number, rowY: (index: number) => number): void {
     const toggleAdaptive = (next: boolean): void => {
       updateSettings({ adaptiveDifficulty: next });
@@ -98,12 +112,14 @@ export class SettingsRows {
     this.resetModal.createRow(centerX, rowY(5));
     this.installRow.create(centerX, rowY(6));
     this.voiceRow.create(centerX, rowY(7));
+    this.createPaceRow(centerX, rowY(8));
   }
 
   /** Forgets row state before the parent destroys the page objects. */
   clear(): void {
     this.toggles.length = 0;
     this.progressRowPoint = null;
+    this.pacePoint = null;
   }
 
   /**
@@ -127,6 +143,43 @@ export class SettingsRows {
    */
   e2eProgressRow(): { x: number; y: number } | null {
     return this.progressRowPoint;
+  }
+
+  /** The pace chip's canvas centre, or null before the row is built. */
+  e2ePace(): { x: number; y: number } | null {
+    return this.pacePoint;
+  }
+
+  /** The active profile's pace, normalised for profiles saved without one. */
+  e2eNarrationPace(): NarrationPace {
+    return normalizeNarrationPace(getActiveProfile().narrationPace);
+  }
+
+  /**
+   * The pace row sits directly below Voice so a parent finds both narration
+   * controls together. Tapping cycles the three presets and writes the choice
+   * to the active profile; the label updates in place, matching VoiceRow's
+   * chip pattern without any new art.
+   */
+  private createPaceRow(x: number, y: number): void {
+    const pace = this.e2eNarrationPace();
+    const text = createRow(
+      this.scene,
+      x,
+      y,
+      this.pageObjects,
+      `Pace: ${PACE_LABELS[pace]}`,
+      ENABLED_COLOR,
+      () => {
+        const current = normalizeNarrationPace(getActiveProfile().narrationPace);
+        const next =
+          NARRATION_PACES[(NARRATION_PACES.indexOf(current) + 1) % NARRATION_PACES.length];
+        if (!next) return;
+        setActiveProfileNarrationPace(next);
+        text.setText(`Pace: ${PACE_LABELS[next]}`);
+      },
+    );
+    this.pacePoint = { x, y };
   }
 
   /**

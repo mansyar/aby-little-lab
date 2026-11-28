@@ -71,6 +71,8 @@ function noPanelSettings(): E2ESettingsState {
     toggles: [],
     progressRow: null,
     progress: null,
+    pace: null,
+    narrationPace: "gentle",
     helpButton: null,
     help: null,
     degraded: false,

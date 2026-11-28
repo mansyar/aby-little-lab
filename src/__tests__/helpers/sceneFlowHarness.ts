@@ -38,6 +38,7 @@ export const mockSpeech = {
   speakNumber: vi.fn(() => true),
   speakSentence: vi.fn(() => true),
   setPreferredVoiceURI: vi.fn(),
+  setNarrationPace: vi.fn(),
 };
 
 export const mockSettingsPanel = vi.fn();

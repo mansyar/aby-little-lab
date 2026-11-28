@@ -74,6 +74,8 @@ export function settings(v: HubE2EState): E2ESettingsState {
     // panel losing focus, so neither is gated on the panel staying open.
     progressRow: panel ? panel.e2eProgressRow() : null,
     progress: panel ? panel.e2eProgress() : null,
+    pace: open && panel ? panel.e2ePace() : null,
+    narrationPace: panel ? panel.e2eNarrationPace() : "gentle",
     // Help is published only while its own panel is up, never as a stale state.
     helpButton: open && panel ? panel.e2eHelpButton() : null,
     help: open && panel ? panel.e2eHelp() : null,

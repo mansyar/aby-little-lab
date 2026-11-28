@@ -1,3 +1,4 @@
+import { normalizeNarrationPace } from "../game/narrationPace";
 import type {
   DayActivity,
   GameId,
@@ -146,5 +147,8 @@ export function mergeProfiles(local: Profile, incoming: Profile): Profile {
     progress,
     activity: mergeActivity(local.activity, incoming.activity),
     insights: mergeInsights(local.insights, incoming.insights),
+    // Like the face and the daily limit, pace is a device setting: merging
+    // another device's progress must not silently change how this one reads.
+    narrationPace: normalizeNarrationPace(local.narrationPace),
   };
 }
