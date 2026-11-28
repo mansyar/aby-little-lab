@@ -60,3 +60,70 @@ The full list of known issues lives in the README's [Known Issues](../README.md#
 
 - Physical iOS Safari, Android Chrome and Fire tablet behaviour remains an accepted gap; see [device-testing-checklist.md](device-testing-checklist.md). No physical-device pass is claimed.
 - Candidate verification is green locally; CI, tag, deploy and live verification remain pending while this document is DRAFT.
+
+## Post-merge Ship Runbook
+
+This section records the exact post-merge sequence. Nothing below has happened
+yet: Status stays DRAFT, Tag stays pending, and every CI, deploy and live field
+stays pending until the ship evidence exists. Preparing this runbook authorizes
+no merge, tag, deploy or live action.
+
+### Merge and issue #108 closure
+
+Only an explicit **Merge now** answer authorizes merging the release PR and
+deleting the local and remote release branch. Merge approval does **not**
+authorize tagging: the immutable tag and the Coolify deploy require a separate,
+explicit go-ahead (below). Stop at `awaiting-merge` if that answer is not given.
+
+After the release PR is merged and verified `MERGED`, close issue #108 as
+completed with this exact comment, replacing `#<release-pr>` with the merged
+release PR number:
+
+> Fixed by #110 and included in the v1.28.0 release PR #<release-pr>. The wide-grid regression is covered by the 25-tile/25-plaque bounds tests, the chip-clearance guard, the green release-candidate gate and browser journeys. Closing as completed after the release PR merge.
+
+Evidence for the closure is PR #110 (the fix) plus the merged release PR; do not
+close #108 before the merge is confirmed.
+
+### Authorized tag, deploy and live verification
+
+Tagging requires a separate explicit go-ahead. Do not infer it from the merge
+answer, and do not create, push, move or delete any tag before that go-ahead.
+Once it is given, perform these steps in order:
+
+1. Merge the release PR with the configured `merge` method only after explicit
+   approval and green required checks (Quality Gates and Browser Journeys),
+   verify `MERGED`, and delete the local and remote release branch.
+2. Fetch `master`; require a clean tree and the release merge at HEAD.
+3. Require no local or remote `v1.28.0` tag. Create one annotated tag at the
+   merged HEAD and push it once. Never move, delete or recreate it.
+4. Require tag CI to pass Quality Gates, both Browser Journeys shards, the
+   engine matrix (WebKit, Firefox and mobile Chromium) and the Browser Journeys
+   rollup, and require Deploy to Coolify to pass.
+5. Verify the live URL returns HTTP 200, the title is `Aby's Little Lab`, the
+   served shell embeds `1.28.0`, the local and remote shell SHA-256 hashes are
+   equal, `sw.js` names the served shell, and `manifest.webmanifest` returns
+   HTTP 200.
+
+Until steps 1–5 pass, all CI run IDs, the deploy/live URL, the served shell name
+and hash, the embedded version, and the service-worker/manifest results remain
+pending here. No shipped version or production hash is claimed by this draft.
+
+### FINAL notes and rollback
+
+The notes stay DRAFT until all ship evidence exists. Only when every step above
+passes may Status flip to FINAL and Tag to the annotated `v1.28.0` target, with
+the tag commit, CI run IDs, deploy/live URL, served shell/hash/version,
+service-worker and manifest results, and `SKIPPED — accepted gap` for physical
+devices recorded. Post-tag finalization is documentation/Conductor-only: it may
+not change runtime code, assets, dependencies, the tag or its target commit.
+
+Rollback rules:
+
+- **Before tag:** revert the release PR; there is no production impact and no
+  published tag to reconcile.
+- **After tag/deploy:** never move or delete the published `v1.28.0` tag.
+  Revert the release merge with a reviewed follow-up and cut a patch release if
+  a shipped defect is found.
+- **Data:** this release has no migration, schema change or profile rewrite, so
+  no user-data rollback is required; profiles, stickers, settings and saves
+  carry over unchanged.
