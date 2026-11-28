@@ -6,8 +6,8 @@
 - **Date:** 2026-11-28
 - **Reviewer:** read-only `conductor-reviewer`
 - **Mode:** strict, small-volume, one-pass
-- **Verdict:** PASS WITH FINDINGS
-- **Round:** 1
+- **Verdict:** PASS
+- **Round:** 1 (targeted re-review completed)
 
 ## Summary
 
@@ -61,4 +61,14 @@ The behavior-neutral v1.28.0 release record is accurate and locally evidenced. V
 
 | Round | Verdict | Findings | Resolution |
 |---|---|---|---|
-| 1 | PASS WITH FINDINGS | F1 Low | Fixed in Phase R1 (`f448e29b`); primary full gate passed; targeted re-review pending |
+| 1 | PASS WITH FINDINGS | F1 Low | Fixed in Phase R1 (`f448e29b`); primary full gate passed; targeted re-review returned PASS with no findings |
+
+## Targeted Re-review
+
+The same read-only reviewer inspected `64cdb652..f448e29b` and the R1 evidence after primary acceptance commit `5ca48345`.
+
+- **Verdict:** PASS
+- **Findings:** none
+- **F1:** resolved; both README entries now distinguish completed local candidate verification from pending CI/tag/deploy/live work.
+- **Scope:** only the two intended README status clauses changed; highlights, links, version, date, DRAFT status and Tag pending remained intact.
+- **Checks:** full R1 gate remained green (165 files / 3,559 tests; coverage 96.91/90.23/96.22/98.06; all validators passed).
