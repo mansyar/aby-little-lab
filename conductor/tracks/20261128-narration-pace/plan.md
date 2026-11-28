@@ -34,7 +34,7 @@
 - **Covers:** FR-1, FR-4, NFR-2, AC-1, AC-4
 - **Touches:** `src/components/SettingsPanel.*`, `src/scenes/BootScene.ts`, `src/game/backup.ts`, `src/__tests__/components/SettingsPanel.test.ts`, `e2e/journeys/settings*.spec.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Settings pace control** — covers: FR-1
   - [ ] **P2.T1.1: Three-preset selector beside voice, bound to the active profile**
