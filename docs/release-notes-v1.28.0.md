@@ -23,7 +23,7 @@ Three PRs merged after v1.27.0, listed in merge order.
 
 ### PR #110 - Wide hub grid shows and taps the 25th tile
 
-- On wide desktop screens the All view used four rows, leaving the 25th tile and its plaque below the 1024×768 fold. The 25th tile now flows onto a fifth row and the wide board is recentered, so every game is visible and tappable without scrolling.
+- On wide desktop screens the All view used four rows, leaving the 25th tile and its plaque below the 1024×768 fold. The 25th tile now flows onto a fifth row; the wide board stays horizontally centered and anchors below the interactive chip band, so every game is visible and tappable without scrolling.
 - Row 0 now anchors below the interactive chip band. Tile size and horizontal spacing are unchanged; vertical row spacing is now 18px so the five-row board clears the chip band and fits 1024×768. No paging was added; the narrow, paged hub path is unchanged.
 - No migration, new dependency, new asset or storage change. [PR #110](https://github.com/mansyar/aby-little-lab/pull/110).
 - Archived evidence: [wide hub grid fix track record](../conductor/archive/20261128-wide-hub-grid-overflow/pr.md) and [issue #108](https://github.com/mansyar/aby-little-lab/issues/108) (RM-11), the wide-grid overflow report this fix addresses.
@@ -46,7 +46,7 @@ Nothing to install by hand: this release is the PWA shell plus its content-addre
 > matrix passed. PR CI, the immutable tag, Coolify deploy and live verification
 > have not run yet.
 
-- Integrated gate: **PASS** — Biome checked 393 files; application and E2E TypeScript projects passed; Vitest passed 165 files / 3,559 tests; coverage reached 96.91 % statements, 90.20 % branches, 96.22 % functions and 98.06 % lines. Vite built 501 modules. Bundle, module-size, texture, PWA and docs validators all passed; the shell entry is 190.3 kB via `validate-bundle`, PWA validation is 16/0 with 55 chunks precached, and texture figures remain 76.42 / 321.00 MiB with ratio 0.238.
+- Integrated gate: **PASS** — Biome checked 393 files; application and E2E TypeScript projects passed; Vitest passed 165 files / 3,559 tests; coverage reached 96.91 % statements, 90.23 % branches, 96.22 % functions and 98.06 % lines. Vite built 501 modules. Bundle, module-size, texture, PWA and docs validators all passed; the shell entry is 190.3 kB via `validate-bundle`, PWA validation is 16/0 with 55 chunks precached, and texture figures remain 76.42 / 321.00 MiB with ratio 0.238.
 - Boot and first tap: **PASS** — the corrected headed cold-control run recorded 50 cold / 0 warm samples, exactly 10 per game. Aggregate cold p95 response / finished / total was 40.9 / 32.4 / 265.2 ms, cold median total was 202.4 ms, and the worst cold total was 273.2 ms (Find the Word), inside the 400 ms gate. Boot median was 450.1 ms; 4×-throttled boot median was 1957.1 ms.
 - Browser matrix: **PASS after one caused rerun** — Chromium 30/30, WebKit 10/10, Firefox 10/10 and mobile Chromium 10/10, 60/60 total with zero local retries. The first attempt's single boot-toast timeout and the identical successful rerun are retained in the release track. This is local emulated-browser evidence; PR CI remains authoritative.
 - Physical-device coverage: **SKIPPED — accepted gap.** No physical iOS Safari, Android Chrome or Fire tablet pass is claimed. See [device-testing-checklist.md](device-testing-checklist.md).

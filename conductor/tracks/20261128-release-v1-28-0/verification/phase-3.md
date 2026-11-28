@@ -16,7 +16,7 @@
 | Static | `pnpm check` | 0 | Biome checked 393 files; no fixes required. |
 | Static | `pnpm typecheck` | 0 | Application and E2E TypeScript projects clean. |
 | Unit | `pnpm test -- --run` | 0 | 165 files / 3,559 tests passed. |
-| Coverage | `pnpm test:coverage` | 0 | Final post-doc gate: statements 96.91 (8354/8621), branches 90.20 (2522/2796), functions 96.22 (1860/1933), lines 98.06 (7742/7895); all gates met. |
+| Coverage | `pnpm test:coverage` | 0 | Final post-doc gate: statements 96.91 (8355/8621), branches 90.23 (2523/2796), functions 96.22 (1860/1933), lines 98.06 (7742/7895); all gates met. |
 | Build | `pnpm build` | 0 | 501 modules; shell `index-B7LXOJIw.js` 194.87 kB (48.95 kB gzip); 55 JS chunks; PWA precache 67 entries / 1901.93 KiB. |
 | Build artifact | `node scripts/validate-bundle.js` | 0 | Vendor `phaser-C831z-fk.js` isolated; shell 190.3 kB ≤ 200 kB. |
 | Build artifact | `node scripts/validate-module-size.js` | 0 | PASS with three pre-existing warn-only notes. |
@@ -106,7 +106,7 @@ The exact ten-command `verify_phase` chain was rerun after all measured document
 - `pnpm check` — 393 files clean.
 - `pnpm typecheck` — application and E2E projects clean.
 - `pnpm test -- --run` — 165 files / 3,559 tests passed.
-- `pnpm test:coverage` — statements 96.91% (8354/8621), branches 90.20% (2522/2796), functions 96.22% (1860/1933), lines 98.06% (7742/7895); all above 90/85/88/95 gates.
+- `pnpm test:coverage` — statements 96.91% (8355/8621), branches 90.23% (2523/2796), functions 96.22% (1860/1933), lines 98.06% (7742/7895); all above 90/85/88/95 gates.
 - `pnpm build` — 501 modules; shell `index-B7LXOJIw.js` 194.87 kB / 48.95 kB gzip.
 - `validate-bundle` — PASS; shell 190.3 kB ≤ 200 kB.
 - `validate-module-size` — PASS with three warn-only notes (`SettingsPanel.ts` 411, `e2eBridgeTypes.ts` 459, `RepeatMachineScene.ts` 463).
