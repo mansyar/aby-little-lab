@@ -53,7 +53,7 @@
 - **Goal:** the final candidate has a full green gate, measured first-tap evidence, browser evidence, and a truthful perf-baseline update.
 - **Depends on:** Phase 2
 - **Covers:** FR-4, FR-5, NFR-2, NFR-3, NFR-4, AC-4, AC-5
-- **Touches:** `docs/perf-baseline.md`, `docs/release-notes-v1.28.0.md`, `conductor/tracks/20261128-release-v1-28-0/verification/**`
+- **Touches:** `scripts/measure-first-tap.mjs`, `docs/perf-baseline.md`, `docs/release-notes-v1.28.0.md`, `conductor/tracks/20261128-release-v1-28-0/verification/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js` plus `TAP_HEADED=1 TAP_INERT_IDLE=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10`
 - **Status:** in_progress
 
@@ -62,6 +62,7 @@
 - [ ] **P3.T2: Measure headed cold first tap** — covers: FR-4, FR-5, AC-4, AC-5
   - [ ] **P3.T2.1:** Run the documented headed cold-control command against a production preview.
   - [ ] **P3.T2.2:** Require 50 cold / 0 warm samples, exactly 10 per target, exit 0, and every worst cold total ≤400 ms; retain JSON/stdout evidence.
+  - [ ] **P3.T2.3:** Synchronize the measurement harness with the merged 5-row wide-grid geometry before the one caused rerun; this changes verification tooling only, not runtime behavior.
 - [ ] **P3.T3: Verify browser journeys** — covers: FR-5, AC-5
   - [ ] **P3.T3.1:** Run the Chromium, WebKit, Firefox, and mobile Chromium projects sequentially and retain the roster/log; CI remains authoritative for the PR.
 - [ ] **P3.T4: Refresh measured release documentation** — covers: FR-2, FR-4, NFR-2, AC-2, AC-4
